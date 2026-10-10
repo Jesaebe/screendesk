@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/screendeck-home/kiosk.env"
+
+if [[ ! -r "$config_file" ]]; then
+  echo "Configuração ausente: $config_file" >&2
+  exit 1
+fi
+
+# O arquivo é gerado pelo instalador, contém somente a URL LAN e não credenciais.
+source "$config_file"
+
+if [[ "${SCREENDECK_HA_URL:-}" != http://* && "${SCREENDECK_HA_URL:-}" != https://* ]]; then
+  echo "SCREENDECK_HA_URL deve usar http:// ou https://" >&2
+  exit 1
+fi
+
+command -v chromium >/dev/null
+
+# Reforço por sessão; as preferências persistentes são configuradas pelo instalador.
+xset s off
+xset -dpms
+xset s noblank
+
+while true; do
+  chromium \
+    --kiosk \
+    --no-first-run \
+    --disable-session-crashed-bubble \
+    --disable-features=Translate \
+    --ozone-platform=x11 \
+    "$SCREENDECK_HA_URL"
+  sleep 5
+done

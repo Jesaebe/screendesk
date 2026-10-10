@@ -1,0 +1,32 @@
+[[source]]
+id = "maker"
+display_name = "Maker"
+engine = "postgresql"
+version = "14"
+host = "151.243.236.61"
+port = 5433
+database = "janus"
+username = "cyriusBackup"
+password_env = "BACKUP_MAKER_PASSWORD"
+sslmode = "disable"
+schedule = ["00:00", "06:00", "12:00", "18:00"]
+timezone = "America/Bahia"
+estimated_size_mb = 15
+enabled = false
+readiness_note = "Usuario cyriusBackup e pg_dump validados; configurar segredo e remote crypt antes de habilitar."
+
+[[source]]
+id = "new-database-example"
+display_name = "Novo banco"
+engine = "mariadb"
+host = "db.example.internal"
+port = 3306
+database = "app"
+username = "backup_reader"
+password_env = "BACKUP_NEW_DATABASE_PASSWORD"
+sslmode = "required"
+schedule = ["02:00"]
+timezone = "America/Bahia"
+estimated_size_mb = 100
+enabled = false
+readiness_note = "Copie este bloco, use um id unico e mantenha a senha somente no ambiente."

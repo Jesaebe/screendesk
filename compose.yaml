@@ -1,0 +1,65 @@
+name: screendeck-home
+
+services:
+  home-assistant:
+    image: ghcr.io/home-assistant/home-assistant:2026.10.1
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-America/Bahia}
+    ports:
+      - "${HA_PORT:-8123}:8123"
+    volumes:
+      - ./home-assistant:/config
+      - backup-status:/backup-status:ro
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  backup:
+    build:
+      context: ./backup
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-America/Bahia}
+      BACKUP_ROOT: /backups
+      BACKUP_CONFIG: ${BACKUP_CONFIG:-/run/secrets/sources.toml}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}
+      BACKUP_LOCAL_HIGH_WATERMARK: ${BACKUP_LOCAL_HIGH_WATERMARK:-85}
+      BACKUP_LOCAL_LOW_WATERMARK: ${BACKUP_LOCAL_LOW_WATERMARK:-75}
+      BACKUP_CLOUD_RETENTION_DAYS: ${BACKUP_CLOUD_RETENTION_DAYS:-15}
+      RCLONE_CONFIG: ${RCLONE_CONFIG:-/run/secrets/rclone.conf}
+      RCLONE_CRYPT_REMOTE: ${RCLONE_CRYPT_REMOTE:-gdrive-crypt:screendeck-home}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      ALERT_EMAIL_FROM: ${ALERT_EMAIL_FROM:-}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-}
+    volumes:
+      - ${BACKUP_ROOT:-/srv/backups}:/backups
+      - backup-status:/status
+      - ./secrets:/run/secrets:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "python3", "-m", "src.main", "healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  backup-status:

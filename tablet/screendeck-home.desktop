@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=ScreenDeck Home
+Comment=Painel Home Assistant em modo kiosk
+Exec=/home/painel/.local/bin/screendeck-kiosk
+Terminal=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5

@@ -1,0 +1,38 @@
+command_line:
+  - sensor:
+      name: ScreenDeck Backup Status
+      unique_id: screendeck_backup_status
+      command: >-
+        python3 -c "import json; print(json.load(open('/backup-status/latest.json')).get('status', 'unknown'))"
+      scan_interval: 300
+  - sensor:
+      name: ScreenDeck Backup Last Success
+      unique_id: screendeck_backup_last_success
+      command: >-
+        python3 -c "import json; print(json.load(open('/backup-status/latest.json')).get('finished_at', 'never'))"
+      scan_interval: 300
+
+automation:
+  - id: screendeck_backup_failure_notification
+    alias: ScreenDeck — alerta persistente de falha no backup
+    triggers:
+      - trigger: state
+        entity_id: sensor.screendeck_backup_status
+        to: failed
+      - trigger: state
+        entity_id: sensor.screendeck_backup_status
+        to: cloud_failed
+      - trigger: state
+        entity_id: sensor.screendeck_backup_status
+        to: cloud_retention_failed
+      - trigger: state
+        entity_id: sensor.screendeck_backup_status
+        to: configuration_failed
+      - trigger: state
+        entity_id: sensor.screendeck_backup_status
+        to: internal_failed
+    actions:
+      - action: persistent_notification.create
+        data:
+          title: Falha no backup
+          message: Verifique o relatório e o log sanitizado da última execução.

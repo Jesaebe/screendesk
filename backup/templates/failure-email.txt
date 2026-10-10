@@ -1,0 +1,8 @@
+Assunto: [ScreenDeck] Falha no backup de {source}
+
+Origem: {source}
+Execução: {run_id}
+Data/hora: {finished_at}
+Resumo sanitizado: {error}
+
+Consulte o relatório local para detalhes. Esta mensagem não contém credenciais.

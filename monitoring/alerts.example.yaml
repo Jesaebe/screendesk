@@ -1,0 +1,6 @@
+cpu_sustained_percent: 85
+cpu_sustained_minutes: 15
+memory_available_percent: 10
+root_disk_used_percent: 85
+backup_disk_used_percent: 85
+service_unavailable_minutes: 5

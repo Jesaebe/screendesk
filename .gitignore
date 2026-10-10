@@ -1,0 +1,35 @@
+# Secrets and local overrides
+.env
+.env.*
+!.env.example
+secrets.yaml
+**/secrets.yaml
+**/*.secret
+**/*credentials*.json
+**/rclone.conf
+
+# Runtime data
+backups/
+logs/
+runtime/
+*.dump
+*.sql
+*.sql.gz
+*.sqlite*
+*.log
+
+# Python/editor artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+.idea/
+.vscode/
+*~
+
+# Home Assistant runtime files (configuration stays versioned)
+home-assistant/.storage/
+home-assistant/deps/
+home-assistant/home-assistant.log*
+home-assistant/home-assistant_v2.db*
