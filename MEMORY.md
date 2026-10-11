@@ -14,6 +14,8 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A imagem de backup foi construída no servidor e somente o container `screendeck-home-backup-1` está em execução, saudável, como UID/GID `1000:1000`. Todas as origens permanecem desabilitadas; não houve dump, upload ou criação de relatórios. O Home Assistant continua desligado.
 - O primeiro pipeline real completo do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Maker retornou para `enabled = false`.
 - A renovação OAuth foi validada após montar o diretório dedicado `/home/cyrius/.config/rclone` em `/run/rclone`: a listagem cloud terminou sem stderr, o diretório contém somente `rclone.conf` e o arquivo permanece em modo `0600`. Os demais segredos continuam somente leitura.
+- Maker está permanentemente habilitado desde 10/10/2026, com agenda às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia` e retenção cloud de 15 dias. O container permaneceu saudável após a ativação.
+- A agenda é definida por origem no campo `schedule`; bancos futuros podem usar frequências diferentes. Após editar o TOML real, deve-se validá-lo e reiniciar somente o serviço `backup`.
 - Cinquenta e oito testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações e sanitização.
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
@@ -99,7 +101,7 @@ Fechar o desenho funcional antes de habilitar o serviço de backup:
 
 1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
 2. definir a solução de monitoramento do host e seus limiares;
-3. mediante autorização explícita, alterar Maker para `enabled = true` e ativar a agenda permanente das 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`;
+3. acompanhar a primeira execução automática do Maker e confirmar o novo objeto cloud;
 4. configurar SMTP para que falhas do backup gerem alertas reais;
 5. preparar a implantação controlada do restante da solução agora que a pré-checagem e o pipeline de backup estão aprovados;
 6. instalar/configurar o tablet somente com autorização explícita posterior.

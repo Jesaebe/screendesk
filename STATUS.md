@@ -1,5 +1,15 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Backup automático do Maker ativado
+
+- Após autorização explícita, Maker foi alterado para `enabled = true` no `sources.toml` real do servidor.
+- A agenda ativa é 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`, com retenção cloud de 15 dias.
+- O arquivo permaneceu com modo `0600`, somente uma origem está habilitada e o container reiniciou saudável.
+- As agendas são independentes por origem: bancos futuros podem ter quantidades e horários diferentes no próprio bloco `[[source]]`.
+- Alterações de agenda exigem validação do TOML e reinício somente do serviço `backup`; não exigem reconstrução da imagem.
+- SMTP ainda não está configurado, portanto falhas ficam registradas localmente, mas não geram e-mail.
+- Próximo passo: acompanhar a primeira execução automática e configurar o canal de alertas SMTP.
+
 ## 2026-10-10 — Renovação OAuth do rclone validada
 
 - O servidor foi atualizado para o commit `d4d54cd` e o `.env` migrou para `RCLONE_CONFIG=/run/rclone/rclone.conf` e `RCLONE_CONFIG_DIR_HOST=/home/cyrius/.config/rclone` sem expor valores secretos.

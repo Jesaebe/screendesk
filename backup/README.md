@@ -10,6 +10,8 @@ O runbook concede acesso aos objetos existentes. Se a aplicação criar tabelas 
 
 As agendas são interpretadas no fuso definido em cada origem. Para Maker: 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
 
+Cada bloco `[[source]]` possui sua própria lista `schedule`, portanto não existe obrigação de quatro execuções diárias para todos os bancos. Exemplos válidos incluem `schedule = ["02:00"]` para uma execução diária ou `schedule = ["06:00", "18:00"]` para duas. Depois de alterar o arquivo real no servidor, valide o TOML e reinicie somente o serviço `backup`; não é necessário reconstruir a imagem.
+
 ## Executor local
 
 `src/executor.py` implementa uma execução isolada com trava exclusiva por origem, arquivo `.partial`, validação de conteúdo não vazio, promoção atômica, log sanitizado e relatórios `latest.json` e `history.jsonl`. Os limites configurados em `BACKUP_LOCAL_HIGH_WATERMARK` e `BACKUP_LOCAL_LOW_WATERMARK` são repassados pelo entrypoint.
