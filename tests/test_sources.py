@@ -29,8 +29,9 @@ class SourceConfigurationTests(unittest.TestCase):
     def test_maker_is_safely_disabled_until_secrets_and_cloud_are_ready(self):
         maker = self.sources[0]
         self.assertEqual(maker.username, "cyriusBackup")
+        self.assertEqual(maker.password_file, "/run/secrets/maker-password")
         self.assertFalse(maker.enabled)
-        self.assertIn("configurar segredo e remote crypt", maker.readiness_note)
+        self.assertIn("instalar segredo", maker.readiness_note)
 
     def test_disabled_source_is_never_due(self):
         maker = self.sources[0]

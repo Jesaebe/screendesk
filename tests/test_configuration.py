@@ -23,6 +23,10 @@ class ConfigurationTests(unittest.TestCase):
         sensitive = (line for line in lines if "PASSWORD=" in line)
         self.assertTrue(all(line.endswith("=") for line in sensitive))
 
+    def test_runtime_secrets_directory_is_ignored(self):
+        content = (ROOT / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn("/secrets/", content)
+
 
 if __name__ == "__main__":
     unittest.main()

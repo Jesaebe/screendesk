@@ -9,7 +9,7 @@ RUN apt-get update \
         tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --create-home --uid 10001 backup
+RUN useradd --create-home --uid 1000 backup
 WORKDIR /app
 COPY --chown=backup:backup src ./src
 USER backup

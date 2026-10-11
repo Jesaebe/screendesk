@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
-import os
 from pathlib import Path
 import time
 from typing import Callable
@@ -33,13 +32,11 @@ class BackupScheduler:
         pipeline: Pipeline,
         status_root: Path,
         notifier: FailureNotifier,
-        environment: dict[str, str] | None = None,
     ):
         self.sources = sources
         self.pipeline = pipeline
         self.status_root = status_root
         self.notifier = notifier
-        self.environment = os.environ if environment is None else environment
         self._state_path = status_root / "scheduler-state.json"
         self._notification_path = status_root / "notification-status.json"
         self._completed_slots = self._load_slots()
@@ -132,12 +129,15 @@ class BackupScheduler:
                 continue
             self._completed_slots.add(slot_key)
             self._save_slots()
-            password = self.environment.get(source.password_env, "")
+            try:
+                password = Path(source.password_file).read_text(encoding="utf-8").rstrip("\r\n")
+            except OSError:
+                password = ""
             if not password:
                 report = self._failure_report(
                     source,
                     current,
-                    f"required environment variable is missing: {source.password_env}",
+                    f"required password file is missing or empty: {source.password_file}",
                     "configuration_failed",
                 )
             else:

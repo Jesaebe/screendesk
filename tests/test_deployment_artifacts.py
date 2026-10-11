@@ -11,7 +11,9 @@ class DeploymentArtifactTests(unittest.TestCase):
         content = (SCRIPTS / "preflight-deploy.sh").read_text(encoding="utf-8")
         self.assertIn("192.168.25.249", content)
         self.assertIn("sport = :8123", content)
-        self.assertIn('backup_owner" == "10001"', content)
+        self.assertIn('backup_owner" == "$backup_uid"', content)
+        self.assertIn("/home/cyrius/.config/rclone/rclone.conf", content)
+        self.assertIn("/home/cyrius/.config/screendeck-home/maker-password", content)
         self.assertIn("docker compose", content)
         self.assertNotIn("docker compose up", content)
         self.assertNotIn("sudo ", content)
@@ -24,6 +26,16 @@ class DeploymentArtifactTests(unittest.TestCase):
         rollback = (SCRIPTS / "rollback.sh").read_text(encoding="utf-8")
         self.assertIn("SCREENDECK_DEPLOY_AUTHORIZED", deploy)
         self.assertIn("SCREENDECK_ROLLBACK_AUTHORIZED", rollback)
+
+    def test_rclone_config_is_mounted_read_only_from_server(self):
+        compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
+        dockerfile = (ROOT / "backup" / "Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("RCLONE_CONFIG_HOST", compose)
+        self.assertIn("/home/cyrius/.config/rclone/rclone.conf", compose)
+        self.assertIn(":/run/secrets/rclone.conf:ro", compose)
+        self.assertIn(":/run/secrets/maker-password:ro", compose)
+        self.assertIn('${BACKUP_UID:-1000}:${BACKUP_GID:-1000}', compose)
+        self.assertIn("--uid 1000 backup", dockerfile)
 
 
 if __name__ == "__main__":

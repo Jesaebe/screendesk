@@ -1,6 +1,6 @@
 # Configurar Google Drive criptografado
 
-Estado: remotes criados e validados pelo usuário em 10/10/2026, incluindo envio criptografado e restauração descriptografada de uma pasta de teste.
+Estado: remotes criados e validados pelo usuário no servidor definitivo em 10/10/2026, incluindo envio criptografado e restauração descriptografada de uma pasta de teste. O `rclone.conf` permanece em `/home/cyrius/.config/rclone/rclone.conf` nesse servidor e não deve ser copiado para a máquina de desenvolvimento.
 
 ## Destino aprovado
 
@@ -21,7 +21,7 @@ A pasta aprovada será a raiz visível do `crypt`. Abaixo dela, nomes de diretó
 - Manter `secrets/rclone.conf` com modo `0600` e fora do Git.
 - Não usar `rclone sync`, `move`, `purge` ou `delete` durante a configuração e validação.
 
-## Configuração interativa futura
+## Configuração interativa (procedimento já concluído)
 
 No servidor, a partir do diretório do projeto:
 

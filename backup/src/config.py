@@ -61,7 +61,7 @@ def load_sources(path: Path) -> list[Source]:
             port=int(raw["port"]),
             database=str(raw["database"]),
             username=str(raw["username"]),
-            password_env=str(raw["password_env"]),
+            password_file=str(raw["password_file"]),
             sslmode=sslmode,
             schedule=schedule,
             timezone=str(raw.get("timezone", "UTC")),
@@ -71,8 +71,11 @@ def load_sources(path: Path) -> list[Source]:
         )
         if not 1 <= source.port <= 65535:
             raise ValueError(f"invalid port for {identifier}: {source.port}")
-        if not source.password_env.startswith("BACKUP_"):
-            raise ValueError(f"password_env for {identifier} must start with BACKUP_")
+        password_path = Path(source.password_file)
+        if not password_path.is_absolute() or password_path.parent != Path("/run/secrets"):
+            raise ValueError(
+                f"password_file for {identifier} must be an absolute path below /run/secrets"
+            )
         identifiers.add(identifier)
         sources.append(source)
     return sources

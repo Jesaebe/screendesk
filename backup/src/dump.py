@@ -13,7 +13,7 @@ class Source:
     port: int
     database: str
     username: str
-    password_env: str
+    password_file: str
     sslmode: str
     schedule: tuple[str, ...]
     timezone: str

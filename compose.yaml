@@ -22,6 +22,7 @@ services:
   backup:
     build:
       context: ./backup
+    user: "${BACKUP_UID:-1000}:${BACKUP_GID:-1000}"
     restart: unless-stopped
     environment:
       TZ: ${TZ:-America/Bahia}
@@ -42,7 +43,9 @@ services:
     volumes:
       - ${BACKUP_ROOT:-/srv/backups}:/backups
       - backup-status:/status
-      - ./secrets:/run/secrets:ro
+      - ${BACKUP_CONFIG_HOST:-./secrets/sources.toml}:/run/secrets/sources.toml:ro
+      - ${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}:/run/secrets/maker-password:ro
+      - ${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}:/run/secrets/rclone.conf:ro
     networks:
       - internal
     healthcheck:

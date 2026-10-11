@@ -4,6 +4,10 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 expected_host="${SCREENDECK_EXPECTED_HOST:-192.168.25.249}"
 backup_root="${BACKUP_ROOT:-/srv/backups}"
+backup_uid="${BACKUP_UID:-1000}"
+backup_config_host="${BACKUP_CONFIG_HOST:-$project_dir/secrets/sources.toml}"
+maker_password_host="${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}"
+rclone_config_host="${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}"
 failed=0
 
 pass() {
@@ -53,13 +57,13 @@ fi
 
 backup_owner="$(stat -c '%u' "$backup_root" 2>/dev/null || true)"
 backup_mode="$(stat -c '%a' "$backup_root" 2>/dev/null || true)"
-if [[ "$backup_owner" == "10001" ]] && (( (8#${backup_mode:-0} & 8#200) != 0 )); then
-  pass "diretório de backups gravável pelo UID 10001 do container"
+if [[ "$backup_owner" == "$backup_uid" ]] && (( (8#${backup_mode:-0} & 8#200) != 0 )); then
+  pass "diretório de backups gravável pelo UID $backup_uid do container"
 else
-  fail "diretório de backups deve pertencer ao UID 10001 e permitir escrita ao proprietário"
+  fail "diretório de backups deve pertencer ao UID $backup_uid e permitir escrita ao proprietário"
 fi
 
-for required in compose.yaml .env secrets/sources.toml secrets/rclone.conf; do
+for required in compose.yaml .env; do
   if [[ -f "$project_dir/$required" ]]; then
     pass "arquivo presente: $required"
   else
@@ -67,14 +71,20 @@ for required in compose.yaml .env secrets/sources.toml secrets/rclone.conf; do
   fi
 done
 
-for secret in .env secrets/sources.toml secrets/rclone.conf; do
-  path="$project_dir/$secret"
+for secret_path in "$project_dir/.env" "$backup_config_host" "$maker_password_host" "$rclone_config_host"; do
+  path="$secret_path"
+  if [[ -f "$path" ]]; then
+    pass "arquivo secreto presente: $path"
+  else
+    fail "arquivo secreto ausente: $path"
+    continue
+  fi
   [[ -e "$path" ]] || continue
   mode="$(stat -c '%a' "$path")"
   if (( (8#$mode & 8#077) == 0 )); then
-    pass "permissões restritas: $secret ($mode)"
+    pass "permissões restritas: $path ($mode)"
   else
-    fail "permissões abertas em $secret ($mode); esperado 600 ou mais restritivo"
+    fail "permissões abertas em $path ($mode); esperado 600 ou mais restritivo"
   fi
 done
 

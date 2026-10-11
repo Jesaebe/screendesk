@@ -1,14 +1,46 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Acesso SSH externo confirmado
+
+- Confirmado acesso ao servidor por `cyrius@45.225.13.12`, porta `1522`, usando autenticação não interativa já configurada.
+- O host remoto se identifica como `cyrius`; o usuário operacional permanece UID/GID `1000:1000`.
+- O `rclone.conf` continua presente com proprietário `cyrius:cyrius` e modo `0600`.
+- `/srv/backups` continua `root:root` modo `0755` e ainda não atende ao contrato de escrita do container.
+- O diretório novo `/home/cyrius/screendeck-home` não existia antes da tentativa de transferência; a estratégia foi alterada pelo usuário para distribuição via Git.
+- Nenhum container ou serviço foi iniciado.
+
+## 2026-10-10 — Segredo do Maker preparado como arquivo protegido
+
+- O contrato deixou de transportar a senha do banco por variável de ambiente e passou a usar um arquivo exclusivo abaixo de `/run/secrets`.
+- O Compose monta `/home/cyrius/.config/screendeck-home/maker-password` como `/run/secrets/maker-password`, somente leitura, sem incluir o valor no `.env`, no `sources.toml` ou nos argumentos do processo.
+- O agendador lê o segredo somente no momento da execução, remove apenas a quebra de linha final e mantém sanitização de erros; arquivo ausente ou vazio resulta em `configuration_failed`.
+- A pré-checagem passou a exigir o arquivo real e permissão `0600` ou mais restritiva, sem ler seu conteúdo.
+- Foi adicionado um runbook de captura interativa sem eco nem histórico do shell; `secrets/` inteiro passou a ser ignorado pelo Git.
+- Maker continua desabilitado e nenhum arquivo, segredo ou serviço foi alterado no servidor.
+- Validação local: 52 testes aprovados, sintaxe Bash aprovada, validação de configuração aprovada e diff sem erros de whitespace.
+- Próximo passo: mediante autorização explícita, instalar interativamente o segredo no servidor, preparar `secrets/sources.toml` ainda com Maker desabilitado e executar a pré-checagem somente leitura.
+
+## 2026-10-10 — rclone.conf do servidor integrado ao Compose
+
+- Confirmado por inspeção SSH somente leitura o arquivo já validado em `/home/cyrius/.config/rclone/rclone.conf`, pertencente a `cyrius:cyrius` e com modo `0600` no servidor definitivo.
+- Confirmados sem revelar a configuração os remotes `gdrive` e `gdrive-crypt` no arquivo definitivo.
+- O Compose passou a montar esse arquivo diretamente em `/run/secrets/rclone.conf`, somente leitura, sem refazer OAuth, recriar remotes ou copiar o segredo para o repositório.
+- Como o arquivo `0600` pertence ao UID/GID `1000:1000`, o serviço de backup foi alinhado a esse mesmo usuário não-root; o servidor não possui ferramentas ACL instaladas e nenhuma permissão do segredo foi afrouxada.
+- A configuração versionável das origens passou a ter montagem separada, evitando expor todo um diretório de segredos ao container.
+- A pré-checagem valida existência e permissões do arquivo real no servidor sem ler seu conteúdo.
+- Validação local: sintaxe Bash aprovada, 51 testes aprovados e `scripts/validate-config.sh` aprovado; nenhum acesso ou alteração foi feito no servidor.
+- Próximo passo: instalar a senha de `cyriusBackup` como segredo protegido e preparar `sources.toml` no servidor antes de habilitar Maker.
+
 ## 2026-10-10 — Remotes rclone validados
 
 - Os remotes `gdrive` e `gdrive-crypt` foram criados e testados pelo usuário.
+- A configuração e os testes foram realizados no servidor definitivo; o `rclone.conf` permanece em `/home/cyrius/.config/rclone/rclone.conf` e não precisa ser copiado para a máquina de desenvolvimento.
 - A pasta correta é `CyriusBackups`, com maiúsculas, diretamente na raiz do Google Drive.
 - O remote criptografado grava dentro dessa pasta com nomes ilegíveis, conforme esperado.
 - O usuário concluiu um teste de restauração: enviou uma pasta pelo remote criptografado e recuperou nomes e conteúdo originais por meio do `gdrive-crypt`.
 - O remote base `gdrive` representa a raiz do Drive; portanto, caminhos informados depois de `gdrive:` são relativos à raiz e podem criar novas pastas.
 - Nenhum token, senha ou conteúdo do `rclone.conf` foi registrado no repositório.
-- Próximo passo: preservar o `rclone.conf` como segredo e validar seu uso no servidor de backup definitivo.
+- Próximo passo: confirmar no servidor apenas o caminho e as permissões do `rclone.conf` já validado e instalar a senha de `cyriusBackup` como segredo protegido.
 
 ## 2026-10-10 — Destino Google Drive definido
 

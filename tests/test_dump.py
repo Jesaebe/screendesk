@@ -17,7 +17,7 @@ def source_for(engine):
         port=5432 if engine == "postgresql" else 3306,
         database="app",
         username="reader",
-        password_env="BACKUP_DB_PASSWORD",
+        password_file="/run/secrets/db-password",
         sslmode="require",
         schedule=("00:00",),
         timezone="America/Bahia",

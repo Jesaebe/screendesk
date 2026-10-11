@@ -66,8 +66,11 @@ class SchedulerTests(unittest.TestCase):
         pipeline = RecordingPipeline()
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:
+            password_file = Path(directory) / "password"
+            password_file.write_text("secret\n")
+            maker = replace(self.maker, password_file=str(password_file))
             scheduler = BackupScheduler(
-                [self.maker], pipeline, Path(directory), notifier, {"BACKUP_MAKER_PASSWORD": "secret"}
+                [maker], pipeline, Path(directory), notifier
             )
             first = scheduler.run_due(self.due)
             second = scheduler.run_due(self.due)
@@ -80,21 +83,22 @@ class SchedulerTests(unittest.TestCase):
         first_pipeline = RecordingPipeline()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            password_file = root / "password"
+            password_file.write_text("secret")
+            maker = replace(self.maker, password_file=str(password_file))
             first = BackupScheduler(
-                [self.maker],
+                [maker],
                 first_pipeline,
                 root,
                 RecordingNotifier(),
-                {"BACKUP_MAKER_PASSWORD": "secret"},
             )
             first.run_due(self.due)
             second_pipeline = RecordingPipeline()
             restarted = BackupScheduler(
-                [self.maker],
+                [maker],
                 second_pipeline,
                 root,
                 RecordingNotifier(),
-                {"BACKUP_MAKER_PASSWORD": "secret"},
             )
             result = restarted.run_due(self.due)
         self.assertEqual(result, [])
@@ -104,7 +108,7 @@ class SchedulerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             scheduler = BackupScheduler(
-                [self.maker], RecordingPipeline(), root, RecordingNotifier(), {}
+                [self.maker], RecordingPipeline(), root, RecordingNotifier()
             )
             scheduler._completed_slots = {
                 ("maker", f"2026-10-{index // 1440 + 1:02d}T{(index // 60) % 24:02d}:{index % 60:02d}")
@@ -119,7 +123,7 @@ class SchedulerTests(unittest.TestCase):
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            scheduler = BackupScheduler([self.maker], pipeline, root, notifier, {})
+            scheduler = BackupScheduler([self.maker], pipeline, root, notifier)
             result = scheduler.run_due(self.due)[0]
             latest = json.loads((root / "latest.json").read_text())
         self.assertEqual(result.report.status, "configuration_failed")
@@ -130,12 +134,13 @@ class SchedulerTests(unittest.TestCase):
     def test_pipeline_failure_is_notified(self):
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:
+            password_file = Path(directory) / "password"
+            password_file.write_text("secret")
             scheduler = BackupScheduler(
-                [self.maker],
+                [replace(self.maker, password_file=str(password_file))],
                 RecordingPipeline("cloud_failed"),
                 Path(directory),
                 notifier,
-                {"BACKUP_MAKER_PASSWORD": "secret"},
             )
             scheduler.run_due(self.due)
         self.assertEqual(notifier.reports[0].status, "cloud_failed")
@@ -143,12 +148,13 @@ class SchedulerTests(unittest.TestCase):
     def test_unexpected_error_is_sanitized_and_notified(self):
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:
+            password_file = Path(directory) / "password"
+            password_file.write_text("secret")
             scheduler = BackupScheduler(
-                [self.maker],
+                [replace(self.maker, password_file=str(password_file))],
                 ExplodingPipeline(),
                 Path(directory),
                 notifier,
-                {"BACKUP_MAKER_PASSWORD": "secret"},
             )
             report = scheduler.run_due(self.due)[0].report
         self.assertEqual(report.status, "internal_failed")
@@ -158,12 +164,13 @@ class SchedulerTests(unittest.TestCase):
     def test_notification_failure_is_recorded_without_raising(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            password_file = root / "password"
+            password_file.write_text("secret")
             scheduler = BackupScheduler(
-                [self.maker],
+                [replace(self.maker, password_file=str(password_file))],
                 RecordingPipeline("cloud_failed"),
                 root,
                 ExplodingNotifier(),
-                {"BACKUP_MAKER_PASSWORD": "secret"},
             )
             result = scheduler.run_due(self.due)
             notification = json.loads((root / "notification-status.json").read_text())
