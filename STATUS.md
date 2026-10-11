@@ -1,5 +1,16 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Container de backup validado com origens desabilitadas
+
+- O servidor foi atualizado para o commit `38a9526` e o build da imagem `screendeck-home-backup` foi concluído.
+- Antes da inicialização, foi confirmado que o `sources.toml` real possui zero origens com `enabled = true`.
+- Somente o serviço `backup` foi iniciado; o Home Assistant permanece desligado.
+- O container está saudável e executa como usuário não-root `screendeck`, UID/GID `1000:1000`.
+- `/status`, `/backups`, `sources.toml`, `maker-password` e `rclone.conf` ficaram acessíveis com os proprietários e modos esperados; nenhum conteúdo secreto foi exibido.
+- Logs permaneceram vazios e não foram criados dumps, arquivos de estado, uploads ou relatórios, conforme esperado com todas as origens desabilitadas.
+- Recursos criados: imagem de backup, rede interna, volume nomeado de status e o container `screendeck-home-backup-1` em execução.
+- Próximo passo: mediante autorização específica, executar o primeiro backup controlado do Maker e validar dump local, upload criptografado e restauração antes da ativação permanente.
+
 ## 2026-10-10 — Entrypoint funcional do backup concluído
 
 - O entrypoint agora carrega as origens TOML, monta o pipeline real e executa o laço contínuo do agendador.
