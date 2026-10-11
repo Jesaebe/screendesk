@@ -42,9 +42,14 @@ def managed_backup_files(root: Path) -> list[BackupFile]:
     for source_directory in root.iterdir():
         if not source_directory.is_dir() or source_directory.name.startswith("."):
             continue
-        if source_directory.name == "logs":
+        if source_directory.name in {"logs", "lost+found"}:
             continue
-        for candidate in source_directory.iterdir():
+        try:
+            candidates = source_directory.iterdir()
+            candidates = list(candidates)
+        except OSError:
+            continue
+        for candidate in candidates:
             if candidate.is_file() and not candidate.name.endswith(".partial"):
                 metadata = candidate.stat()
                 files.append(

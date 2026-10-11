@@ -4,12 +4,20 @@ import sys
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT / "backup"))
 
 from src.config import load_sources
-from src.storage import DiskUsage, InsufficientSpaceError, MIB, prepare_storage, required_space
+from src.storage import (
+    DiskUsage,
+    InsufficientSpaceError,
+    MIB,
+    managed_backup_files,
+    prepare_storage,
+    required_space,
+)
 
 
 def sparse_file(path: Path, size: int, timestamp: int):
@@ -20,6 +28,25 @@ def sparse_file(path: Path, size: int, timestamp: int):
 
 
 class StorageTests(unittest.TestCase):
+    def test_ignores_filesystem_and_inaccessible_directories(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            lost_found = root / "lost+found"
+            lost_found.mkdir()
+            (lost_found / "filesystem-metadata").write_text("not a backup")
+            inaccessible = root / "unrelated"
+            inaccessible.mkdir()
+            with patch.object(Path, "iterdir", autospec=True) as iterdir:
+                def list_directory(path):
+                    if path == root:
+                        return iter([lost_found, inaccessible])
+                    if path == inaccessible:
+                        raise PermissionError("simulated")
+                    return iter([])
+
+                iterdir.side_effect = list_directory
+                self.assertEqual(managed_backup_files(root), [])
+
     @classmethod
     def setUpClass(cls):
         cls.maker = load_sources(ROOT / "backup/config/sources.example.toml")[0]

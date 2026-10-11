@@ -11,6 +11,13 @@
 - Recursos criados: imagem de backup, rede interna, volume nomeado de status e o container `screendeck-home-backup-1` em execução.
 - Próximo passo: mediante autorização específica, executar o primeiro backup controlado do Maker e validar dump local, upload criptografado e restauração antes da ativação permanente.
 
+### Primeira execução controlada — falha segura antes do dump
+
+- A primeira tentativa real parou na preparação do armazenamento, antes de chamar `pg_dump`, porque o volume contém o diretório de sistema `lost+found`, inacessível ao usuário do container.
+- O mecanismo de proteção restaurou `enabled = false` e reiniciou o container saudável; nenhum dump ou upload foi criado.
+- Foi gerado apenas um log sanitizado da falha abaixo de `/srv/backups/logs/maker/`.
+- A varredura local foi corrigida para ignorar `lost+found` e pular de forma segura diretórios não gerenciados que não possam ser lidos.
+
 ## 2026-10-10 — Entrypoint funcional do backup concluído
 
 - O entrypoint agora carrega as origens TOML, monta o pipeline real e executa o laço contínuo do agendador.
