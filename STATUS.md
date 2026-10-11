@@ -1,5 +1,15 @@
 # Status — ScreenDeck Home
 
+## 2026-10-11 — Primeiro backup automático aprovado
+
+- O slot automático das 00:00 em `America/Bahia` iniciou às 00:00:18 e terminou às 00:02:41 com `status=success`.
+- O dump do Maker possui 12.433.797 bytes, pertence a `cyrius:cyrius` e usa modo `0600`.
+- O upload criptografado foi concluído em `gdrive-crypt:screendeck-home/maker/`, que passou a conter dois objetos.
+- O slot `2026-10-11T00:00` foi persistido no estado do agendador, protegendo contra repetição após reinício.
+- O container permaneceu saudável e nenhum alerta de falha foi gerado.
+- A cadeia de backup do Maker está operacional de ponta a ponta; próximas execuções previstas: 06:00, 12:00 e 18:00.
+- Próximo passo: avançar para a implantação controlada do Home Assistant e das integrações funcionais pendentes.
+
 ## 2026-10-10 — Alertas Gmail ativados e testados
 
 - A senha de app do Google foi instalada pelo usuário como arquivo protegido, com 16 bytes, proprietário `cyrius:cyrius` e modo `0600`; seu conteúdo não foi exibido.

@@ -10,17 +10,17 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A fundação local da Fase 1 foi implementada em 09/10/2026.
 - Foram criados os arquivos raiz de governança, exemplo de ambiente e Compose declarativo.
 - Foram adicionados documentação, runbooks, esqueleto do Home Assistant, contrato inicial do serviço de backup, monitoramento pendente de decisão, scripts protegidos e testes locais.
-- O entrypoint funcional do backup carrega as origens, monta o pipeline real e executa o agendador contínuo. Maker continua deliberadamente com `enabled = false`, portanto nenhum dump é executado antes do teste controlado.
-- A imagem de backup foi construída no servidor e somente o container `screendeck-home-backup-1` está em execução, saudável, como UID/GID `1000:1000`. Todas as origens permanecem desabilitadas; não houve dump, upload ou criação de relatórios. O Home Assistant continua desligado.
+- O entrypoint funcional do backup carrega as origens, monta o pipeline real e executa o agendador contínuo. O container `screendeck-home-backup-1` está saudável como UID/GID `1000:1000`; o Home Assistant continua desligado.
 - O primeiro pipeline real completo do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Maker retornou para `enabled = false`.
 - A renovação OAuth foi validada após montar o diretório dedicado `/home/cyrius/.config/rclone` em `/run/rclone`: a listagem cloud terminou sem stderr, o diretório contém somente `rclone.conf` e o arquivo permanece em modo `0600`. Os demais segredos continuam somente leitura.
 - Maker está permanentemente habilitado desde 10/10/2026, com agenda às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia` e retenção cloud de 15 dias. O container permaneceu saudável após a ativação.
 - A agenda é definida por origem no campo `schedule`; bancos futuros podem usar frequências diferentes. Após editar o TOML real, deve-se validá-lo e reiniciar somente o serviço `backup`.
 - O canal SMTP Gmail foi ativado e testado em 10/10/2026, usando provisoriamente `jesaebe@gmail.com` como remetente e destinatário: senha de app em arquivo `0600`, STARTTLS e autenticação aprovados, e-mail sintético recebido na caixa de entrada e container saudável. Nenhuma senha foi exibida ou colocada no `.env`.
-- Cinquenta e oito testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações e sanitização.
+- O primeiro backup automático do Maker foi aprovado em 11/10/2026: slot das 00:00 persistido, `status=success`, dump de 12.433.797 bytes em modo `0600`, upload criptografado concluído e dois objetos confirmados na pasta cloud da origem. O container permaneceu saudável.
+- Sessenta e dois testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações, segredos SMTP e sanitização.
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
-- Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup` foi criado e um `pg_dump` de validação funcionou, conforme confirmação do usuário em 10/10/2026. A senha foi instalada no servidor como arquivo protegido, e o `sources.toml` real e o remote `crypt` estão preparados; a habilitação ainda depende do entrypoint funcional e de um teste controlado.
+- Maker permanece com `enabled = true`. O usuário exclusivo `cyriusBackup`, o segredo protegido, o pipeline e a restauração foram validados no servidor.
 - Google Drive definido para backups: conta `jesaebe@gmail.com`, pasta `CyriusBackups` diretamente na raiz do Drive, remote base `gdrive` e remote criptografado `gdrive-crypt`. Ambos foram criados e testados pelo usuário no servidor definitivo em 10/10/2026; o `crypt` grava dentro de `CyriusBackups` com nomes ilegíveis. O `rclone.conf` permanece somente em `/home/cyrius/.config/rclone/rclone.conf` nesse servidor e será montado no container como somente leitura. O teste de ida e volta foi concluído nele: uma pasta foi enviada criptografada e restaurada com nomes e conteúdo legíveis pelo `gdrive-crypt`.
 - O executor local foi implementado com trava por origem, arquivo parcial, validação não vazia, promoção atômica, logs sanitizados e relatórios `latest.json`/`history.jsonl`.
 - O executor externo é injetável; todos os testes usam simulação. Agendamento, upload cloud e notificações estão conectados pelo entrypoint, mas nenhuma origem real está habilitada.
@@ -28,11 +28,10 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A reserva prévia inicial é o maior valor entre duas vezes o tamanho estimado e 64 MiB.
 - Travas com mais de seis horas e PID inexistente são apenas classificadas como candidatas a obsoletas; não há remoção automática.
 - O adaptador cloud simulado constrói upload por `rclone copyto` e retenção por `rclone delete --min-age 15d`, sempre limitado ao diretório da origem.
-- O remote real `gdrive-crypt` foi validado pelo usuário no servidor definitivo: envio, listagem e restauração funcionaram, e nomes/conteúdo permanecem criptografados dentro de `CyriusBackups` quando vistos pelo remote base. O arquivo está em `/home/cyrius/.config/rclone/rclone.conf`, pertence a `cyrius:cyrius`, tem modo `0600` e será montado no container como somente leitura; não é necessário copiá-lo para a máquina de desenvolvimento.
+- O remote real `gdrive-crypt` foi validado no servidor definitivo: envio, listagem e restauração funcionaram, e nomes/conteúdo permanecem criptografados dentro de `CyriusBackups` quando vistos pelo remote base. O diretório dedicado do arquivo `rclone.conf` é montado com escrita para persistir renovações OAuth atômicas; o arquivo permanece modo `0600`.
 - O pipeline simulado integra dump, upload e retenção cloud, preserva o dump local em falhas cloud e publica um único relatório final com duração total.
 - O agendador interpreta o fuso de cada origem, evita repetição no mesmo minuto enquanto o processo está ativo e transforma senha ausente ou exceção inesperada em relatório e alerta.
-- O adaptador SMTP usa STARTTLS e foi validado apenas com cliente falso. Nenhum e-mail foi enviado.
-- O laço contínuo existe, porém não está conectado ao entrypoint e não foi iniciado.
+- O adaptador SMTP usa STARTTLS e foi validado com cliente falso nos testes e com Gmail real no servidor; o e-mail sintético foi recebido.
 - A deduplicação do agendador persiste atomicamente entre reinícios e mantém somente os 512 slots mais recentes.
 - Falhas do canal SMTP são registradas em estado separado, sem substituir o resultado do backup ou interromper o ciclo.
 - Senhas de bancos são referenciadas por `password_file` abaixo de `/run/secrets`, não por variáveis de ambiente. Para Maker, o host deverá manter `/home/cyrius/.config/screendeck-home/maker-password` com modo `0600`; o Compose o monta somente para leitura e o agendador trata arquivo ausente ou vazio como falha de configuração.
@@ -52,7 +51,7 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Maker foi confirmado como banco externo em outro servidor; não corresponde ao PostgreSQL 11 local do Cartório.
 - Foram descartados os dados de Rifa, Cartório, HML, PRD FEJJB e Jiu-Jitsu System, além de imagens, volumes anônimos, diretórios antigos e cache de build.
 - Nenhum pacote foi instalado.
-- Nenhum serviço ou container do ScreenDeck foi iniciado.
+- O serviço de backup do ScreenDeck está em execução; o Home Assistant ainda não foi iniciado.
 - Não houve acesso SSH nem alteração no servidor Ubuntu de produção.
 - Não houve alteração fora desta pasta do projeto.
 - A referência isolada à AWS na seção de segurança do PRD foi removida. O destino cloud aprovado é Google Drive, com criptografia via rclone ou solução equivalente.
@@ -102,10 +101,9 @@ Fechar o desenho funcional antes de habilitar o serviço de backup:
 
 1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
 2. definir a solução de monitoramento do host e seus limiares;
-3. acompanhar a primeira execução automática do Maker e confirmar o novo objeto cloud;
-4. acompanhar a primeira execução automática do Maker;
-5. preparar a implantação controlada do restante da solução agora que a pré-checagem e o pipeline de backup estão aprovados;
-6. instalar/configurar o tablet somente com autorização explícita posterior.
+3. preparar a implantação controlada do Home Assistant e das integrações funcionais pendentes;
+4. definir a solução de monitoramento do host e seus limiares;
+5. instalar/configurar o tablet somente com autorização explícita posterior.
 
 Não há autorização para SSH, implantação ou execução de containers.
 
@@ -129,7 +127,7 @@ Ao concluir cada etapa, atualizar este arquivo com o que mudou, validações fei
 
 - Data: 10/10/2026.
 - Comando: `python3 -m unittest discover -s tests -v`.
-- Resultado: 58 testes aprovados; entrypoint funcional, pipeline, scripts de implantação e tablet validados.
+- Resultado: 62 testes aprovados; entrypoint funcional, pipeline, segredos SMTP, scripts de implantação e tablet validados.
 - Comando: `bash scripts/validate-config.sh`.
 - Resultado: aprovado.
-- Infraestrutura do ScreenDeck executada: nenhuma. Ambiente Docker antigo removido pelo usuário em 10/10/2026 e validado vazio.
+- Infraestrutura do ScreenDeck executada: serviço de backup saudável e operacional; Home Assistant ainda desligado.
