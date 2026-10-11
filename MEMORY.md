@@ -37,6 +37,7 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A URL do Home Assistant é obrigatória em tempo de instalação e não está fixada no launcher.
 - Servidor Ubuntu: `192.168.25.249`. URL LAN planejada do Home Assistant: `http://192.168.25.249:8123`, pendente de confirmar a porta.
 - Endpoint SSH externo confirmado em 10/10/2026: `45.225.13.12`, porta `1522`, usuário `cyrius`; o host se identifica como `cyrius`. O endereço LAN `192.168.25.249` continua sendo o destino local do Home Assistant.
+- Repositório Git configurado em `https://github.com/Jesaebe/screendesk.git`; o projeto foi clonado em `/home/cyrius/screendeck-home` no servidor, inicialmente no commit `d539366`, sem segredos e sem iniciar infraestrutura.
 - A desativação das aplicações Docker antigas foi executada pelo usuário em 10/10/2026 conforme o plano documentado.
 - A validação posterior mostrou zero containers, imagens, volumes locais e cache de build; restaram somente as redes padrão `bridge`, `host` e `none`.
 - Porta 8123 está livre. Docker, Nginx/80 e Zabbix/10050 permaneceram ativos; SSH/22 também permaneceu disponível.

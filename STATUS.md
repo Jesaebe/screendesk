@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Repositório publicado e clonado no servidor
+
+- Repositório privado/externo informado pelo usuário configurado como `origin`: `https://github.com/Jesaebe/screendesk.git`.
+- A branch `main` foi publicada e validada no commit `d539366`.
+- O projeto foi clonado via Git em `/home/cyrius/screendeck-home` no servidor acessado por SSH em `45.225.13.12:1522`.
+- O checkout remoto ficou limpo e alinhado a `origin/main` no mesmo commit.
+- Nenhum segredo foi transferido pelo Git; nenhum container ou serviço foi iniciado.
+- Próximo passo: instalar interativamente o segredo do Maker, criar `.env` e `secrets/sources.toml` protegidos no servidor e corrigir, com autorização, a propriedade de `/srv/backups` antes da pré-checagem.
+
 ## 2026-10-10 — Acesso SSH externo confirmado
 
 - Confirmado acesso ao servidor por `cyrius@45.225.13.12`, porta `1522`, usando autenticação não interativa já configurada.
