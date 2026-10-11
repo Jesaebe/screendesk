@@ -11,7 +11,7 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Foram criados os arquivos raiz de governança, exemplo de ambiente e Compose declarativo.
 - Foram adicionados documentação, runbooks, esqueleto do Home Assistant, contrato inicial do serviço de backup, monitoramento pendente de decisão, scripts protegidos e testes locais.
 - O entrypoint funcional do backup carrega as origens, monta o pipeline real e executa o agendador contínuo. O container `screendeck-home-backup-1` está saudável como UID/GID `1000:1000`; o Home Assistant continua desligado.
-- O primeiro pipeline real completo do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Maker retornou para `enabled = false`.
+- O primeiro pipeline real controlado do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Ao fim desse teste, Maker retornou temporariamente para `enabled = false`; a ativação permanente posterior está registrada abaixo.
 - A renovação OAuth foi validada após montar o diretório dedicado `/home/cyrius/.config/rclone` em `/run/rclone`: a listagem cloud terminou sem stderr, o diretório contém somente `rclone.conf` e o arquivo permanece em modo `0600`. Os demais segredos continuam somente leitura.
 - Maker está permanentemente habilitado desde 10/10/2026, com agenda às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia` e retenção cloud de 15 dias. O container permaneceu saudável após a ativação.
 - A agenda é definida por origem no campo `schedule`; bancos futuros podem usar frequências diferentes. Após editar o TOML real, deve-se validá-lo e reiniciar somente o serviço `backup`.
@@ -21,9 +21,9 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
 - Maker permanece com `enabled = true`. O usuário exclusivo `cyriusBackup`, o segredo protegido, o pipeline e a restauração foram validados no servidor.
-- Google Drive definido para backups: conta `jesaebe@gmail.com`, pasta `CyriusBackups` diretamente na raiz do Drive, remote base `gdrive` e remote criptografado `gdrive-crypt`. Ambos foram criados e testados pelo usuário no servidor definitivo em 10/10/2026; o `crypt` grava dentro de `CyriusBackups` com nomes ilegíveis. O `rclone.conf` permanece somente em `/home/cyrius/.config/rclone/rclone.conf` nesse servidor e será montado no container como somente leitura. O teste de ida e volta foi concluído nele: uma pasta foi enviada criptografada e restaurada com nomes e conteúdo legíveis pelo `gdrive-crypt`.
+- Google Drive definido para backups: conta `jesaebe@gmail.com`, pasta `CyriusBackups` diretamente na raiz do Drive, remote base `gdrive` e remote criptografado `gdrive-crypt`. Ambos foram criados e testados no servidor definitivo em 10/10/2026; o `crypt` grava dentro de `CyriusBackups` com nomes ilegíveis. O diretório dedicado de `/home/cyrius/.config/rclone/rclone.conf` é montado com escrita no container para permitir a renovação OAuth atômica, mantendo o arquivo em modo `0600`. O teste de ida e volta foi concluído: uma pasta foi enviada criptografada e restaurada com nomes e conteúdo legíveis pelo `gdrive-crypt`.
 - O executor local foi implementado com trava por origem, arquivo parcial, validação não vazia, promoção atômica, logs sanitizados e relatórios `latest.json`/`history.jsonl`.
-- O executor externo é injetável; todos os testes usam simulação. Agendamento, upload cloud e notificações estão conectados pelo entrypoint, mas nenhuma origem real está habilitada.
+- O executor externo é injetável e os testes unitários usam simulação. Em produção, agendamento, dump, upload cloud e notificações estão conectados pelo entrypoint, e a origem Maker está habilitada.
 - A retenção local foi integrada ao executor: inicia em 85%, busca retornar a 75%, preserva o último backup de cada origem e recusa o dump se a margem não puder ser restaurada.
 - A reserva prévia inicial é o maior valor entre duas vezes o tamanho estimado e 64 MiB.
 - Travas com mais de seis horas e PID inexistente são apenas classificadas como candidatas a obsoletas; não há remoção automática.
@@ -34,13 +34,13 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - O adaptador SMTP usa STARTTLS e foi validado com cliente falso nos testes e com Gmail real no servidor; o e-mail sintético foi recebido.
 - A deduplicação do agendador persiste atomicamente entre reinícios e mantém somente os 512 slots mais recentes.
 - Falhas do canal SMTP são registradas em estado separado, sem substituir o resultado do backup ou interromper o ciclo.
-- Senhas de bancos são referenciadas por `password_file` abaixo de `/run/secrets`, não por variáveis de ambiente. Para Maker, o host deverá manter `/home/cyrius/.config/screendeck-home/maker-password` com modo `0600`; o Compose o monta somente para leitura e o agendador trata arquivo ausente ou vazio como falha de configuração.
+- Senhas de bancos são referenciadas por `password_file` abaixo de `/run/secrets`, não por variáveis de ambiente. Para Maker, o host mantém `/home/cyrius/.config/screendeck-home/maker-password` com modo `0600`; o Compose o monta somente para leitura e o agendador trata arquivo ausente ou vazio como falha de configuração.
 - Tablet inventariado por SSH somente leitura: Debian 12 i386, Cinnamon/X11, `1920x1200` horizontal, usuário `painel` com autologin, Chromium ausente e aproximadamente 19 GiB livres.
 - Não há autostart persistente do kiosk. A sessão bloqueia após 900 segundos e desliga a tela em AC após 1800 segundos.
 - A configuração desejada é Chromium após o autologin, tela sempre ativa e recuperação automática do navegador. Nenhuma mudança foi aplicada ao tablet.
 - Artefatos locais do kiosk foram preparados em `tablet/`: launcher resiliente, autostart Cinnamon, instalador protegido, captura de preferências e rollback direcionado.
 - A URL do Home Assistant é obrigatória em tempo de instalação e não está fixada no launcher.
-- Servidor Ubuntu: `192.168.25.249`. URL LAN planejada do Home Assistant: `http://192.168.25.249:8123`, pendente de confirmar a porta.
+- Servidor Ubuntu: `192.168.25.249`. URL LAN planejada do Home Assistant: `http://192.168.25.249:8123`; a porta 8123 foi confirmada livre.
 - Endpoint SSH externo confirmado em 10/10/2026: `45.225.13.12`, porta `1522`, usuário `cyrius`; o host se identifica como `cyrius`. O endereço LAN `192.168.25.249` continua sendo o destino local do Home Assistant.
 - Repositório Git configurado em `https://github.com/Jesaebe/screendesk.git`; o projeto foi clonado em `/home/cyrius/screendeck-home` no servidor, inicialmente no commit `d539366`, sem segredos e sem iniciar infraestrutura.
 - A desativação das aplicações Docker antigas foi executada pelo usuário em 10/10/2026 conforme o plano documentado.
@@ -52,7 +52,8 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Foram descartados os dados de Rifa, Cartório, HML, PRD FEJJB e Jiu-Jitsu System, além de imagens, volumes anônimos, diretórios antigos e cache de build.
 - Nenhum pacote foi instalado.
 - O serviço de backup do ScreenDeck está em execução; o Home Assistant ainda não foi iniciado.
-- Não houve acesso SSH nem alteração no servidor Ubuntu de produção.
+- A primeira ativação do Home Assistant está preparada em `scripts/deploy.sh`: exige autorização explícita, executa a pré-checagem, baixa a imagem fixada, valida a configuração, inicia somente `home-assistant` e verifica a resposta HTTP. O rollback para somente esse serviço e preserva o backup e os dados.
+- Houve acesso SSH autorizado e alterações controladas no servidor Ubuntu para preparar e ativar exclusivamente o serviço de backup; o Home Assistant permanece desligado.
 - Não houve alteração fora desta pasta do projeto.
 - A referência isolada à AWS na seção de segurança do PRD foi removida. O destino cloud aprovado é Google Drive, com criptografia via rclone ou solução equivalente.
 - A pré-checagem de implantação `scripts/preflight-deploy.sh` foi aprovada integralmente no servidor em 10/10/2026. O usuário `cyrius` foi adicionado ao grupo `docker` após autorização explícita; host, Docker/Compose, porta 8123, segredos, `/srv/backups` e Compose foram validados sem iniciar containers.
@@ -83,9 +84,9 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Segredos: arquivos locais ignorados pelo Git e um `.env.example` sem valores reais.
 - O monitoramento deve representar o host real, não apenas métricas internas dos containers; a solução exata ainda será definida.
 
-## Estrutura local planejada
+## Estrutura local implementada
 
-A Fase 1 deverá preparar, sem executar a infraestrutura:
+A Fase 1 preparou no repositório:
 
 - arquivos raiz: `README.md`, `STATUS.md`, `.gitignore`, `.editorconfig`, `.env.example` e `compose.yaml`;
 - `docs/` para arquitetura, decisões, segurança, inventário, implantação, rollback, tablet e runbooks;
@@ -97,27 +98,21 @@ A Fase 1 deverá preparar, sem executar a infraestrutura:
 
 ## Próxima etapa autorizável
 
-Fechar o desenho funcional antes de habilitar o serviço de backup:
+O backup já está habilitado e aprovado. A próxima frente é a implantação controlada do Home Assistant:
 
-1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
+1. confirmar calendários/listas Google e marca/modelo do ar-condicionado;
 2. definir a solução de monitoramento do host e seus limiares;
-3. preparar a implantação controlada do Home Assistant e das integrações funcionais pendentes;
-4. definir a solução de monitoramento do host e seus limiares;
-5. instalar/configurar o tablet somente com autorização explícita posterior.
+3. revisar e preparar a implantação do Home Assistant e das integrações funcionais pendentes;
+4. instalar/configurar o tablet somente com autorização explícita posterior.
 
-Não há autorização para SSH, implantação ou execução de containers.
+Não há autorização vigente para iniciar o Home Assistant nem alterar o tablet. Novos acessos ou mudanças no servidor exigem escopo e autorização explícitos.
 
 ## Pendências de levantamento
 
-- Bancos a copiar: tipos, hosts, portas, tamanhos e janelas permitidas.
-- Conta e pasta do Google Drive.
+- Outras origens de banco, caso existam: tipos, hosts, portas, tamanhos e janelas permitidas.
 - Marca, modelo e método de controle do ar-condicionado.
-- Resolução, orientação e comportamento de tela do tablet.
 - Calendários e listas do Google Tasks que aparecerão.
-- Frequência final dos backups.
-- Conta SMTP e destinatários dos alertas.
 - Limiares finais de CPU, memória e armazenamento.
-- Portas e serviços já existentes no servidor, a levantar futuramente por diagnóstico somente leitura.
 
 ## Regra de atualização
 
@@ -125,9 +120,10 @@ Ao concluir cada etapa, atualizar este arquivo com o que mudou, validações fei
 
 ## Última validação
 
-- Data: 10/10/2026.
+- Data: 11/10/2026.
 - Comando: `python3 -m unittest discover -s tests -v`.
-- Resultado: 62 testes aprovados; entrypoint funcional, pipeline, segredos SMTP, scripts de implantação e tablet validados.
+- Resultado: 63 testes aprovados; entrypoint funcional, pipeline, segredos SMTP, implantação controlada do Home Assistant, rollback direcionado e tablet validados.
 - Comando: `bash scripts/validate-config.sh`.
 - Resultado: aprovado.
+- Validação operacional: primeiro slot automático do Maker concluído com `status=success`, upload criptografado e persistência da deduplicação; Gmail de alerta previamente validado com recebimento confirmado.
 - Infraestrutura do ScreenDeck executada: serviço de backup saudável e operacional; Home Assistant ainda desligado.

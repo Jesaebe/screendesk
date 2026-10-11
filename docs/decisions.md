@@ -10,7 +10,7 @@ O remote usado pelo serviço deverá ser um remote `crypt` do rclone sobre um re
 
 ## D-003 — Configuração de origens em TOML
 
-O serviço usa TOML porque Python moderno oferece leitura pela biblioteca padrão. Senhas são referenciadas por nome de variável de ambiente, nunca gravadas no TOML versionado.
+O serviço usa TOML porque Python moderno oferece leitura pela biblioteca padrão. Senhas são referenciadas por caminho de arquivo abaixo de `/run/secrets`, nunca gravadas no TOML versionado nem transportadas em variáveis de ambiente.
 
 ## D-004 — Estado do backup por volume compartilhado
 

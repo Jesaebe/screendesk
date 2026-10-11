@@ -1,5 +1,16 @@
 # Status — ScreenDeck Home
 
+## 2026-10-11 — Ativação do Home Assistant preparada
+
+- O deploy passou a executar uma ativação limitada ao serviço `home-assistant`, mantendo o backup em execução sem recriação.
+- A rotina exige autorização explícita, repete a pré-checagem, baixa a imagem fixada, valida a configuração dentro da imagem, inicia o container e aguarda resposta HTTP por até 120 segundos.
+- O rollback correspondente para somente o Home Assistant, com janela de 60 segundos, e preserva configuração, volumes e o serviço de backup.
+- O Compose recebeu `stop_grace_period: 60s`, conforme a orientação oficial para encerramento limpo do banco interno do Home Assistant.
+- Documentação operacional foi sincronizada com o estado real: backup ativo, `rclone` gravável para renovação OAuth e porta 8123 previamente aprovada.
+- Validação local: 63 testes aprovados, sintaxe Bash aprovada, configuração aprovada e diff sem erros de whitespace.
+- Nenhum Docker, SSH ou serviço foi executado; o Home Assistant permanece desligado.
+- Próximo passo: publicar os artefatos e, mediante autorização explícita, executar a primeira ativação controlada no servidor.
+
 ## 2026-10-11 — Primeiro backup automático aprovado
 
 - O slot automático das 00:00 em `America/Bahia` iniciou às 00:00:18 e terminou às 00:02:41 com `status=success`.

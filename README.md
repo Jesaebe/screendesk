@@ -4,14 +4,14 @@ Infraestrutura versionada para um painel residencial baseado em Home Assistant e
 
 ## Estado
 
-A Fase 1 prepara artefatos locais e testes de lógica. Nada deste repositório deve ser implantado ou executado no servidor de produção sem autorização explícita. Consulte `MEMORY.md` para o ponto de retomada e `STATUS.md` para o histórico.
+O serviço de backup da Fase 1 está implantado e operacional. O Home Assistant ainda aguarda ativação controlada. Nada adicional deste repositório deve ser implantado ou executado no servidor de produção sem autorização explícita. Consulte `MEMORY.md` para o ponto de retomada e `STATUS.md` para o histórico.
 
 ## Regras essenciais
 
 - Não versionar segredos, dumps, logs ou configurações OAuth reais.
 - Não executar o Compose na máquina de desenvolvimento.
-- SSH no servidor é somente leitura até autorização de implantação.
-- Revisar `docs/deployment.md` e concluir `docs/server-inventory.md` antes de implantar.
+- Novos acessos ou alterações no servidor exigem escopo e autorização explícitos.
+- Revisar `docs/deployment.md` antes de ativar o Home Assistant.
 
 ## Validação local permitida
 

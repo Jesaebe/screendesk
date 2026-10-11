@@ -1,6 +1,6 @@
-# Implantação futura
+# Implantação controlada
 
-Estado atual: **não autorizada**.
+Estado atual: o backup está implantado e operacional; o Home Assistant ainda não foi iniciado.
 
 Pré-condições: Fase 1 validada, inventário concluído, segredos preparados fora do Git, backups dos arquivos que serão afetados e autorização explícita do usuário.
 
@@ -12,22 +12,30 @@ As aplicações Docker antigas foram removidas pelo usuário conforme o plano ap
 
 Antes de qualquer alteração, executar `scripts/preflight-deploy.sh` no diretório transferido. A pré-checagem é somente leitura e confirma host, Ubuntu, Docker/Compose, porta 8123, armazenamento, arquivos secretos, permissões e validade declarativa do Compose. Ela não cria diretórios, não corrige permissões e não inicia containers.
 
-O `rclone.conf` já validado permanece em `/home/cyrius/.config/rclone/rclone.conf` no servidor. O Compose o monta como `/run/secrets/rclone.conf`, somente leitura; não é necessário refazer a autorização OAuth nem copiar o arquivo para o repositório.
+O `rclone.conf` já validado permanece em `/home/cyrius/.config/rclone/rclone.conf` no servidor. O Compose monta seu diretório dedicado em `/run/rclone` com escrita, necessária para a renovação OAuth atômica; o arquivo continua protegido com modo `0600` e não é copiado para o repositório.
 
 O serviço de backup executa como UID/GID `1000:1000`, correspondente ao usuário `cyrius` no servidor. Isso mantém o processo sem privilégios de root e permite ler o `rclone.conf` com modo `0600`. Antes da implantação, `/srv/backups` deverá pertencer ao UID `1000` e permitir escrita ao proprietário.
 
 A senha do Maker deve ficar em `/home/cyrius/.config/screendeck-home/maker-password`, pertencente a `cyrius:cyrius`, modo `0600`, sem quebra de linha obrigatória. O Compose monta somente esse arquivo em `/run/secrets/maker-password`, somente leitura. O procedimento interativo está em `docs/runbooks/install-maker-secret.md`.
 
-Ordem planejada:
+## Primeira ativação do Home Assistant
 
-1. revisar diff e imagens fixadas;
-2. transferir somente artefatos versionados;
-3. criar configuração secreta com permissões restritas;
-4. validar a configuração do Compose;
-5. construir a imagem de backup;
-6. iniciar os serviços;
-7. validar health checks, LAN e persistência;
-8. executar backup controlado e restauração de teste;
-9. documentar comandos e resultados em `STATUS.md`.
+Depois de publicar e atualizar o checkout do servidor, executar somente mediante autorização explícita:
 
-O script `scripts/deploy.sh` permanece bloqueado e ainda não executa a implantação. Ele só será implementado quando as origens, o remote `crypt`, SMTP e o entrypoint funcional do backup estiverem fechados; sua execução futura continuará exigindo autorização explícita por variável de ambiente.
+```sh
+SCREENDECK_DEPLOY_AUTHORIZED=YES ./scripts/deploy.sh
+```
+
+O script executa novamente a pré-checagem, baixa a imagem fixada, valida os YAMLs do Home Assistant dentro da própria imagem, inicia somente `home-assistant` com `--no-deps` e aguarda uma resposta HTTP local. O container de backup não é recriado. Se a resposta não chegar em 120 segundos, o container fica preservado e os últimos logs são exibidos para diagnóstico.
+
+Quando a resposta local estiver aprovada, abrir `http://192.168.25.249:8123` pela LAN e concluir o onboarding criando o administrador individual. Não publicar a porta no roteador.
+
+## Reversão da primeira ativação
+
+Mediante autorização específica:
+
+```sh
+SCREENDECK_ROLLBACK_AUTHORIZED=YES ./scripts/rollback.sh
+```
+
+O rollback para somente `home-assistant`, aguarda até 60 segundos pelo encerramento limpo e preserva a configuração, o volume compartilhado e o serviço de backup.

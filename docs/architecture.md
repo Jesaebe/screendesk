@@ -1,6 +1,6 @@
 # Arquitetura
 
-O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubuntu executará, futuramente, o Home Assistant e o serviço independente de backup descritos por `compose.yaml`.
+O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubuntu já executa o serviço independente de backup descrito por `compose.yaml`; o Home Assistant é a próxima ativação controlada.
 
 ## Fluxos
 
@@ -22,4 +22,4 @@ O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubu
 - Home Assistant: `http://192.168.25.249:8123`.
 - Tablet: `192.168.25.47`.
 
-A URL pressupõe que a porta 8123 esteja livre; isso ainda precisa ser confirmado pelo inventário somente leitura do servidor.
+A porta 8123 foi confirmada livre pelo inventário e pela pré-checagem do servidor.
