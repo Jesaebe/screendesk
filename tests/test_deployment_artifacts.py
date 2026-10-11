@@ -35,7 +35,7 @@ class DeploymentArtifactTests(unittest.TestCase):
         self.assertIn(":/run/secrets/rclone.conf:ro", compose)
         self.assertIn(":/run/secrets/maker-password:ro", compose)
         self.assertIn('${BACKUP_UID:-1000}:${BACKUP_GID:-1000}', compose)
-        self.assertIn("--uid 1000 backup", dockerfile)
+        self.assertIn("--uid 1000 screendeck", dockerfile)
 
 
 if __name__ == "__main__":

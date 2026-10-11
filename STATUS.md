@@ -11,6 +11,12 @@
 - Validação local: 58 testes aprovados, configuração aprovada e diff sem erros de whitespace.
 - Próximo passo: publicar o código e preparar um teste controlado do container de backup, ainda com Maker desabilitado, antes de autorizar a primeira execução real.
 
+### Correção encontrada no primeiro build controlado
+
+- O primeiro build no servidor parou antes de criar o container porque a imagem Debian já reserva o nome de usuário `backup`.
+- O usuário interno foi renomeado para `screendeck`, preservando UID/GID `1000:1000` e todo o contrato de permissões do host.
+- Nenhum container, dump ou upload foi iniciado durante a tentativa que revelou o conflito.
+
 ## 2026-10-10 — Pré-checagem do servidor aprovada
 
 - Confirmados no servidor `.env`, `secrets/sources.toml`, o segredo do Maker e o `rclone.conf`, todos pertencentes a `cyrius:cyrius` e com modo `0600`; nenhum conteúdo secreto foi exibido ou copiado.

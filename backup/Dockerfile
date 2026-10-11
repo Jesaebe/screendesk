@@ -9,11 +9,11 @@ RUN apt-get update \
         tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --create-home --uid 1000 backup
-RUN install -d -o backup -g backup /status
+RUN useradd --create-home --uid 1000 screendeck
+RUN install -d -o screendeck -g screendeck /status
 WORKDIR /app
-COPY --chown=backup:backup src ./src
-USER backup
+COPY --chown=screendeck:screendeck src ./src
+USER screendeck
 
 ENTRYPOINT ["python3", "-m", "src.main"]
 CMD ["scheduler"]
