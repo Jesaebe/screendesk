@@ -51,8 +51,9 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Maker foi confirmado como banco externo em outro servidor; não corresponde ao PostgreSQL 11 local do Cartório.
 - Foram descartados os dados de Rifa, Cartório, HML, PRD FEJJB e Jiu-Jitsu System, além de imagens, volumes anônimos, diretórios antigos e cache de build.
 - Nenhum pacote foi instalado.
-- O serviço de backup do ScreenDeck está em execução; o Home Assistant ainda não foi iniciado.
+- O serviço de backup do ScreenDeck está em execução e saudável. O Home Assistant `2026.10.1` foi ativado em 11/10/2026 e responde na LAN em `http://192.168.25.249:8123`; o onboarding ainda precisa ser concluído pelo usuário.
 - A primeira ativação do Home Assistant está preparada em `scripts/deploy.sh`: exige autorização explícita, executa a pré-checagem, baixa a imagem fixada, valida a configuração, inicia somente `home-assistant` e verifica a resposta HTTP. O rollback para somente esse serviço e preserva o backup e os dados.
+- O servidor está no commit `41d813e`, aplicado por bundle Git e fast-forward. O GitHub permanece em `67fcd1c`, pois HTTPS, SSH e o checkout do servidor não possuem credencial de escrita disponível; a publicação precisa ser regularizada posteriormente.
 - Houve acesso SSH autorizado e alterações controladas no servidor Ubuntu para preparar e ativar exclusivamente o serviço de backup; o Home Assistant permanece desligado.
 - Não houve alteração fora desta pasta do projeto.
 - A referência isolada à AWS na seção de segurança do PRD foi removida. O destino cloud aprovado é Google Drive, com criptografia via rclone ou solução equivalente.
@@ -126,4 +127,4 @@ Ao concluir cada etapa, atualizar este arquivo com o que mudou, validações fei
 - Comando: `bash scripts/validate-config.sh`.
 - Resultado: aprovado.
 - Validação operacional: primeiro slot automático do Maker concluído com `status=success`, upload criptografado e persistência da deduplicação; Gmail de alerta previamente validado com recebimento confirmado.
-- Infraestrutura do ScreenDeck executada: serviço de backup saudável e operacional; Home Assistant ainda desligado.
+- Infraestrutura do ScreenDeck executada: serviço de backup saudável e operacional; Home Assistant ativo e aguardando onboarding.

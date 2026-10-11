@@ -31,6 +31,9 @@ __pycache__/
 
 # Home Assistant runtime files (configuration stays versioned)
 home-assistant/.storage/
+home-assistant/.HA_VERSION
+home-assistant/.ha_run.lock
+home-assistant/blueprints/
 home-assistant/deps/
 home-assistant/home-assistant.log*
 home-assistant/home-assistant_v2.db*

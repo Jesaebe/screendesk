@@ -1,5 +1,16 @@
 # Status — ScreenDeck Home
 
+## 2026-10-11 — Home Assistant ativado no servidor
+
+- O checkout do servidor recebeu por fast-forward os commits até `41d813e`; a publicação desse commit no GitHub permanece pendente porque nenhum dos ambientes possui credencial de escrita disponível.
+- A pré-checagem de produção foi aprovada integralmente antes da mudança, incluindo host, Docker, Compose, porta 8123, armazenamento, segredos e configuração declarativa.
+- A imagem fixada `ghcr.io/home-assistant/home-assistant:2026.10.1` foi baixada e a configuração foi aprovada pelo verificador da própria imagem.
+- Somente o serviço `home-assistant` foi criado e iniciado; ele respondeu localmente e pela LAN em `http://192.168.25.249:8123`, com redirecionamento HTTP 302 para o onboarding.
+- O container de backup não foi recriado, permaneceu ativo e saudável durante e após a implantação.
+- Os logs iniciais do Home Assistant não apresentaram erro de configuração; houve apenas um `SyntaxWarning` interno de dependência durante a inicialização.
+- Artefatos normais gerados na primeira execução (`.HA_VERSION`, `.ha_run.lock` e `blueprints/`) foram adicionados ao `.gitignore`.
+- Próximo passo: o usuário deve abrir a URL LAN e concluir o onboarding criando a conta administradora individual; depois serão configuradas as integrações Google.
+
 ## 2026-10-11 — Ativação do Home Assistant preparada
 
 - O deploy passou a executar uma ativação limitada ao serviço `home-assistant`, mantendo o backup em execução sem recriação.
