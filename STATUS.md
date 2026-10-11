@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Alertas Gmail ativados e testados
+
+- A senha de app do Google foi instalada pelo usuário como arquivo protegido, com 16 bytes, proprietário `cyrius:cyrius` e modo `0600`; seu conteúdo não foi exibido.
+- A negociação SMTP/STARTTLS com `smtp.gmail.com:587` foi validada e a autenticação com a senha de app funcionou.
+- Um e-mail sintético de teste foi aceito pelo Gmail para `jesaebe@gmail.com`, sem provocar falha ou execução de backup.
+- O container de backup permaneceu saudável e o Maker continua com a agenda automática ativa.
+- Próximo passo: confirmar o recebimento na caixa de entrada e acompanhar a primeira execução automática agendada.
+
 ## 2026-10-10 — Gmail preparado para alertas com segredo em arquivo
 
 - Definido provisoriamente `jesaebe@gmail.com` como remetente e destinatário, até existir um e-mail corporativo.
