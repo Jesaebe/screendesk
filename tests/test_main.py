@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 ROOT = Path(__file__).parents[1]
@@ -61,6 +61,18 @@ class MainTests(unittest.TestCase):
             missing = Path(temporary) / "missing.toml"
             with patch.dict(os.environ, {"BACKUP_CONFIG": str(missing)}, clear=True):
                 self.assertEqual(main(["main", "scheduler"]), 1)
+
+    def test_scheduler_restricts_created_files(self):
+        service = MagicMock()
+        with (
+            patch("src.main.os.umask") as umask,
+            patch("src.main.load_sources", return_value=[]),
+            patch("src.main.BackupScheduler", return_value=service),
+            patch.dict(os.environ, {}, clear=True),
+        ):
+            self.assertEqual(main(["main", "scheduler"]), 0)
+        umask.assert_called_once_with(0o077)
+        service.run_forever.assert_called_once_with(interval_seconds=30)
 
     def test_unknown_command_returns_usage_error(self):
         self.assertEqual(main(["main", "unknown"]), 2)

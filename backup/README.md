@@ -18,7 +18,7 @@ O executor real usa `subprocess` sem shell. Nos testes, essa dependência é sub
 
 ## Google Drive criptografado
 
-`src/cloud.py` constrói comandos `rclone copyto` e `rclone delete` sem shell. O remote configurado em `RCLONE_CRYPT_REMOTE` deverá ser obrigatoriamente um remote do tipo `crypt`, apoiado por um remote Google Drive; essa propriedade será confirmada no checklist de implantação porque não é seguro inferi-la apenas pelo nome.
+`src/cloud.py` constrói comandos `rclone copyto` e `rclone delete` sem shell. O remote configurado em `BACKUP_CLOUD_REMOTE` deverá ser obrigatoriamente um remote do tipo `crypt`, apoiado por um remote Google Drive. O prefixo `RCLONE_` é evitado porque o próprio rclone o interpreta como configuração de backend.
 
 A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. Os testes injetam um runner simulado e não executam o binário rclone.
 

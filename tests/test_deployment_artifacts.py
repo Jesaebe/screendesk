@@ -31,6 +31,8 @@ class DeploymentArtifactTests(unittest.TestCase):
         compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
         dockerfile = (ROOT / "backup" / "Dockerfile").read_text(encoding="utf-8")
         self.assertIn("RCLONE_CONFIG_HOST", compose)
+        self.assertIn("BACKUP_CLOUD_REMOTE", compose)
+        self.assertNotIn("RCLONE_CRYPT_REMOTE", compose)
         self.assertIn("/home/cyrius/.config/rclone/rclone.conf", compose)
         self.assertIn(":/run/secrets/rclone.conf:ro", compose)
         self.assertIn(":/run/secrets/maker-password:ro", compose)

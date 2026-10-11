@@ -18,6 +18,14 @@
 - Foi gerado apenas um log sanitizado da falha abaixo de `/srv/backups/logs/maker/`.
 - A varredura local foi corrigida para ignorar `lost+found` e pular de forma segura diretórios não gerenciados que não possam ser lidos.
 
+### Segunda execução controlada — dump preservado, upload bloqueado
+
+- O dump real do Maker foi concluído com 12.433.797 bytes e preservado localmente; o upload falhou antes de gravar a cópia cloud.
+- A variável da aplicação `RCLONE_CRYPT_REMOTE` colidia com o namespace de configuração do próprio rclone e fazia o backend `crypt` apontar recursivamente para si mesmo, apesar do `rclone.conf` estar correto.
+- A variável foi renomeada para `BACKUP_CLOUD_REMOTE`, removendo a colisão sem alterar o remote aprovado.
+- O processo agora aplica `umask 077`; o dump e os logs já existentes foram corrigidos imediatamente para modo `0600`.
+- Maker foi restaurado automaticamente para `enabled = false` e o container permanece saudável.
+
 ## 2026-10-10 — Entrypoint funcional do backup concluído
 
 - O entrypoint agora carrega as origens TOML, monta o pipeline real e executa o laço contínuo do agendador.
