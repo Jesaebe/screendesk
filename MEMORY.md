@@ -12,7 +12,8 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - Foram adicionados documentação, runbooks, esqueleto do Home Assistant, contrato inicial do serviço de backup, monitoramento pendente de decisão, scripts protegidos e testes locais.
 - O entrypoint funcional do backup carrega as origens, monta o pipeline real e executa o agendador contínuo. Maker continua deliberadamente com `enabled = false`, portanto nenhum dump é executado antes do teste controlado.
 - A imagem de backup foi construída no servidor e somente o container `screendeck-home-backup-1` está em execução, saudável, como UID/GID `1000:1000`. Todas as origens permanecem desabilitadas; não houve dump, upload ou criação de relatórios. O Home Assistant continua desligado.
-- O primeiro pipeline real completo do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Maker retornou para `enabled = false`. O mount individual de `rclone.conf` precisa ser atualizado no servidor para leitura/escrita a fim de persistir renovações OAuth; os demais segredos permanecem somente leitura.
+- O primeiro pipeline real completo do Maker foi aprovado: dump de 12.433.797 bytes, upload pelo remote criptografado, retenção cloud, download de validação, SHA-256 idêntico e catálogo `pg_restore` válido. Maker retornou para `enabled = false`.
+- A renovação OAuth foi validada após montar o diretório dedicado `/home/cyrius/.config/rclone` em `/run/rclone`: a listagem cloud terminou sem stderr, o diretório contém somente `rclone.conf` e o arquivo permanece em modo `0600`. Os demais segredos continuam somente leitura.
 - Cinquenta e oito testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações e sanitização.
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
@@ -98,9 +99,10 @@ Fechar o desenho funcional antes de habilitar o serviço de backup:
 
 1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
 2. definir a solução de monitoramento do host e seus limiares;
-3. habilitar Maker somente durante a primeira execução real autorizada, validar dump, upload e restauração, e então decidir a ativação permanente;
-4. preparar a implantação controlada do restante da solução agora que a pré-checagem e o container de backup estão aprovados;
-5. instalar/configurar o tablet somente com autorização explícita posterior.
+3. mediante autorização explícita, alterar Maker para `enabled = true` e ativar a agenda permanente das 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`;
+4. configurar SMTP para que falhas do backup gerem alertas reais;
+5. preparar a implantação controlada do restante da solução agora que a pré-checagem e o pipeline de backup estão aprovados;
+6. instalar/configurar o tablet somente com autorização explícita posterior.
 
 Não há autorização para SSH, implantação ou execução de containers.
 

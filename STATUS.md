@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Renovação OAuth do rclone validada
+
+- O servidor foi atualizado para o commit `d4d54cd` e o `.env` migrou para `RCLONE_CONFIG=/run/rclone/rclone.conf` e `RCLONE_CONFIG_DIR_HOST=/home/cyrius/.config/rclone` sem expor valores secretos.
+- O container foi recriado saudável com o diretório dedicado do rclone montado para leitura/escrita.
+- Uma listagem pelo remote criptografado terminou com código zero e stderr vazio, confirmando a persistência OAuth sem o aviso anterior.
+- O diretório montado contém somente `rclone.conf`; o arquivo permanece com modo `0600`, e um objeto do Maker foi confirmado no destino cloud.
+- Maker continua com `enabled = false`; nenhum novo dump foi executado nesta validação.
+- Próximo passo: obter autorização explícita para habilitar permanentemente os backups automáticos do Maker nos quatro horários aprovados.
+
 ## 2026-10-10 — Container de backup validado com origens desabilitadas
 
 - O servidor foi atualizado para o commit `38a9526` e o build da imagem `screendeck-home-backup` foi concluído.
