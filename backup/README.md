@@ -20,6 +20,8 @@ O executor real usa `subprocess` sem shell. Nos testes, essa dependência é sub
 
 `src/cloud.py` constrói comandos `rclone copyto` e `rclone delete` sem shell. O remote configurado em `BACKUP_CLOUD_REMOTE` deverá ser obrigatoriamente um remote do tipo `crypt`, apoiado por um remote Google Drive. O prefixo `RCLONE_` é evitado porque o próprio rclone o interpreta como configuração de backend.
 
+O arquivo individual `rclone.conf` é gravável pelo processo UID 1000 para permitir que o rclone persista a renovação do token OAuth. Ele permanece fora do repositório, com modo `0600`; nenhum outro arquivo do diretório de configuração é montado.
+
 A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. Os testes injetam um runner simulado e não executam o binário rclone.
 
 ## Pipeline

@@ -45,7 +45,7 @@ services:
       - backup-status:/status
       - ${BACKUP_CONFIG_HOST:-./secrets/sources.toml}:/run/secrets/sources.toml:ro
       - ${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}:/run/secrets/maker-password:ro
-      - ${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}:/run/secrets/rclone.conf:ro
+      - ${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}:/run/secrets/rclone.conf:rw
     networks:
       - internal
     healthcheck:

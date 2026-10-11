@@ -11,5 +11,6 @@
 - O container de backup executa sem root como UID/GID `1000:1000`, alinhado ao usuário operacional `cyrius`, para ler diretamente o `rclone.conf` protegido por modo `0600`; o arquivo é montado somente para leitura.
 - Cada senha de banco fica em arquivo próprio com modo `0600`, montado individualmente abaixo de `/run/secrets`; ela não passa pelo `.env`, pelo TOML versionável ou por argumentos de linha de comando.
 - Nenhum `.env`, `sources.toml` real, `rclone.conf`, token, dump ou log entra no Git.
+- O container monta somente o arquivo `rclone.conf` como leitura/escrita para o rclone persistir renovações do token OAuth. O arquivo permanece `0600`, pertence ao UID 1000 e não expõe o diretório de configuração inteiro; os demais segredos continuam somente leitura.
 
 Antes do deploy, revisar imagens fixadas, portas, volumes, permissões e resultados do inventário.

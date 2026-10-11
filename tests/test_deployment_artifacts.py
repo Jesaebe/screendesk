@@ -34,7 +34,7 @@ class DeploymentArtifactTests(unittest.TestCase):
         self.assertIn("BACKUP_CLOUD_REMOTE", compose)
         self.assertNotIn("RCLONE_CRYPT_REMOTE", compose)
         self.assertIn("/home/cyrius/.config/rclone/rclone.conf", compose)
-        self.assertIn(":/run/secrets/rclone.conf:ro", compose)
+        self.assertIn(":/run/secrets/rclone.conf:rw", compose)
         self.assertIn(":/run/secrets/maker-password:ro", compose)
         self.assertIn('${BACKUP_UID:-1000}:${BACKUP_GID:-1000}', compose)
         self.assertIn("--uid 1000 screendeck", dockerfile)
