@@ -34,6 +34,12 @@
 - Durante o download, o rclone renovou o token, mas não conseguiu persistir a atualização porque o arquivo estava montado somente leitura. O mount individual de `rclone.conf` foi alterado para leitura/escrita, mantendo modo `0600`, UID 1000 e todos os demais segredos somente leitura.
 - Próximo passo: publicar e aplicar o ajuste do token, validar que o rclone consegue persistir a configuração sem aviso e então decidir a ativação permanente do Maker.
 
+### Ajuste do mount para renovação OAuth atômica
+
+- O mount gravável do arquivo individual ainda não permitiu a renovação porque o rclone cria um temporário no diretório e substitui `rclone.conf` atomicamente.
+- Confirmado que `/home/cyrius/.config/rclone` contém somente `rclone.conf`; o Compose passou a montar esse diretório dedicado em `/run/rclone`, com leitura/escrita.
+- Maker permaneceu desabilitado, o container saudável e a listagem criptografada confirmou um objeto cloud; nenhum novo dump foi executado.
+
 ## 2026-10-10 — Entrypoint funcional do backup concluído
 
 - O entrypoint agora carrega as origens TOML, monta o pipeline real e executa o laço contínuo do agendador.

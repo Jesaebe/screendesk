@@ -7,7 +7,8 @@ backup_root="${BACKUP_ROOT:-/srv/backups}"
 backup_uid="${BACKUP_UID:-1000}"
 backup_config_host="${BACKUP_CONFIG_HOST:-$project_dir/secrets/sources.toml}"
 maker_password_host="${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}"
-rclone_config_host="${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}"
+rclone_config_dir_host="${RCLONE_CONFIG_DIR_HOST:-/home/cyrius/.config/rclone}"
+rclone_config_host="$rclone_config_dir_host/rclone.conf"
 failed=0
 
 pass() {

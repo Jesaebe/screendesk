@@ -32,7 +32,7 @@ services:
       BACKUP_LOCAL_HIGH_WATERMARK: ${BACKUP_LOCAL_HIGH_WATERMARK:-85}
       BACKUP_LOCAL_LOW_WATERMARK: ${BACKUP_LOCAL_LOW_WATERMARK:-75}
       BACKUP_CLOUD_RETENTION_DAYS: ${BACKUP_CLOUD_RETENTION_DAYS:-15}
-      RCLONE_CONFIG: ${RCLONE_CONFIG:-/run/secrets/rclone.conf}
+      RCLONE_CONFIG: ${RCLONE_CONFIG:-/run/rclone/rclone.conf}
       BACKUP_CLOUD_REMOTE: ${BACKUP_CLOUD_REMOTE:-gdrive-crypt:screendeck-home}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -45,7 +45,7 @@ services:
       - backup-status:/status
       - ${BACKUP_CONFIG_HOST:-./secrets/sources.toml}:/run/secrets/sources.toml:ro
       - ${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}:/run/secrets/maker-password:ro
-      - ${RCLONE_CONFIG_HOST:-/home/cyrius/.config/rclone/rclone.conf}:/run/secrets/rclone.conf:rw
+      - ${RCLONE_CONFIG_DIR_HOST:-/home/cyrius/.config/rclone}:/run/rclone:rw
     networks:
       - internal
     healthcheck:

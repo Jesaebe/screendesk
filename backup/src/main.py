@@ -69,7 +69,7 @@ def scheduler() -> int:
     backup_root = Path(os.environ.get("BACKUP_ROOT", "/backups"))
     status_root = Path(os.environ.get("BACKUP_STATUS_ROOT", "/status"))
     config_path = Path(os.environ.get("BACKUP_CONFIG", "/run/secrets/sources.toml"))
-    rclone_config = Path(os.environ.get("RCLONE_CONFIG", "/run/secrets/rclone.conf"))
+    rclone_config = Path(os.environ.get("RCLONE_CONFIG", "/run/rclone/rclone.conf"))
     rclone_remote = os.environ.get("BACKUP_CLOUD_REMOTE", "gdrive-crypt:screendeck-home")
     retention_days = _positive_integer("BACKUP_CLOUD_RETENTION_DAYS", 15)
     interval_seconds = _positive_integer("BACKUP_SCHEDULER_INTERVAL_SECONDS", 30)
