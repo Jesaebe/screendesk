@@ -116,6 +116,8 @@ def execute_backup(
     started_at: datetime | None = None,
     usage_provider: Callable[[Path], DiskUsage] | None = None,
     publish_report: bool = True,
+    high_watermark: int = 85,
+    low_watermark: int = 75,
 ) -> RunReport:
     """Execute one local dump and always publish a sanitized report.
 
@@ -153,6 +155,8 @@ def execute_backup(
             storage = prepare_storage(
                 backup_root,
                 source,
+                high_watermark=high_watermark,
+                low_watermark=low_watermark,
                 usage_provider=usage_provider or shutil.disk_usage,
             )
             command = build_dump_command(source, str(partial))

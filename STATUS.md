@@ -1,5 +1,25 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Entrypoint funcional do backup concluído
+
+- O entrypoint agora carrega as origens TOML, monta o pipeline real e executa o laço contínuo do agendador.
+- Dump, upload criptografado, retenção cloud, retenção local e notificação foram conectados aos adaptadores de produção sem shell.
+- Os limites locais configuráveis de 85%/75% passaram a ser efetivamente repassados ao executor e são validados antes da inicialização.
+- SMTP incompleto permanece explicitamente desabilitado e uma eventual tentativa de alerta registra a falha do canal sem derrubar o agendador.
+- A imagem prepara `/status` com UID/GID do usuário não-root para persistir a deduplicação no volume nomeado.
+- Maker continua com `enabled = false`; nenhum banco, rclone, container ou serviço real foi acessado ou iniciado nesta etapa.
+- Validação local: 58 testes aprovados, configuração aprovada e diff sem erros de whitespace.
+- Próximo passo: publicar o código e preparar um teste controlado do container de backup, ainda com Maker desabilitado, antes de autorizar a primeira execução real.
+
+## 2026-10-10 — Pré-checagem do servidor aprovada
+
+- Confirmados no servidor `.env`, `secrets/sources.toml`, o segredo do Maker e o `rclone.conf`, todos pertencentes a `cyrius:cyrius` e com modo `0600`; nenhum conteúdo secreto foi exibido ou copiado.
+- `/srv/backups` foi atribuído a `cyrius:cyrius` (UID/GID `1000:1000`) e permanece com modo `0755`, atendendo ao contrato de escrita do serviço de backup.
+- O usuário `cyrius` foi adicionado ao grupo `docker`, após autorização explícita, para acessar o socket do daemon; uma nova sessão confirmou a associação.
+- `scripts/preflight-deploy.sh` foi aprovado integralmente: host, Ubuntu, Docker, Compose, porta 8123, armazenamento, segredos e configuração declarativa estão prontos.
+- `docker ps` permaneceu vazio e nenhum container ou serviço do projeto foi iniciado.
+- Próximo passo: concluir as decisões funcionais pendentes e habilitar o entrypoint real antes de qualquer implantação.
+
 ## 2026-10-10 — Repositório publicado e clonado no servidor
 
 - Repositório privado/externo informado pelo usuário configurado como `origin`: `https://github.com/Jesaebe/screendesk.git`.

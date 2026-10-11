@@ -1,10 +1,10 @@
 # Serviço de backup
 
-O diretório contém o contrato inicial do serviço. Nesta fase ele não agenda nem executa dumps reais; comandos externos permanecem separados e testáveis. A implementação funcional será feita após definir origens, janelas e credenciais.
+O diretório contém o serviço de backup. O entrypoint carrega as origens, executa o agendador contínuo e encadeia dump, upload criptografado e retenção. As origens só executam quando possuem `enabled = true`; Maker permanece desabilitado até o teste controlado no servidor.
 
 `sources.example.toml` contém a origem Maker desabilitada e um segundo bloco que serve de modelo para novas origens. Cada bloco referencia um arquivo de segredo exclusivo montado somente para leitura; nunca grave a senha diretamente no TOML ou em variável de ambiente.
 
-Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup` e um `pg_dump` de validação foram confirmados pelo usuário em 10/10/2026. Por conter maiúscula, o nome deve ser citado como `"cyriusBackup"` em comandos SQL. O procedimento sem senha versionada está em `docs/runbooks/create-maker-backup-role.sql`. A origem só será habilitada após instalar a senha como segredo no servidor e validar o remote `crypt`.
+Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup`, o segredo protegido, um `pg_dump` de validação e o remote `crypt` foram confirmados em 10/10/2026. Por conter maiúscula, o nome deve ser citado como `"cyriusBackup"` em comandos SQL. O procedimento sem senha versionada está em `docs/runbooks/create-maker-backup-role.sql`. A origem só será habilitada durante o teste controlado.
 
 O runbook concede acesso aos objetos existentes. Se a aplicação criar tabelas ou sequências no futuro, os proprietários desses objetos também deverão configurar `ALTER DEFAULT PRIVILEGES` para o usuário de backup ou o procedimento precisará ser reaplicado antes do próximo dump.
 
@@ -12,7 +12,7 @@ As agendas são interpretadas no fuso definido em cada origem. Para Maker: 00:00
 
 ## Executor local
 
-`src/executor.py` implementa uma execução isolada com trava exclusiva por origem, arquivo `.partial`, validação de conteúdo não vazio, promoção atômica, log sanitizado e relatórios `latest.json` e `history.jsonl`. Upload, retenção, notificações e agendamento são etapas separadas e ainda não estão habilitadas.
+`src/executor.py` implementa uma execução isolada com trava exclusiva por origem, arquivo `.partial`, validação de conteúdo não vazio, promoção atômica, log sanitizado e relatórios `latest.json` e `history.jsonl`. Os limites configurados em `BACKUP_LOCAL_HIGH_WATERMARK` e `BACKUP_LOCAL_LOW_WATERMARK` são repassados pelo entrypoint.
 
 O executor real usa `subprocess` sem shell. Nos testes, essa dependência é substituída por um objeto simulado que cria arquivos temporários e nunca acessa banco ou rede.
 
@@ -30,6 +30,6 @@ A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. 
 
 `src/scheduler.py` avalia cada agenda no fuso da origem, impede repetição dentro do mesmo minuto e lê a senha do arquivo protegido antes de chamar o pipeline. Arquivo ausente ou vazio gera `configuration_failed`, relatório e notificação.
 
-`src/notifications.py` oferece o contrato de notificação e adaptador SMTP com STARTTLS. Nos testes, pipeline, notificador e SMTP são falsos. O método contínuo `run_forever` existe, mas o entrypoint não o chama enquanto as origens reais estiverem desabilitadas e a implantação não estiver autorizada.
+`src/notifications.py` oferece o contrato de notificação e adaptador SMTP com STARTTLS. Nos testes, pipeline, notificador e SMTP são falsos. O entrypoint chama `run_forever`; com todas as origens desabilitadas, o laço apenas avalia a agenda e não executa comandos externos. Enquanto SMTP não estiver completo, uma tentativa de alerta registra o canal como não configurado sem encerrar o agendador.
 
 Os slots processados são persistidos atomicamente em `scheduler-state.json`, limitados aos 512 mais recentes, para evitar repetição após reinício. O resultado do canal de alerta fica separado em `notification-status.json`. Uma falha do SMTP não altera o resultado do backup nem encerra o agendador.

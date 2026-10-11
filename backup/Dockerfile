@@ -10,6 +10,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --uid 1000 backup
+RUN install -d -o backup -g backup /status
 WORKDIR /app
 COPY --chown=backup:backup src ./src
 USER backup

@@ -37,6 +37,8 @@ def run_pipeline(
     started_at: datetime | None = None,
     usage_provider=None,
     known_cloud_secrets: list[str] | None = None,
+    high_watermark: int = 85,
+    low_watermark: int = 75,
 ) -> RunReport:
     """Run all stages and publish exactly one final history record."""
     report = execute_backup(
@@ -48,6 +50,8 @@ def run_pipeline(
         started_at=started_at,
         usage_provider=usage_provider,
         publish_report=False,
+        high_watermark=high_watermark,
+        low_watermark=low_watermark,
     )
     if report.status != "success":
         return _finish(report, status_root)

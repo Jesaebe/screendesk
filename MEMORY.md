@@ -10,14 +10,14 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A fundação local da Fase 1 foi implementada em 09/10/2026.
 - Foram criados os arquivos raiz de governança, exemplo de ambiente e Compose declarativo.
 - Foram adicionados documentação, runbooks, esqueleto do Home Assistant, contrato inicial do serviço de backup, monitoramento pendente de decisão, scripts protegidos e testes locais.
-- O serviço de backup continua deliberadamente desabilitado: o entrypoint da Fase 1 apenas publica o estado `not_configured` e não executa dumps.
-- Dez testes unitários passaram, cobrindo configuração, comandos de dump sem senha, relatórios, retenção e sanitização.
+- O entrypoint funcional do backup carrega as origens, monta o pipeline real e executa o agendador contínuo. Maker continua deliberadamente com `enabled = false`, portanto nenhum dump é executado antes do teste controlado.
+- Cinquenta e oito testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações e sanitização.
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
-- Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup` foi criado e um `pg_dump` de validação funcionou, conforme confirmação do usuário em 10/10/2026. O remote `crypt` e seu caminho já foram validados no servidor; ainda falta instalar a senha do banco como arquivo protegido e preparar o `sources.toml` real antes de habilitar a origem.
+- Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup` foi criado e um `pg_dump` de validação funcionou, conforme confirmação do usuário em 10/10/2026. A senha foi instalada no servidor como arquivo protegido, e o `sources.toml` real e o remote `crypt` estão preparados; a habilitação ainda depende do entrypoint funcional e de um teste controlado.
 - Google Drive definido para backups: conta `jesaebe@gmail.com`, pasta `CyriusBackups` diretamente na raiz do Drive, remote base `gdrive` e remote criptografado `gdrive-crypt`. Ambos foram criados e testados pelo usuário no servidor definitivo em 10/10/2026; o `crypt` grava dentro de `CyriusBackups` com nomes ilegíveis. O `rclone.conf` permanece somente em `/home/cyrius/.config/rclone/rclone.conf` nesse servidor e será montado no container como somente leitura. O teste de ida e volta foi concluído nele: uma pasta foi enviada criptografada e restaurada com nomes e conteúdo legíveis pelo `gdrive-crypt`.
 - O executor local foi implementado com trava por origem, arquivo parcial, validação não vazia, promoção atômica, logs sanitizados e relatórios `latest.json`/`history.jsonl`.
-- O executor externo é injetável; todos os testes usam simulação. Agendamento, upload cloud e notificações permanecem desligados.
+- O executor externo é injetável; todos os testes usam simulação. Agendamento, upload cloud e notificações estão conectados pelo entrypoint, mas nenhuma origem real está habilitada.
 - A retenção local foi integrada ao executor: inicia em 85%, busca retornar a 75%, preserva o último backup de cada origem e recusa o dump se a margem não puder ser restaurada.
 - A reserva prévia inicial é o maior valor entre duas vezes o tamanho estimado e 64 MiB.
 - Travas com mais de seis horas e PID inexistente são apenas classificadas como candidatas a obsoletas; não há remoção automática.
@@ -42,15 +42,15 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A validação posterior mostrou zero containers, imagens, volumes locais e cache de build; restaram somente as redes padrão `bridge`, `host` e `none`.
 - Porta 8123 está livre. Docker, Nginx/80 e Zabbix/10050 permaneceram ativos; SSH/22 também permaneceu disponível.
 - A raiz caiu de 84% para 10% de uso, com 84 GB disponíveis após a limpeza.
-- `/srv/backups` tem 93 GB disponíveis, mas pertence a `root:root` modo 0755 e precisará ser atribuído ao UID/GID `1000:1000` para o container não-root.
+- `/srv/backups` tem aproximadamente 93 GB disponíveis e foi atribuído a `cyrius:cyrius` (UID/GID `1000:1000`), modo `0755`, atendendo ao contrato de escrita do container não-root.
 - Maker foi confirmado como banco externo em outro servidor; não corresponde ao PostgreSQL 11 local do Cartório.
 - Foram descartados os dados de Rifa, Cartório, HML, PRD FEJJB e Jiu-Jitsu System, além de imagens, volumes anônimos, diretórios antigos e cache de build.
 - Nenhum pacote foi instalado.
-- Nenhum serviço, container ou Docker foi iniciado.
+- Nenhum serviço ou container do ScreenDeck foi iniciado.
 - Não houve acesso SSH nem alteração no servidor Ubuntu de produção.
 - Não houve alteração fora desta pasta do projeto.
 - A referência isolada à AWS na seção de segurança do PRD foi removida. O destino cloud aprovado é Google Drive, com criptografia via rclone ou solução equivalente.
-- Uma pré-checagem de implantação somente leitura foi adicionada em `scripts/preflight-deploy.sh`. Ela valida o host `192.168.25.249`, Ubuntu, Docker/Compose, porta 8123, arquivos secretos e permissões, UID configurado em `/srv/backups` e a configuração declarativa do Compose, sem corrigir ou iniciar nada.
+- A pré-checagem de implantação `scripts/preflight-deploy.sh` foi aprovada integralmente no servidor em 10/10/2026. O usuário `cyrius` foi adicionado ao grupo `docker` após autorização explícita; host, Docker/Compose, porta 8123, segredos, `/srv/backups` e Compose foram validados sem iniciar containers.
 - Os documentos de inventário e implantação foram atualizados para refletir a desativação Docker já concluída. `deploy.sh` e `rollback.sh` continuam deliberadamente bloqueados e sem ações de infraestrutura.
 
 ## Restrições permanentes desta etapa
@@ -94,11 +94,11 @@ A Fase 1 deverá preparar, sem executar a infraestrutura:
 
 Fechar o desenho funcional antes de habilitar o serviço de backup:
 
-1. com autorização explícita, instalar interativamente a senha de `cyriusBackup` em `/home/cyrius/.config/screendeck-home/maker-password`, modo `0600`, sem registrá-la no repositório, `.env`, comandos ou chat;
-2. confirmar que o `rclone.conf` já validado no servidor está no caminho e com as permissões esperados pelo Compose, sem copiar ou exibir seu conteúdo;
-3. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
-4. definir a solução de monitoramento do host e seus limiares;
-5. preparar a implantação controlada no servidor, incluindo atribuir com autorização o `/srv/backups` ao UID/GID `1000:1000` e então executar a pré-checagem somente leitura;
+1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
+2. definir a solução de monitoramento do host e seus limiares;
+3. publicar o entrypoint funcional e preparar um teste controlado do container com Maker ainda desabilitado;
+4. habilitar Maker somente durante a primeira execução real autorizada, validar dump, upload e restauração, e então decidir a ativação permanente;
+5. preparar a implantação controlada agora que a pré-checagem do servidor está aprovada;
 6. instalar/configurar o tablet somente com autorização explícita posterior.
 
 Não há autorização para SSH, implantação ou execução de containers.
@@ -123,7 +123,7 @@ Ao concluir cada etapa, atualizar este arquivo com o que mudou, validações fei
 
 - Data: 10/10/2026.
 - Comando: `python3 -m unittest discover -s tests -v`.
-- Resultado: 52 testes aprovados; sintaxe dos scripts de implantação e tablet validada.
+- Resultado: 58 testes aprovados; entrypoint funcional, pipeline, scripts de implantação e tablet validados.
 - Comando: `bash scripts/validate-config.sh`.
 - Resultado: aprovado.
 - Infraestrutura do ScreenDeck executada: nenhuma. Ambiente Docker antigo removido pelo usuário em 10/10/2026 e validado vazio.
