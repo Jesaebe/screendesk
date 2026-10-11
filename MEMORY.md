@@ -16,6 +16,7 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 - A renovação OAuth foi validada após montar o diretório dedicado `/home/cyrius/.config/rclone` em `/run/rclone`: a listagem cloud terminou sem stderr, o diretório contém somente `rclone.conf` e o arquivo permanece em modo `0600`. Os demais segredos continuam somente leitura.
 - Maker está permanentemente habilitado desde 10/10/2026, com agenda às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia` e retenção cloud de 15 dias. O container permaneceu saudável após a ativação.
 - A agenda é definida por origem no campo `schedule`; bancos futuros podem usar frequências diferentes. Após editar o TOML real, deve-se validá-lo e reiniciar somente o serviço `backup`.
+- Gmail foi escolhido provisoriamente para alertas, usando `jesaebe@gmail.com` como remetente e destinatário. A senha de app será instalada como arquivo `smtp-password` modo `0600`; SMTP ainda não está ativo e nenhuma senha foi recebida no chat ou gravada no `.env`.
 - Cinquenta e oito testes unitários passaram, cobrindo configuração, entrypoint, comandos de dump sem senha, relatórios, retenção, agendamento, notificações e sanitização.
 - `scripts/validate-config.sh` passou, incluindo a verificação de nomes de arquivos secretos versionados.
 - A primeira origem foi modelada: `Maker`, PostgreSQL 14, host `151.243.236.61`, porta 5433, banco `janus`, aproximadamente 15 MB, sem SSL e agenda diária às 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
@@ -102,7 +103,7 @@ Fechar o desenho funcional antes de habilitar o serviço de backup:
 1. confirmar SMTP, destinatários, calendários/listas Google e marca/modelo do ar-condicionado;
 2. definir a solução de monitoramento do host e seus limiares;
 3. acompanhar a primeira execução automática do Maker e confirmar o novo objeto cloud;
-4. configurar SMTP para que falhas do backup gerem alertas reais;
+4. instalar interativamente a senha de app do Gmail no servidor e validar um alerta SMTP controlado;
 5. preparar a implantação controlada do restante da solução agora que a pré-checagem e o pipeline de backup estão aprovados;
 6. instalar/configurar o tablet somente com autorização explícita posterior.
 

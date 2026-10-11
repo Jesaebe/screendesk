@@ -37,7 +37,7 @@ services:
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_PASSWORD_FILE: ${SMTP_PASSWORD_FILE:-/run/secrets/smtp-password}
       ALERT_EMAIL_FROM: ${ALERT_EMAIL_FROM:-}
       ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-}
     volumes:
@@ -45,6 +45,7 @@ services:
       - backup-status:/status
       - ${BACKUP_CONFIG_HOST:-./secrets/sources.toml}:/run/secrets/sources.toml:ro
       - ${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}:/run/secrets/maker-password:ro
+      - ${SMTP_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/smtp-password}:/run/secrets/smtp-password:ro
       - ${RCLONE_CONFIG_DIR_HOST:-/home/cyrius/.config/rclone}:/run/rclone:rw
     networks:
       - internal

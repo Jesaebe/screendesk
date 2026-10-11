@@ -46,12 +46,22 @@ def _notifier_from_environment() -> FailureNotifier:
     recipient = os.environ.get("ALERT_EMAIL_TO", "").strip()
     if not host or not sender or not recipient:
         return DisabledNotifier()
+    username = os.environ.get("SMTP_USERNAME", "").strip()
+    password_file = Path(
+        os.environ.get("SMTP_PASSWORD_FILE", "/run/secrets/smtp-password")
+    )
+    try:
+        password = password_file.read_text(encoding="utf-8").rstrip("\r\n")
+    except OSError as error:
+        raise ValueError("SMTP password file is missing or unreadable") from error
+    if username and not password:
+        raise ValueError("SMTP password file is empty")
     return SMTPNotifier(
         SMTPSettings(
             host=host,
             port=_positive_integer("SMTP_PORT", 587),
-            username=os.environ.get("SMTP_USERNAME", ""),
-            password=os.environ.get("SMTP_PASSWORD", ""),
+            username=username,
+            password=password,
             sender=sender,
             recipient=recipient,
         )

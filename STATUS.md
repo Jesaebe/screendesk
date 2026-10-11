@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-10 — Gmail preparado para alertas com segredo em arquivo
+
+- Definido provisoriamente `jesaebe@gmail.com` como remetente e destinatário, até existir um e-mail corporativo.
+- A senha SMTP deixou de ser aceita por variável de ambiente e passou a ser lida de `/run/secrets/smtp-password`.
+- O Compose monta somente `/home/cyrius/.config/screendeck-home/smtp-password` como leitura, e o runbook orienta capturar uma senha de app do Google sem eco nem histórico.
+- SMTP permanece desativado até o usuário criar a senha de app e instalar o arquivo protegido no servidor.
+- Validação local: 62 testes aprovados, configuração aprovada e diff sem erros de whitespace.
+- Próximo passo: publicar, instalar interativamente a senha de app e enviar um alerta de teste controlado.
+
 ## 2026-10-10 — Backup automático do Maker ativado
 
 - Após autorização explícita, Maker foi alterado para `enabled = true` no `sources.toml` real do servidor.

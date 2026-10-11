@@ -45,16 +45,34 @@ class MainTests(unittest.TestCase):
                 _retention_watermarks()
 
     def test_notifier_uses_smtp_when_required_fields_exist(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            password_file = Path(temporary) / "smtp-password"
+            password_file.write_text("smtp-secret\n", encoding="utf-8")
+            environment = {
+                "SMTP_HOST": "smtp.example.internal",
+                "SMTP_PORT": "2525",
+                "SMTP_USERNAME": "sender-user",
+                "SMTP_PASSWORD_FILE": str(password_file),
+                "ALERT_EMAIL_FROM": "from@example.com",
+                "ALERT_EMAIL_TO": "to@example.com",
+            }
+            with patch.dict(os.environ, environment, clear=True):
+                notifier = _notifier_from_environment()
+        self.assertIsInstance(notifier, SMTPNotifier)
+        self.assertEqual(notifier.settings.port, 2525)
+        self.assertEqual(notifier.settings.password, "smtp-secret")
+
+    def test_configured_smtp_requires_password_file(self):
         environment = {
             "SMTP_HOST": "smtp.example.internal",
-            "SMTP_PORT": "2525",
+            "SMTP_USERNAME": "sender-user",
+            "SMTP_PASSWORD_FILE": "/missing/smtp-password",
             "ALERT_EMAIL_FROM": "from@example.com",
             "ALERT_EMAIL_TO": "to@example.com",
         }
         with patch.dict(os.environ, environment, clear=True):
-            notifier = _notifier_from_environment()
-        self.assertIsInstance(notifier, SMTPNotifier)
-        self.assertEqual(notifier.settings.port, 2525)
+            with self.assertRaisesRegex(ValueError, "missing or unreadable"):
+                _notifier_from_environment()
 
     def test_scheduler_configuration_error_returns_failure(self):
         with tempfile.TemporaryDirectory() as temporary:
