@@ -20,7 +20,7 @@ echo "Validando o dashboard..."
 
 echo "Parando o Home Assistant antigo de forma recuperável..."
 if docker container inspect screendeck-home-home-assistant-1 >/dev/null 2>&1; then
-  docker stop --time 60 screendeck-home-home-assistant-1
+  docker stop --timeout 60 screendeck-home-home-assistant-1
 fi
 
 echo "Iniciando somente o dashboard; o serviço de backup não será recriado..."

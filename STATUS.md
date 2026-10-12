@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Dashboard customizado implantado
+
+- O commit `821694a` foi aplicado ao servidor por bundle Git e fast-forward; a publicação no GitHub continua pendente por ausência de credencial de escrita neste ambiente.
+- O dashboard foi construído, validado e iniciado na porta 8123; Nginx e HTTPS permaneceram no mesmo endereço.
+- O Home Assistant foi parado, mas seu container e dados foram preservados para rollback.
+- O serviço de backup não foi recriado nem interrompido e continua saudável.
+- Validação operacional: dashboard saudável, autenticação sem credenciais retorna HTTP 401, clima de Salvador respondeu, último backup possui `status=success` e logs não têm erros.
+- A credencial OAuth Google está montada; Calendar e Tasks aguardam somente a autorização do usuário pelo botão “Conectar Google”. SmartThings permanece opcional e desconectado.
+
 ## 2026-10-12 — Credencial OAuth Google instalada
 
 - O cliente OAuth Web foi validado sem expor `client_id` ou `client_secret`.
