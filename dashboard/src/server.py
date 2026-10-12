@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import secrets
 import time
+from .host_metrics import HostMetrics
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, quote, urlencode, urlparse
@@ -33,6 +34,14 @@ PASSWORD_FILE = Path(os.environ.get("DASHBOARD_PASSWORD_FILE", "/run/secrets/das
 USERNAME = os.environ.get("DASHBOARD_USERNAME", "admin")
 OAUTH_STATES: dict[str, float] = {}
 WEATHER_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+HOST_METRICS = HostMetrics(
+    Path(os.environ.get("HOST_PROC_ROOT", "/host/proc")),
+    Path(os.environ.get("HOST_ROOT_PATH", "/host/root")),
+    Path(os.environ.get("HOST_BACKUP_PATH", "/host/backups")),
+    DATA_ROOT / "host-metrics.jsonl",
+    BACKUP_ROOT / "service-status.json",
+    interval_seconds=int(os.environ.get("HOST_METRICS_INTERVAL_SECONDS", "60")),
+)
 
 
 def read_json(path: Path, default: Any) -> Any:
@@ -238,6 +247,8 @@ class Handler(SimpleHTTPRequestHandler):
                 except (FileNotFoundError, PermissionError):
                     pass
                 self.send_json({"items": [json.loads(line) for line in reversed(lines) if line.strip()]})
+            elif parsed.path == "/api/host/metrics":
+                self.send_json({"current": HOST_METRICS.snapshot(), "history": HOST_METRICS.history()})
             elif parsed.path == "/api/weather":
                 query = parse_qs(parsed.query)
                 city = query.get("city", [read_json(SETTINGS_PATH, {}).get("city", "Salvador")])[0]
@@ -339,6 +350,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     DATA_ROOT.mkdir(parents=True, exist_ok=True)
+    HOST_METRICS.start()
     server = ThreadingHTTPServer(("0.0.0.0", 8080), Handler)
     print("ScreenDeck dashboard listening on 0.0.0.0:8080", flush=True)
     server.serve_forever()

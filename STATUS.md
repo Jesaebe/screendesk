@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Métricas do host preparadas localmente
+
+- O dashboard passou a coletar CPU, carga, memória, swap, uptime, disco raiz e volume `/srv/backups` diretamente do host a cada minuto.
+- Uma nova área de saúde apresenta os valores atuais, disponibilidade do dashboard e do backup e um histórico visual recente.
+- O histórico persistente é limitado a 1.440 amostras; o backup publica heartbeat no volume de status compartilhado.
+- A solução não usa socket Docker, modo privilegiado, pacotes adicionais nem exposição ampla de `/proc`; somente os quatro arquivos necessários e dois pontos de filesystem são montados como leitura.
+- Validação local: 69 testes aprovados, configuração e sintaxe Python aprovadas e diff sem erros de whitespace.
+- Nada foi implantado nesta etapa. A ativação exige reconstruir o dashboard e o backup de forma controlada, preservando dados e demais serviços.
+
 ## 2026-10-12 — Tema roxo implantado
 
 - O dashboard passou a usar `#723ebe` como cor principal em uma paleta roxa escura.

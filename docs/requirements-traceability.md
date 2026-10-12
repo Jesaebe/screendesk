@@ -13,5 +13,5 @@
 | Retenção local/cloud | `backup/src/retention.py` | Lógica local inicial |
 | Alertas/e-mail | dashboard + `notifications.py` | Gmail real aprovado; status visual implementado |
 | Agenda por origem | `scheduler.py` | Maker ativo em quatro horários; deduplicação persistente aprovada |
-| Saúde do servidor | solução após inventário | Pendente |
+| Saúde do servidor | `dashboard/src/host_metrics.py` + heartbeat do backup | Implementado localmente; aguarda implantação controlada |
 | Restauração testada | `docs/runbooks/restore-test.md` | SHA-256 e catálogo `pg_restore` aprovados |

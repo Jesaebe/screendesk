@@ -14,12 +14,22 @@ services:
       DASHBOARD_PASSWORD_FILE: /run/secrets/dashboard-password
       DASHBOARD_USERNAME: ${DASHBOARD_USERNAME:-admin}
       DASHBOARD_PUBLIC_URL: ${DASHBOARD_PUBLIC_URL:-http://localhost:8123}
+      HOST_PROC_ROOT: /host/proc
+      HOST_ROOT_PATH: /host/root
+      HOST_BACKUP_PATH: /host/backups
+      HOST_METRICS_INTERVAL_SECONDS: ${HOST_METRICS_INTERVAL_SECONDS:-60}
     ports:
       - "${DASHBOARD_PORT:-8123}:8080"
     volumes:
       - dashboard-data:/data
       - backup-status:/backup-status:ro
       - ./secrets/dashboard:/run/secrets:ro
+      - /proc/stat:/host/proc/stat:ro
+      - /proc/meminfo:/host/proc/meminfo:ro
+      - /proc/loadavg:/host/proc/loadavg:ro
+      - /proc/uptime:/host/proc/uptime:ro
+      - /etc/hostname:/host/root:ro
+      - ${BACKUP_ROOT:-/srv/backups}:/host/backups:ro
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"]
       interval: 30s

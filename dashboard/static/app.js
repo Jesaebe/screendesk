@@ -14,12 +14,28 @@ async function loadWeather(city){
 
 function renderBackup(backup){ const state=$('#backup-state'); if(!backup){state.textContent='Sem dados';return;} const good=backup.status==='success'; state.textContent=good?'Concluído':'Falhou'; state.className='status '+(good?'good':'bad'); const values=[backup.source,formatDate(backup.finished_at),formatBytes(backup.size_bytes),`${Math.round(backup.duration_seconds||0)} s`]; document.querySelectorAll('#backup-details dd').forEach((node,i)=>node.textContent=values[i]); }
 
+const percent=(value)=>value==null?'—':`${Math.round(value)}%`;
+const setMetric=(name,value)=>{ $(`#metric-${name}`).textContent=percent(value); const meter=$(`#meter-${name}`); meter.style.width=`${Math.max(0,Math.min(100,value||0))}%`; meter.className=value>=85?'bad':value>=70?'warn':''; };
+function renderHostMetrics(data){
+  const current=data.current; if(!current)return;
+  setMetric('cpu',current.cpu_percent); setMetric('memory',current.memory.used_percent); setMetric('root',current.root_disk.used_percent); setMetric('backup',current.backup_disk.used_percent);
+  $('#metric-swap').textContent=`Swap ${percent(current.memory.swap_used_percent)}`;
+  $('#metric-load').textContent=[current.load.one,current.load.five,current.load.fifteen].map(value=>value.toFixed(2)).join(' / ');
+  $('#metric-uptime').textContent=`Ativo há ${Math.floor(current.uptime_seconds/86400)} dias · ${current.load.cpu_count} CPUs`;
+  ['dashboard','backup'].forEach(name=>$('#service-'+name).className='service-dot '+(current.services[name]?'good':'bad'));
+  const healthy=current.services.dashboard&&current.services.backup&&current.memory.used_percent<90&&current.root_disk.used_percent<90&&current.backup_disk.used_percent<90;
+  $('#host-state').textContent=healthy?'Saudável':'Atenção'; $('#host-state').className='status '+(healthy?'good':'bad');
+  const samples=data.history.slice(-30); const bars=samples.map(item=>`<i title="${formatDate(item.recorded_at)} · CPU ${percent(item.cpu_percent)} · Memória ${percent(item.memory.used_percent)}" style="--cpu:${item.cpu_percent||0};--memory:${item.memory.used_percent}"></i>`).join('');
+  $('#metrics-history').innerHTML=bars||'<small>O histórico aparecerá após as primeiras coletas.</small>';
+}
+async function loadHostMetrics(){ try { renderHostMetrics(await api('/api/host/metrics')); } catch(error) { $('#host-state').textContent='Indisponível'; $('#host-state').className='status bad'; } }
+
 async function loadGoogle(){ try { const data=await api('/api/google/data'); $('#google-connect').textContent='Google conectado'; $('#events').classList.remove('empty'); $('#events').innerHTML=data.events.length?data.events.slice(0,8).map(event=>{const start=event.start.dateTime||event.start.date;return `<div class="row"><span class="dot"></span><span>${event.summary}</span><time>${formatDate(start)}</time></div>`}).join(''):'Nenhum evento próximo.'; $('#task-count').textContent=data.tasks.length; $('#tasks').classList.remove('empty'); $('#tasks').innerHTML=data.tasks.length?data.tasks.slice(0,10).map(task=>`<button class="row task" data-list="${task.tasklist_id}" data-task="${task.id}"><span>○</span><span>${task.title}</span><small>${task.due?formatDate(task.due):''}</small></button>`).join(''):'Nenhuma tarefa pendente.'; }
   catch(error){ if(!error.message.includes('não foi conectado')) toast(error.message); }
 }
 
 async function loadDevices(selected=''){ try { const data=await api('/api/smartthings/devices'); const devices=data.items||[]; $('#device-select').innerHTML='<option value="">Selecione o aparelho</option>'+devices.map(device=>`<option value="${device.deviceId}" ${device.deviceId===selected?'selected':''}>${device.label||device.name}</option>`).join(''); } catch(error) { /* Token ainda não instalado. */ } }
-async function init(){ tick(); setInterval(tick,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup); loadWeather(city); if(overview.google_connected) loadGoogle(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ tick(); setInterval(tick,1000); loadHostMetrics(); setInterval(loadHostMetrics,60000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup); loadWeather(city); if(overview.google_connected) loadGoogle(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };

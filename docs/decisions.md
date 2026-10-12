@@ -16,9 +16,9 @@ O serviço usa TOML porque Python moderno oferece leitura pela biblioteca padrã
 
 O serviço publica JSON atômico em volume dedicado. O Home Assistant monta esse volume somente para leitura. O formato definitivo de histórico será validado durante a implementação funcional.
 
-## D-005 — Monitoramento do host pendente
+## D-005 — Monitoramento integrado e sem socket Docker
 
-Não será escolhida uma imagem de monitoramento antes do inventário. A solução deverá expor CPU, memória, carga, disco raiz e `/srv/backups` sem privilégios desnecessários.
+O dashboard coleta as métricas agregadas necessárias diretamente de arquivos específicos de `/proc` e de pontos de montagem somente leitura. A disponibilidade do backup usa heartbeat no volume de status compartilhado. Essa abordagem evita outro serviço, dependências externas, modo privilegiado e acesso ao socket Docker.
 
 ## Google Drive para backups
 

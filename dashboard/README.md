@@ -15,3 +15,7 @@ Cadastre no Google Cloud o callback `${DASHBOARD_PUBLIC_URL}/oauth/google/callba
 O clima usa a geocodificação e previsão do Open-Meteo e não exige chave.
 
 O dispositivo SmartThings é escolhido após consultar `/api/smartthings/devices`; seu ID é salvo em `/data/settings.json` como `smartthings_device_id`.
+
+## Saúde do servidor
+
+O painel exibe CPU, carga, memória, swap, disco raiz, volume de backups, uptime e disponibilidade dos dois serviços. A coleta usa somente montagens específicas e somente leitura definidas no Compose. O histórico persistente mantém até 1.440 amostras, equivalentes a 24 horas no intervalo padrão de 60 segundos.

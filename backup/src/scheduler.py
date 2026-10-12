@@ -39,6 +39,7 @@ class BackupScheduler:
         self.notifier = notifier
         self._state_path = status_root / "scheduler-state.json"
         self._notification_path = status_root / "notification-status.json"
+        self._service_status_path = status_root / "service-status.json"
         self._completed_slots = self._load_slots()
 
     def _load_slots(self) -> set[tuple[str, str]]:
@@ -164,4 +165,8 @@ class BackupScheduler:
             raise ValueError("scheduler interval must be positive")
         while True:
             self.run_due()
+            self._write_json_atomic(
+                self._service_status_path,
+                {"status": "running", "updated_at": datetime.now(timezone.utc).isoformat()},
+            )
             sleep(interval_seconds)

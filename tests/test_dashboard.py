@@ -2,14 +2,21 @@ import json
 import os
 from pathlib import Path
 import importlib.util
+import types
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 SERVER_PATH = Path(__file__).parents[1] / "dashboard" / "src" / "server.py"
-SPEC = importlib.util.spec_from_file_location("dashboard_server", SERVER_PATH)
+PACKAGE = "screendeck_dashboard_test"
+package = types.ModuleType(PACKAGE)
+package.__path__ = [str(SERVER_PATH.parent)]
+sys.modules[PACKAGE] = package
+SPEC = importlib.util.spec_from_file_location(f"{PACKAGE}.server", SERVER_PATH)
 server = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
+sys.modules[SPEC.name] = server
 SPEC.loader.exec_module(server)
 
 
