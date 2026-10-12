@@ -30,18 +30,18 @@ Nenhuma configuração foi alterada durante o levantamento.
 
 - Instalar Chromium pelo repositório oficial do Debian.
 - Iniciar o Chromium após o login automático do usuário `painel`.
-- Usar modo kiosk apontando para a URL LAN do Home Assistant.
+- Usar modo kiosk apontando para a URL do dashboard.
 - Manter resolução `1920x1200` e orientação horizontal.
 - Desabilitar bloqueio, suspensão e desligamento automático da tela somente para a sessão dedicada `painel`.
 - Reiniciar o navegador automaticamente se ele encerrar inesperadamente.
-- Não armazenar credenciais do Home Assistant na linha de comando ou no arquivo `.desktop`.
+- Não armazenar credenciais do dashboard na linha de comando ou no arquivo `.desktop`.
 - URL LAN planejada: `http://192.168.25.249:8123`, condicionada à confirmação de que a porta está livre no servidor.
 
 ## Implantação futura
 
 A instalação e as mudanças de sessão exigem autorização explícita. Antes de aplicar:
 
-1. definir URL ou hostname LAN definitivo do Home Assistant;
+1. definir URL ou hostname definitivo do dashboard;
 2. registrar os valores atuais do Cinnamon para rollback;
 3. instalar Chromium sem pacotes externos ou globais;
 4. criar launcher versionado e específico do usuário;

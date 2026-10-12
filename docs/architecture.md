@@ -1,13 +1,14 @@
 # Arquitetura
 
-O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubuntu já executa o serviço independente de backup descrito por `compose.yaml`; o Home Assistant é a próxima ativação controlada.
+O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubuntu executa o serviço independente de backup e hospedará um dashboard web customizado e pequeno.
 
 ## Fluxos
 
-1. O tablet acessa o Home Assistant exclusivamente pela LAN.
-2. O Home Assistant consome o resumo somente leitura publicado no volume `backup-status`.
+1. O tablet acessa o dashboard pelo Nginx.
+2. O dashboard consome o resumo somente leitura publicado no volume `backup-status`.
 3. O serviço de backup gera dumps lógicos em `/srv/backups`, registra o resultado e envia uma cópia criptografada ao Google Drive.
-4. Falhas produzem estado para alerta persistente no Home Assistant e, quando configurado, e-mail SMTP.
+4. O dashboard consulta Open-Meteo, Google Calendar, Google Tasks e SmartThings sem armazenar senhas das contas.
+5. Falhas de backup aparecem no painel e geram e-mail SMTP.
 
 ## Limites
 
@@ -19,7 +20,7 @@ O tablet Debian atua somente como cliente Chromium em modo kiosk. O servidor Ubu
 ## Endereçamento planejado
 
 - Servidor Ubuntu: `192.168.25.249`.
-- Home Assistant: `http://192.168.25.249:8123`.
+- Dashboard: `http://192.168.25.249:8123` internamente, publicado pelo Nginx.
 - Tablet: `192.168.25.47`.
 
-A porta 8123 foi confirmada livre pelo inventário e pela pré-checagem do servidor.
+A porta 8123 é preservada durante a substituição para evitar mudanças no Nginx.

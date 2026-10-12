@@ -1,5 +1,32 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Credencial OAuth Google instalada
+
+- O cliente OAuth Web foi validado sem expor `client_id` ou `client_secret`.
+- Origem autorizada: `https://hml.cyrius.com.br`; callback: `https://hml.cyrius.com.br/oauth/google/callback`.
+- O JSON foi instalado fora do Git em `secrets/dashboard/google-client.json`, proprietário `cyrius:cyrius`, modo `0600`.
+- Próximos segredos: senha do dashboard e token SmartThings. A autorização da conta Google ocorrerá pelo navegador depois da implantação.
+
+## 2026-10-12 — HTTPS ativado
+
+- O Certbot emitiu e instalou um certificado Let's Encrypt para `hml.cyrius.com.br`, válido até 10/01/2027.
+- O Nginx escuta em 443 e redireciona HTTP para HTTPS; configuração e resposta local com SNI foram aprovadas.
+- O timer de renovação está ativo e `certbot renew --dry-run --no-random-sleep-on-renew` concluiu com sucesso.
+- O bloco Nginx anterior foi preservado em `/etc/nginx/hml.before-tls-20261012`, fora de `sites-enabled`.
+- O servidor não oferece NAT loopback para o próprio endereço público, mas DNS, certificado, listeners e proxy local foram validados.
+- Próximo passo: criar as credenciais Google/SmartThings e a senha do dashboard antes da substituição do Home Assistant.
+
+## 2026-10-12 — Dashboard customizado preparado
+
+- A direção do produto foi simplificada: o Home Assistant será substituído por um dashboard próprio e pequeno.
+- A base local apresenta data/hora, clima configurável via Open-Meteo, Google Calendar, Google Tasks, situação e histórico dos backups e controles SmartThings para o Samsung WindFree Connect.
+- O dashboard usa somente a biblioteca padrão do Python no servidor e HTML/CSS/JavaScript no navegador.
+- OAuth Google, token SmartThings e senha do painel ficam fora do Git.
+- O Compose preserva o backup e o volume `backup-status`; a porta 8123 permanece para evitar alteração imediata no Nginx.
+- A implantação parará o container antigo sem removê-lo, permitindo rollback. Nada desta versão foi implantado no servidor.
+- Validação local: 67 testes aprovados, sintaxe Python e Bash aprovadas e diff sem erros de whitespace.
+- Próximos passos: configurar HTTPS, criar credencial OAuth Google, instalar token SmartThings e senha do painel, validar o aparelho e executar a substituição controlada.
+
 ## 2026-10-11 — Home Assistant ativado no servidor
 
 - O checkout do servidor recebeu por fast-forward os commits até `41d813e`; a publicação desse commit no GitHub permanece pendente porque nenhum dos ambientes possui credencial de escrita disponível.

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101916">
+  <title>ScreenDeck</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div>
+        <p class="eyebrow" id="date">CARREGANDO</p>
+        <h1 id="clock">--:--</h1>
+      </div>
+      <button class="city" id="city-button" aria-label="Alterar cidade">
+        <span id="weather-icon">◌</span>
+        <span><strong id="temperature">--°</strong><small id="city-name">Clima</small></span>
+      </button>
+    </header>
+
+    <section class="grid">
+      <article class="card calendar-card">
+        <div class="card-title"><h2>Próximos eventos</h2><button id="google-connect">Conectar Google</button></div>
+        <div id="events" class="list empty">Nenhum evento carregado.</div>
+      </article>
+
+      <article class="card tasks-card">
+        <div class="card-title"><h2>Tarefas</h2><span id="task-count" class="count">0</span></div>
+        <div id="tasks" class="list empty">Nenhuma tarefa carregada.</div>
+      </article>
+
+      <article class="card climate-card">
+        <div class="card-title"><h2>Ar-condicionado</h2><span id="ac-state" class="status neutral">Não conectado</span></div>
+        <div class="temperature-control">
+          <button data-temp-step="-1" aria-label="Diminuir temperatura">−</button>
+          <strong><span id="target-temp">23</span>°</strong>
+          <button data-temp-step="1" aria-label="Aumentar temperatura">+</button>
+        </div>
+        <div class="actions"><button data-ac="on" class="primary">Ligar</button><button data-ac="off">Desligar</button><button data-ac="cool">Resfriar</button><button data-ac="temperature">Aplicar temperatura</button></div>
+      </article>
+
+      <article class="card backup-card">
+        <div class="card-title"><h2>Último backup</h2><span id="backup-state" class="status neutral">Verificando</span></div>
+        <dl id="backup-details"><div><dt>Origem</dt><dd>—</dd></div><div><dt>Concluído</dt><dd>—</dd></div><div><dt>Tamanho</dt><dd>—</dd></div><div><dt>Duração</dt><dd>—</dd></div></dl>
+        <button id="history-button" class="text-button">Ver histórico</button>
+      </article>
+    </section>
+
+    <section class="forecast" id="forecast" aria-label="Previsão do tempo"></section>
+  </main>
+
+  <dialog id="settings-dialog">
+    <form method="dialog" id="settings-form">
+      <div class="card-title"><h2>Configurações</h2><button value="cancel" aria-label="Fechar">×</button></div>
+      <label>Cidade<input id="city-input" name="city" autocomplete="address-level2" placeholder="Ex.: Salvador"></label>
+      <p class="hint">O painel usa Open‑Meteo, sem chave de API.</p>
+      <label>Ar-condicionado<select id="device-select"><option value="">SmartThings não configurado</option></select></label>
+      <button value="default" class="primary">Salvar</button>
+    </form>
+  </dialog>
+
+  <dialog id="history-dialog">
+    <div class="card-title"><h2>Histórico de backups</h2><button id="history-close" aria-label="Fechar">×</button></div>
+    <div id="backup-history" class="list"></div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 # Segurança
 
-- Home Assistant disponível somente na LAN, com administrador individual e MFA quando suportado.
+- Dashboard protegido por senha forte e HTTPS antes de expor OAuth ou controles fora da LAN.
+- Credenciais Google e SmartThings ficam em arquivos `0600`, fora do Git.
 - Conta exclusiva e de privilégio mínimo para cada banco copiado.
 - OAuth do Google Drive restrito à finalidade de backup.
 - `rclone crypt` configurado fora do repositório.

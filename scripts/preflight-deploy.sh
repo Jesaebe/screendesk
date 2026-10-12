@@ -9,6 +9,7 @@ backup_config_host="${BACKUP_CONFIG_HOST:-$project_dir/secrets/sources.toml}"
 maker_password_host="${BACKUP_MAKER_PASSWORD_HOST:-/home/cyrius/.config/screendeck-home/maker-password}"
 rclone_config_dir_host="${RCLONE_CONFIG_DIR_HOST:-/home/cyrius/.config/rclone}"
 rclone_config_host="$rclone_config_dir_host/rclone.conf"
+dashboard_password_host="$project_dir/secrets/dashboard/dashboard-password"
 failed=0
 
 pass() {
@@ -45,7 +46,11 @@ else
 fi
 
 if ss -H -ltn 'sport = :8123' 2>/dev/null | grep -q .; then
-  fail "porta TCP 8123 já está em uso"
+  if docker container inspect screendeck-home-home-assistant-1 >/dev/null 2>&1; then
+    pass "porta TCP 8123 ocupada pelo Home Assistant que será substituído"
+  else
+    fail "porta TCP 8123 já está em uso por serviço desconhecido"
+  fi
 else
   pass "porta TCP 8123 livre"
 fi
@@ -72,7 +77,7 @@ for required in compose.yaml .env; do
   fi
 done
 
-for secret_path in "$project_dir/.env" "$backup_config_host" "$maker_password_host" "$rclone_config_host"; do
+for secret_path in "$project_dir/.env" "$backup_config_host" "$maker_password_host" "$rclone_config_host" "$dashboard_password_host"; do
   path="$secret_path"
   if [[ -f "$path" ]]; then
     pass "arquivo secreto presente: $path"

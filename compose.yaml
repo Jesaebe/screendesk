@@ -1,17 +1,31 @@
 name: screendeck-home
 
 services:
-  home-assistant:
-    image: ghcr.io/home-assistant/home-assistant:2026.10.1
+  dashboard:
+    build:
+      context: ./dashboard
     restart: unless-stopped
-    stop_grace_period: 60s
     environment:
       TZ: ${TZ:-America/Bahia}
+      DASHBOARD_DATA_ROOT: /data
+      BACKUP_STATUS_ROOT: /backup-status
+      GOOGLE_CLIENT_SECRET_FILE: /run/secrets/google-client.json
+      SMARTTHINGS_TOKEN_FILE: /run/secrets/smartthings-token
+      DASHBOARD_PASSWORD_FILE: /run/secrets/dashboard-password
+      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME:-admin}
+      DASHBOARD_PUBLIC_URL: ${DASHBOARD_PUBLIC_URL:-http://localhost:8123}
     ports:
-      - "${HA_PORT:-8123}:8123"
+      - "${DASHBOARD_PORT:-8123}:8080"
     volumes:
-      - ./home-assistant:/config
+      - dashboard-data:/data
       - backup-status:/backup-status:ro
+      - ./secrets/dashboard:/run/secrets:ro
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - internal
     logging:
@@ -68,3 +82,4 @@ networks:
 
 volumes:
   backup-status:
+  dashboard-data:

@@ -1,10 +1,10 @@
 # Implantação controlada
 
-Estado atual: o backup está implantado e operacional; o Home Assistant ainda não foi iniciado.
+Estado atual: o backup está implantado e operacional; o Home Assistant está ativo temporariamente e será substituído pelo dashboard customizado.
 
 Pré-condições: Fase 1 validada, inventário concluído, segredos preparados fora do Git, backups dos arquivos que serão afetados e autorização explícita do usuário.
 
-Destino planejado: servidor `192.168.25.249`; o inventário e a validação posterior à limpeza confirmaram a porta 8123 disponível.
+Destino: servidor `192.168.25.249`. A porta 8123 permanece a mesma durante a troca.
 
 Aplicações Docker existentes só poderão ser desativadas ou removidas após inventário e confirmação explícita por recurso. A implantação do ScreenDeck não autoriza implicitamente remoção de containers, volumes, redes ou dados anteriores.
 
@@ -18,7 +18,7 @@ O serviço de backup executa como UID/GID `1000:1000`, correspondente ao usuári
 
 A senha do Maker deve ficar em `/home/cyrius/.config/screendeck-home/maker-password`, pertencente a `cyrius:cyrius`, modo `0600`, sem quebra de linha obrigatória. O Compose monta somente esse arquivo em `/run/secrets/maker-password`, somente leitura. O procedimento interativo está em `docs/runbooks/install-maker-secret.md`.
 
-## Primeira ativação do Home Assistant
+## Substituição controlada pelo dashboard
 
 Depois de publicar e atualizar o checkout do servidor, executar somente mediante autorização explícita:
 
@@ -26,11 +26,11 @@ Depois de publicar e atualizar o checkout do servidor, executar somente mediante
 SCREENDECK_DEPLOY_AUTHORIZED=YES ./scripts/deploy.sh
 ```
 
-O script executa novamente a pré-checagem, baixa a imagem fixada, valida os YAMLs do Home Assistant dentro da própria imagem, inicia somente `home-assistant` com `--no-deps` e aguarda uma resposta HTTP local. O container de backup não é recriado. Se a resposta não chegar em 120 segundos, o container fica preservado e os últimos logs são exibidos para diagnóstico.
+O script executa novamente a pré-checagem, constrói e valida o dashboard, para o Home Assistant sem removê-lo, inicia somente `dashboard` com `--no-deps` e aguarda o endpoint de saúde. O container de backup não é recriado.
 
-Quando a resposta local estiver aprovada, abrir `http://192.168.25.249:8123` pela LAN e concluir o onboarding criando o administrador individual. Não publicar a porta no roteador.
+Antes da execução, instalar `secrets/dashboard/dashboard-password` com modo `0600`. OAuth Google exige HTTPS no endereço público; `google-client.json` e `smartthings-token` são opcionais durante o primeiro boot.
 
-## Reversão da primeira ativação
+## Reversão da substituição
 
 Mediante autorização específica:
 
@@ -38,4 +38,4 @@ Mediante autorização específica:
 SCREENDECK_ROLLBACK_AUTHORIZED=YES ./scripts/rollback.sh
 ```
 
-O rollback para somente `home-assistant`, aguarda até 60 segundos pelo encerramento limpo e preserva a configuração, o volume compartilhado e o serviço de backup.
+O rollback para somente o dashboard e volta a iniciar o container preservado do Home Assistant. O serviço de backup não é alterado.

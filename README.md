@@ -1,17 +1,17 @@
 # ScreenDeck Home
 
-Infraestrutura versionada para um painel residencial baseado em Home Assistant e um serviço independente de backups lógicos.
+Infraestrutura versionada para um painel web residencial customizado e um serviço independente de backups lógicos.
 
 ## Estado
 
-O serviço de backup da Fase 1 está implantado e operacional. O Home Assistant ainda aguarda ativação controlada. Nada adicional deste repositório deve ser implantado ou executado no servidor de produção sem autorização explícita. Consulte `MEMORY.md` para o ponto de retomada e `STATUS.md` para o histórico.
+O serviço de backup está implantado e operacional. O dashboard customizado que substituirá o Home Assistant está em preparação local e ainda não foi implantado. Nada adicional deve ser implantado no servidor sem autorização explícita. Consulte `MEMORY.md` e `STATUS.md`.
 
 ## Regras essenciais
 
 - Não versionar segredos, dumps, logs ou configurações OAuth reais.
 - Não executar o Compose na máquina de desenvolvimento.
 - Novos acessos ou alterações no servidor exigem escopo e autorização explícitos.
-- Revisar `docs/deployment.md` antes de ativar o Home Assistant.
+- Revisar `docs/deployment.md` antes de substituir o Home Assistant pelo dashboard.
 
 ## Validação local permitida
 

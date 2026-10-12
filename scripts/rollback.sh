@@ -13,8 +13,11 @@ if [[ ! -f "$project_dir/.env" ]]; then
   exit 1
 fi
 
-echo "Parando somente o Home Assistant; backup, volumes e configurações serão preservados..."
+echo "Parando somente o dashboard novo; backup e volumes serão preservados..."
 docker compose --project-directory "$project_dir" --env-file "$project_dir/.env" \
-  stop --timeout 60 home-assistant
-docker compose --project-directory "$project_dir" --env-file "$project_dir/.env" \
-  ps home-assistant
+  stop --timeout 30 dashboard
+
+if docker container inspect screendeck-home-home-assistant-1 >/dev/null 2>&1; then
+  echo "Restaurando temporariamente o container anterior do Home Assistant..."
+  docker start screendeck-home-home-assistant-1
+fi

@@ -6,6 +6,14 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 
 ## Estado atual
 
+- A credencial OAuth Web do Google foi instalada no servidor em `secrets/dashboard/google-client.json`, modo `0600`, com origem e callback HTTPS validados sem revelar seus valores secretos.
+- HTTPS foi ativado em 12/10/2026 para `hml.cyrius.com.br` com Let's Encrypt, redirecionamento HTTP, timer de renovação ativo e simulação de renovação aprovada. O certificado expira em 10/01/2027 e será renovado automaticamente.
+- Em 12/10/2026, o usuário decidiu substituir o Home Assistant por um dashboard web customizado e mínimo. O serviço de backup permanece integralmente preservado.
+- A base local do novo dashboard foi implementada com relógio/data, Open-Meteo com cidade configurável, Google Calendar e Tasks via OAuth, histórico de backup e comandos SmartThings para o Samsung WindFree Connect 12.000 BTU.
+- A implantação ainda não ocorreu. O Home Assistant continua ativo até dashboard, HTTPS e credenciais externas serem preparados e validados.
+- A troca mantém a porta 8123 e preserva o container antigo parado para rollback.
+- Última validação da nova base: 67 testes aprovados, sintaxe Python/Bash aprovada e diff sem erros de whitespace.
+
 - O `PRD_ScreenDeck_Home.md` foi lido integralmente.
 - A fundação local da Fase 1 foi implementada em 09/10/2026.
 - Foram criados os arquivos raiz de governança, exemplo de ambiente e Compose declarativo.
@@ -73,7 +81,9 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 
 ## Decisões vigentes
 
-- Interface e automação: Home Assistant Container.
+- Interface: dashboard web customizado e leve.
+- Clima: Open-Meteo, com cidade configurável.
+- Automação inicial: Samsung WindFree Connect 12.000 BTU via SmartThings API.
 - Orquestração futura no servidor: Docker Compose.
 - Cliente: Chromium em modo kiosk no tablet Debian 12 i686.
 - Calendário e tarefas: integrações Google Calendar e Google Tasks por OAuth.

@@ -27,15 +27,16 @@ class DeploymentArtifactTests(unittest.TestCase):
         rollback = (SCRIPTS / "rollback.sh").read_text(encoding="utf-8")
         self.assertIn("SCREENDECK_DEPLOY_AUTHORIZED", deploy)
         self.assertIn("SCREENDECK_ROLLBACK_AUTHORIZED", rollback)
-        self.assertIn("up -d --no-deps home-assistant", deploy)
+        self.assertIn("up -d --no-deps dashboard", deploy)
         self.assertNotIn("up -d backup", deploy)
-        self.assertIn("stop --timeout 60 home-assistant", rollback)
+        self.assertIn("stop --timeout 30 dashboard", rollback)
         self.assertNotIn("down", rollback)
         self.assertNotIn("rm -", rollback)
 
-    def test_home_assistant_has_clean_shutdown_window(self):
+    def test_dashboard_preserves_backup_status_read_only(self):
         compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
-        self.assertIn("stop_grace_period: 60s", compose)
+        self.assertIn("backup-status:/backup-status:ro", compose)
+        self.assertIn("dashboard-data:/data", compose)
 
     def test_rclone_config_is_mounted_read_only_from_server(self):
         compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")

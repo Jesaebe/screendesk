@@ -11,21 +11,26 @@ fi
 
 "$project_dir/scripts/preflight-deploy.sh"
 
-echo "Baixando a imagem fixada do Home Assistant..."
-"${compose[@]}" pull home-assistant
+echo "Construindo o dashboard customizado..."
+"${compose[@]}" build dashboard
 
-echo "Validando a configuração do Home Assistant com a imagem fixada..."
-"${compose[@]}" run --rm --no-deps home-assistant \
-  python -m homeassistant --script check_config --config /config
+echo "Validando o dashboard..."
+"${compose[@]}" run --rm --no-deps --entrypoint python3 dashboard \
+  -m py_compile /app/src/server.py
 
-echo "Iniciando somente o Home Assistant; o serviço de backup não será recriado..."
-"${compose[@]}" up -d --no-deps home-assistant
+echo "Parando o Home Assistant antigo de forma recuperável..."
+if docker container inspect screendeck-home-home-assistant-1 >/dev/null 2>&1; then
+  docker stop --time 60 screendeck-home-home-assistant-1
+fi
 
-ha_url="http://127.0.0.1:${HA_PORT:-8123}/"
+echo "Iniciando somente o dashboard; o serviço de backup não será recriado..."
+"${compose[@]}" up -d --no-deps dashboard
+
+dashboard_url="http://127.0.0.1:${DASHBOARD_PORT:-8123}/healthz"
 for attempt in {1..60}; do
-  if curl --fail --silent --show-error --output /dev/null "$ha_url"; then
-    echo "Home Assistant respondeu em $ha_url"
-    "${compose[@]}" ps home-assistant
+  if curl --fail --silent --show-error --output /dev/null "$dashboard_url"; then
+    echo "Dashboard respondeu em $dashboard_url"
+    "${compose[@]}" ps dashboard
     exit 0
   fi
   if (( attempt == 60 )); then
@@ -34,7 +39,7 @@ for attempt in {1..60}; do
   sleep 2
 done
 
-echo "Home Assistant não respondeu em até 120 segundos. O container foi preservado para diagnóstico." >&2
-"${compose[@]}" ps home-assistant >&2 || true
-"${compose[@]}" logs --tail 80 home-assistant >&2 || true
+echo "Dashboard não respondeu em até 120 segundos. O container foi preservado para diagnóstico." >&2
+"${compose[@]}" ps dashboard >&2 || true
+"${compose[@]}" logs --tail 80 dashboard >&2 || true
 exit 1

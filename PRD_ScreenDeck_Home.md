@@ -31,11 +31,11 @@ O objetivo é ter uma experiência semelhante a um smart display: ao olhar para 
 ```text
 PC Tablet Linux (cliente)
   └─ Chromium em modo kiosk
-       └─ Dashboard do Home Assistant via rede local
+       └─ Dashboard web customizado
 
 Servidor Ubuntu 24.04 (serviços)
   ├─ Docker Compose
-  │    ├─ Home Assistant Container
+  │    ├─ Dashboard ScreenDeck
   │    └─ Serviço de backup independente
   ├─ /srv/backups (volume LVM dedicado)
   └─ Futuro: serviços locais de voz
@@ -69,14 +69,13 @@ Nuvem
 - Calendário Google.
 - Lista de tarefas do Google Tasks, permitindo visualizar e concluir itens.
 - Botões de automação por ambiente/dispositivo.
-- Indicador de disponibilidade do Home Assistant e status do último backup.
+- Indicador de disponibilidade do dashboard e status do último backup.
 
 ### 5.2 Automação
 
 - Controle inicial do ar-condicionado: ligar, desligar, definir modo/temperatura quando a integração do aparelho permitir.
-- Criação de cenas e rotinas por botão no painel.
-- Todas as automações devem poder ser acionadas pela interface do Home Assistant.
-- A integração exata do ar-condicionado será definida após identificar marca, modelo e forma de controle (Wi-Fi, infravermelho ou outro).
+- Controle direto pelo painel via SmartThings.
+- Aparelho inicial: Samsung WindFree Connect 12.000 BTU.
 
 ### 5.3 Google
 
@@ -119,7 +118,9 @@ Nuvem
 
 | Camada | Tecnologia |
 |---|---|
-| Automação e dashboard | Home Assistant Container |
+| Dashboard | Aplicação web customizada em Python e JavaScript |
+| Clima | Open-Meteo, com cidade configurável |
+| Ar-condicionado | Samsung SmartThings API |
 | Orquestração | Docker Compose |
 | Host do servidor | Ubuntu 24.04 LTS |
 | Tela dedicada | Chromium em modo kiosk no Debian 12 do tablet |
@@ -152,8 +153,8 @@ Nuvem
 
 1. **Inventário do servidor:** verificar Docker, Compose, containers existentes, portas 80/443/8123 e utilização de disco.
 2. **Preparar estrutura do projeto:** repositório Git, diretórios, `.gitignore`, documentação e secrets locais.
-3. **Instalar Home Assistant Container:** criar Compose isolado, persistência, política de reinício e acesso na rede local.
-4. **Criar dashboard inicial:** data/hora e layout otimizado para a resolução do tablet.
+3. **Instalar dashboard:** criar Compose isolado, persistência, autenticação e acesso pelo Nginx.
+4. **Criar dashboard inicial:** data/hora, clima e layout otimizado para a resolução do tablet.
 5. **Configurar o tablet:** Chromium em modo kiosk, inicialização automática e economia de tela adequada.
 6. **Conectar Google:** OAuth para Calendar e Tasks.
 7. **Integrar ar-condicionado:** identificar o modelo e configurar entidade, cartões e automações.

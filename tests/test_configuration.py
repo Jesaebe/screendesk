@@ -11,7 +11,8 @@ class ConfigurationTests(unittest.TestCase):
             ".env.example",
             ".gitignore",
             "compose.yaml",
-            "home-assistant/configuration.yaml",
+            "dashboard/src/server.py",
+            "dashboard/static/index.html",
             "backup/config/sources.example.toml",
         ]
         for relative in required:
