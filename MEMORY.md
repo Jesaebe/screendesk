@@ -6,6 +6,7 @@ Este arquivo é o ponto de retomada do projeto. Antes de continuar o trabalho, c
 
 ## Estado atual
 
+- O tema roxo escuro com cor principal `#723ebe` foi implantado e validado; o token Google persistiu e os serviços permaneceram saudáveis.
 - O dashboard customizado foi implantado em 12/10/2026 e está saudável em `https://hml.cyrius.com.br`; o Home Assistant foi parado e preservado para rollback, e o backup continua saudável sem recriação.
 - Clima, autenticação e leitura do último backup foram validados em produção. Google aguarda consentimento pelo navegador; SmartThings foi adiado pelo usuário.
 - A credencial OAuth Web do Google foi instalada no servidor em `secrets/dashboard/google-client.json`, modo `0600`, com origem e callback HTTPS validados sem revelar seus valores secretos.

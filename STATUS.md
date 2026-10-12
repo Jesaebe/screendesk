@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Tema roxo implantado
+
+- O dashboard passou a usar `#723ebe` como cor principal em uma paleta roxa escura.
+- Verde foi preservado exclusivamente para estados de sucesso; alertas e falhas mantêm suas cores semânticas.
+- Contraste validado: 8,72:1 nos botões principais e 17,76:1 no texto sobre o fundo.
+- Somente o dashboard foi reconstruído; Google permaneceu autorizado e dashboard e backup continuam saudáveis.
+
 ## 2026-10-12 — Dashboard customizado implantado
 
 - O commit `821694a` foi aplicado ao servidor por bundle Git e fast-forward; a publicação no GitHub continua pendente por ausência de credencial de escrita neste ambiente.
