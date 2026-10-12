@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Métricas do host implantadas
+
+- O commit `fcaf766` foi aplicado ao servidor por bundle Git e fast-forward; o GitHub permanece em `12de150` por ausência de credencial de escrita neste ambiente.
+- Dashboard e backup foram reconstruídos e recriados de forma direcionada; o Home Assistant preservado, o Nginx, os dados e os segredos não foram alterados.
+- Os dois containers ficaram saudáveis; HTTP e HTTPS responderam 200 e o acesso à API sem credenciais permaneceu bloqueado com HTTP 401.
+- A segunda amostra confirmou CPU, memória, discos raiz e de backups, disponibilidade de dashboard e backup e histórico persistente.
+- O último backup do Maker permaneceu com `status=success`; não havia execução nem lock de backup durante a implantação.
+
 ## 2026-10-12 — Métricas do host preparadas localmente
 
 - O dashboard passou a coletar CPU, carga, memória, swap, uptime, disco raiz e volume `/srv/backups` diretamente do host a cada minuto.
