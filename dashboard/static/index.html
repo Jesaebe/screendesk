@@ -87,24 +87,26 @@
   <dialog id="sources-dialog" class="sources-dialog">
     <div class="card-title"><h2>Bancos de backup</h2><button id="sources-close" aria-label="Fechar">×</button></div>
     <p class="hint">Todos usam <strong>cyriusBackup</strong> e o segredo protegido já instalado.</p>
-    <div id="sources-list" class="sources-list"></div>
-    <form id="source-form">
-      <div class="source-fields">
-        <label>Identificador<input name="id" required pattern="[a-z0-9][a-z0-9-]{1,62}" placeholder="ex.: financeiro"></label>
-        <label>Nome<input name="display_name" required placeholder="Financeiro"></label>
-        <label>Tipo<select name="engine"><option value="postgresql">PostgreSQL</option><option value="mariadb">MariaDB</option><option value="mysql">MySQL</option></select></label>
-        <label>Versão<input name="version" placeholder="16"></label>
-        <label class="wide">Host<input name="host" required placeholder="192.168.1.50"></label>
-        <label>Porta<input name="port" required type="number" min="1" max="65535" value="5432"></label>
-        <label>Banco<input name="database" required></label>
-        <label>SSL<select name="sslmode"><option value="require">Obrigatório</option><option value="prefer">Preferencial</option><option value="disable">Desativado</option></select></label>
-        <label>Estimativa (MB)<input name="estimated_size_mb" type="number" min="0" value="100"></label>
-        <label class="wide">Horários<input name="schedule" required placeholder="00:00, 12:00"></label>
-        <label class="toggle"><input name="enabled" type="checkbox"> Ativo</label>
-      </div>
-      <div id="connection-test-result" class="connection-test-result" aria-live="polite"></div>
-      <div class="dialog-actions"><button type="reset">Novo</button><button id="source-test" type="button">Testar conexão</button><button id="source-delete" type="button" class="danger" hidden>Remover</button><button class="primary" type="submit">Salvar</button></div>
-    </form>
+    <div class="sources-layout">
+      <aside><span class="section-label">Cadastrados</span><div id="sources-list" class="sources-list"></div></aside>
+      <form id="source-form">
+        <input name="id" type="hidden">
+        <div class="source-fields">
+          <label class="wide">Nome<input name="display_name" required placeholder="Financeiro"></label>
+          <label>Tipo<select name="engine"><option value="postgresql">PostgreSQL</option><option value="mariadb">MariaDB</option><option value="mysql">MySQL</option></select></label>
+          <label>Versão<input name="version" placeholder="16"></label>
+          <label class="wide">Host<input name="host" required placeholder="192.168.1.50"></label>
+          <label>Porta<input name="port" required type="number" min="1" max="65535" value="5432"></label>
+          <label>Banco<input name="database" required></label>
+          <label>SSL<select name="sslmode"><option value="require">Obrigatório</option><option value="prefer">Preferencial</option><option value="disable">Desativado</option></select></label>
+          <label>Estimativa (MB)<input name="estimated_size_mb" type="number" min="0" value="100"></label>
+          <label class="wide">Horários<input name="schedule" required placeholder="00:00, 12:00"></label>
+          <label class="toggle"><input name="enabled" type="checkbox"> Ativo</label>
+        </div>
+        <div id="connection-test-result" class="connection-test-result" aria-live="polite"></div>
+        <div class="dialog-actions"><button type="reset">Novo</button><button id="source-test" type="button">Testar conexão</button><button id="source-delete" type="button" class="danger" hidden>Remover</button><button class="primary" type="submit">Salvar</button></div>
+      </form>
+    </div>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>

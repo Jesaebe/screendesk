@@ -135,6 +135,15 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("await loadGoogle();toast('Tarefa concluída')", script)
         self.assertIn("if(googleLoading)return", script)
 
+    def test_backup_source_identifier_is_hidden_and_generated_from_name(self):
+        static = SERVER_PATH.parents[1] / "static"
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        script = (static / "app.js").read_text(encoding="utf-8")
+        self.assertIn('<input name="id" type="hidden">', markup)
+        self.assertNotIn("Identificador<input", markup)
+        self.assertIn("function sourceIdentifier(name)", script)
+        self.assertIn("sourceForm.elements.id.value||sourceIdentifier(payload.display_name)", script)
+
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sources.toml"
