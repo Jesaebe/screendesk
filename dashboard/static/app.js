@@ -4,6 +4,7 @@ const api = async (url, options={}) => { const response = await fetch(url, {...o
 const toast = (message) => { const node=$('#toast'); node.textContent=message; node.classList.add('show'); setTimeout(()=>node.classList.remove('show'),3000); };
 const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(value)) : '—';
 const formatBytes = (value=0) => value ? new Intl.NumberFormat('pt-BR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(value/1048576) : '—';
+const formatCapacity = (value=0) => value ? `${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(value/1073741824)} GB` : '—';
 
 function tick(){ const now=new Date(); $('#clock').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); $('#date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}); }
 
@@ -19,6 +20,10 @@ const setMetric=(name,value)=>{ $(`#metric-${name}`).textContent=percent(value);
 function renderHostMetrics(data){
   const current=data.current; if(!current)return;
   setMetric('cpu',current.cpu_percent); setMetric('memory',current.memory.used_percent); setMetric('root',current.root_disk.used_percent); setMetric('backup',current.backup_disk.used_percent);
+  $('#metric-cpu-total').textContent=`${current.load.cpu_count} CPUs lógicas`;
+  $('#metric-memory-total').textContent=`Total ${formatCapacity(current.memory.total_bytes)}`;
+  $('#metric-root-total').textContent=`Total ${formatCapacity(current.root_disk.total_bytes)}`;
+  $('#metric-backup-total').textContent=`Total ${formatCapacity(current.backup_disk.total_bytes)}`;
   $('#metric-swap').textContent=`Swap ${percent(current.memory.swap_used_percent)}`;
   $('#metric-load').textContent=[current.load.one,current.load.five,current.load.fifteen].map(value=>value.toFixed(2)).join(' / ');
   $('#metric-uptime').textContent=`Ativo há ${Math.floor(current.uptime_seconds/86400)} dias · ${current.load.cpu_count} CPUs`;
@@ -35,7 +40,7 @@ async function loadGoogle(){ try { const data=await api('/api/google/data'); $('
 }
 
 async function loadDevices(selected=''){ try { const data=await api('/api/smartthings/devices'); const devices=data.items||[]; $('#device-select').innerHTML='<option value="">Selecione o aparelho</option>'+devices.map(device=>`<option value="${device.deviceId}" ${device.deviceId===selected?'selected':''}>${device.label||device.name}</option>`).join(''); } catch(error) { /* Token ainda não instalado. */ } }
-async function init(){ tick(); setInterval(tick,1000); loadHostMetrics(); setInterval(loadHostMetrics,60000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup); loadWeather(city); if(overview.google_connected) loadGoogle(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ tick(); setInterval(tick,1000); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup); loadWeather(city); if(overview.google_connected) loadGoogle(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };

@@ -40,7 +40,8 @@ HOST_METRICS = HostMetrics(
     Path(os.environ.get("HOST_BACKUP_PATH", "/host/backups")),
     DATA_ROOT / "host-metrics.jsonl",
     BACKUP_ROOT / "service-status.json",
-    interval_seconds=int(os.environ.get("HOST_METRICS_INTERVAL_SECONDS", "60")),
+    interval_seconds=int(os.environ.get("HOST_METRICS_INTERVAL_SECONDS", "1")),
+    history_interval_seconds=int(os.environ.get("HOST_METRICS_HISTORY_INTERVAL_SECONDS", "60")),
 )
 
 

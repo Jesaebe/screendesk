@@ -22,7 +22,8 @@ class HostMetrics:
         history_path: Path,
         backup_status_path: Path,
         *,
-        interval_seconds: int = 60,
+        interval_seconds: int = 1,
+        history_interval_seconds: int = 60,
         history_limit: int = 1440,
     ) -> None:
         self.proc_root = proc_root
@@ -31,6 +32,7 @@ class HostMetrics:
         self.history_path = history_path
         self.backup_status_path = backup_status_path
         self.interval_seconds = interval_seconds
+        self.history_interval_seconds = history_interval_seconds
         self.history_limit = history_limit
         self._previous_cpu: tuple[int, int] | None = None
         self._latest: dict[str, Any] | None = None
@@ -109,8 +111,8 @@ class HostMetrics:
             self._latest = result
         return result
 
-    def record(self) -> dict[str, Any]:
-        result = self.collect()
+    def record(self, result: dict[str, Any] | None = None) -> dict[str, Any]:
+        result = result or self.collect()
         with self._lock:
             self._history.append(result)
             self.history_path.parent.mkdir(parents=True, exist_ok=True)
@@ -130,9 +132,14 @@ class HostMetrics:
             return list(self._history)[-max(1, min(limit, self.history_limit)):]
 
     def run_forever(self) -> None:
+        next_history_sample = 0.0
         while True:
             try:
-                self.record()
+                result = self.collect()
+                current = time.monotonic()
+                if current >= next_history_sample:
+                    self.record(result)
+                    next_history_sample = current + self.history_interval_seconds
             except (OSError, ValueError, ZeroDivisionError) as error:
                 print(f"host metrics collection failed: {type(error).__name__}", flush=True)
             time.sleep(self.interval_seconds)
