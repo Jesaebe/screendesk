@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-13 — Atualização automática das tarefas implantada
+
+- Agenda e tarefas do Google passam a sincronizar em segundo plano a cada 15 segundos e imediatamente ao retornar para a tela.
+- Ao concluir uma tarefa no painel, o item e o contador são atualizados na hora e em seguida reconciliados com o Google.
+- Atualizações silenciosas preservam o conteúdo visível durante falhas transitórias e evitam requisições Google simultâneas.
+- A revisão `7c500ca` foi implantada reconstruindo somente o dashboard; o Firefox foi reiniciado pelo launcher para carregar o novo JavaScript.
+- O container servido contém os novos gatilhos, dashboard e backup permaneceram saudáveis e não havia backup em andamento.
+
 ## 2026-10-13 — Sessão persistente e filtros do Google corrigidos
 
 - A lista de eventos do calendário passa a mostrar somente eventos do dia atual em diante; a grade mensal continua completa.
