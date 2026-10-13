@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Motivo da falha no card de backup preparado
+
+- Quando o último backup falha, o card troca o campo de tamanho por “Motivo” e mostra o erro sanitizado já presente no relatório.
+- O horário passa a ser identificado como “Falhou em”; o layout continua com quatro campos para não aumentar a altura do dashboard.
+- O relatório atual da origem `camara` foi confirmado com `status=failed` e motivo sanitizado disponível para exibição.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Indicador de backup em andamento preparado
 
 - O agendador publica no volume compartilhado a origem e o início da execução enquanto o pipeline está ativo, removendo o indicador ao concluir ou falhar.

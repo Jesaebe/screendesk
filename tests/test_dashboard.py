@@ -21,6 +21,12 @@ SPEC.loader.exec_module(server)
 
 
 class DashboardTests(unittest.TestCase):
+    def test_backup_card_renders_sanitized_failure_reason(self):
+        script = (SERVER_PATH.parents[1] / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("backup.error", script)
+        self.assertIn("'Motivo'", script)
+        self.assertIn("'Falhou em'", script)
+
     def test_json_round_trip_is_private(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "settings.json"

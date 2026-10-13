@@ -53,6 +53,7 @@ h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.1em; margin:0; co
 .actions { display:flex; justify-content:center; flex-wrap:wrap; gap:.5rem; }
 dl { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 dl div { border-left:2px solid var(--line); padding-left:.75rem; } dt { color:var(--muted); font-size:.8rem; } dd { margin:.25rem 0 0; font-weight:700; }
+.backup-error { color:var(--red); font-size:.82rem; line-height:1.25; overflow-wrap:anywhere; }
 .text-button { background:transparent; border:0; padding:.5rem 0; color:var(--accent-soft); }
 .backup-actions { display:flex; justify-content:space-between; gap:.5rem; }
 .health-card { grid-column:1/-1; min-height:auto; }

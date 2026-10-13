@@ -28,6 +28,8 @@ O painel exibe, em blocos com ícones grandes à esquerda dos dados, CPU e quant
 
 O card de backups consulta o estado a cada segundo. Durante uma execução, ele mostra a origem em processamento, o horário de início, a duração ao vivo e um indicador animado; ao finalizar, volta a apresentar o resultado mais recente.
 
+Quando o resultado mais recente é uma falha, o campo de tamanho é substituído pelo motivo sanitizado registrado pelo serviço de backup, mantendo o card no mesmo tamanho.
+
 Agenda e tarefas mostram indicadores animados e acessíveis enquanto os dados Google estão sendo carregados, inclusive durante a navegação entre meses.
 
 Em telas kiosk com pelo menos 900 pixels de largura, o layout ocupa exatamente a altura disponível e não cria rolagem na página. Cartões e listas são compactados conforme a altura para manter todas as áreas visíveis.

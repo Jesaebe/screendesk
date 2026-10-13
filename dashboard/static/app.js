@@ -35,6 +35,7 @@ async function loadWeather(city){
 
 function renderBackup(backup,active){
   const state=$('#backup-state'); const labels=document.querySelectorAll('#backup-details dt'); const values=document.querySelectorAll('#backup-details dd');
+  values[2].className=''; values[2].removeAttribute('title');
   if(active){
     state.textContent='Backup em andamento'; state.className='status running';
     ['Origem','Iniciado','Situação','Duração'].forEach((label,i)=>labels[i].textContent=label);
@@ -42,10 +43,12 @@ function renderBackup(backup,active){
     [active.display_name||active.source,formatDate(active.started_at),'Criando e enviando backup',`${Math.floor(elapsed/60)} min ${elapsed%60} s`].forEach((value,i)=>values[i].textContent=value);
     return;
   }
-  ['Origem','Concluído','Tamanho','Duração'].forEach((label,i)=>labels[i].textContent=label);
-  if(!backup){state.textContent='Sem dados';state.className='status neutral';values.forEach(node=>node.textContent='—');return;}
+  if(!backup){['Origem','Concluído','Tamanho','Duração'].forEach((label,i)=>labels[i].textContent=label);state.textContent='Sem dados';state.className='status neutral';values.forEach(node=>node.textContent='—');return;}
   const good=backup.status==='success'; state.textContent=good?'Concluído':'Falhou'; state.className='status '+(good?'good':'bad');
-  [backup.source,formatDate(backup.finished_at),formatBytes(backup.size_bytes),`${Math.round(backup.duration_seconds||0)} s`].forEach((value,i)=>values[i].textContent=value);
+  const detail=good?formatBytes(backup.size_bytes):(backup.error||'Falha sem detalhe disponível');
+  ['Origem',good?'Concluído':'Falhou em',good?'Tamanho':'Motivo','Duração'].forEach((label,i)=>labels[i].textContent=label);
+  [backup.source,formatDate(backup.finished_at),detail,`${Math.round(backup.duration_seconds||0)} s`].forEach((value,i)=>values[i].textContent=value);
+  if(!good){values[2].className='backup-error';values[2].title=detail;}
 }
 async function loadBackupStatus(){try{const data=await api('/api/backup/status');renderBackup(data.latest,data.active);}catch(error){/* Mantém o último estado visível durante falhas transitórias. */}}
 
