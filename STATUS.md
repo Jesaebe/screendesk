@@ -6,7 +6,9 @@
 - A consulta roda no serviço de backup com `cyriusBackup` e o segredo existente, sem senha no navegador, argumentos ou resposta.
 - A API de teste fica somente na rede interna do Compose e não publica porta no host.
 - Uma origem nova, reativada ou com conexão alterada não pode ser ativada sem aprovação do teste para os mesmos dados.
-- A revisão ainda não foi implantada.
+- A revisão foi implantada pelo commit `9efc0c4`, reconstruindo dashboard e backup após confirmar ausência de execução em andamento.
+- O novo fluxo testou Maker de ponta a ponta com sucesso: PostgreSQL `14.11`, latência de 861 ms, sem dump ou upload.
+- A porta interna 8090 não ficou publicada no host; HTTPS respondeu 200 e dashboard e backup permaneceram saudáveis.
 
 ## 2026-10-12 — Cadastro de bancos preparado
 
