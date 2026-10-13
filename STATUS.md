@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-13 — Calendário e rolagem implantados; autostart do tablet preparado
+
+- O dashboard passou a exibir somente tarefas com vencimento de hoje em diante, na data de `America/Bahia`; tarefas vencidas e sem data ficam ocultas.
+- Agenda, tarefas e listas roláveis aceitam arraste por mouse/touch sem seleção acidental de texto; um arraste não conclui tarefas por engano.
+- A revisão `ede797a` foi implantada no servidor, reconstruindo somente o dashboard; o backup permaneceu saudável e sem execução ativa.
+- O container servido contém o filtro e a rolagem novos, `/healthz` respondeu 200 e a API sem credenciais permaneceu protegida com 401.
+- O launcher do tablet foi adaptado para priorizar o Firefox ESR instalado, abrir em kiosk após o login automático e reiniciar após encerramento inesperado.
+- A instalação no tablet permanece pendente: o host `192.168.25.47` respondeu, mas recusou autenticação SSH por chave para as contas `painel` e `jesaweb`.
+
 ## 2026-10-12 — Legibilidade da lista de backups preparada
 
 - A fonte dos cinco backups recentes foi ampliada, com maior destaque para a origem e ajuste específico para horário e metadados.
