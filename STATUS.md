@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-13 — Sessão persistente e filtros do Google corrigidos
+
+- A lista de eventos do calendário passa a mostrar somente eventos do dia atual em diante; a grade mensal continua completa.
+- Tarefas voltaram a exibir todos os itens não concluídos, incluindo tarefas vencidas e sem data, com rolagem própria.
+- O dashboard emite uma sessão assinada após a autenticação válida, sem armazenar a senha no navegador como URL, script ou arquivo do projeto.
+- A revisão `f501de9` foi implantada reconstruindo somente o dashboard; a sessão foi validada com autenticação inicial e acesso posterior sem credenciais, e dashboard e backup permaneceram saudáveis.
+- O Firefox do tablet abriu diretamente no painel após encerramento e reinício, sem repetir a solicitação de usuário e senha.
+- O launcher foi corrigido para continuar ativo quando o Firefox encerra; o teste real confirmou novo processo kiosk iniciado automaticamente após cinco segundos.
+
 ## 2026-10-13 — Calendário e rolagem implantados; autostart do tablet preparado
 
 - O dashboard passou a exibir somente tarefas com vencimento de hoje em diante, na data de `America/Bahia`; tarefas vencidas e sem data ficam ocultas.

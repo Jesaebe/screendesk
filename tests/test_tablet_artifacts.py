@@ -34,6 +34,7 @@ class TabletArtifactTests(unittest.TestCase):
         self.assertIn("--kiosk", content)
         self.assertIn("firefox-esr", content)
         self.assertIn("xset -dpms", content)
+        self.assertIn("set +e", content)
 
 
 if __name__ == "__main__":

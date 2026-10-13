@@ -22,6 +22,7 @@ xset -dpms
 xset s noblank
 
 while true; do
+  set +e
   if command -v firefox-esr >/dev/null; then
     MOZ_USE_XINPUT2=1 firefox-esr --kiosk "$SCREENDECK_HA_URL"
   elif command -v firefox >/dev/null; then
@@ -32,5 +33,6 @@ while true; do
     echo "Nenhum navegador compatível encontrado." >&2
     exit 1
   fi
+  set -e
   sleep 5
 done
