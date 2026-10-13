@@ -5,7 +5,8 @@
 - O layout kiosk passou a organizar os quatro cartões principais em uma linha, compactar-se em telas baixas e ocupar uma única viewport sem rolagem a partir de 900 px de largura.
 - CPU, memória e discos agora exibem capacidade total: CPUs lógicas, memória instalada e tamanho total da raiz e de `/srv/backups`.
 - Valores atuais são coletados e consultados a cada segundo; o histórico permanece em uma amostra por minuto, preservando a janela de 24 horas com 1.440 registros.
-- A implantação desta revisão ainda não foi executada.
+- A revisão foi implantada no dashboard pelo commit `cd76288`; o backup não foi reiniciado e ambos os containers permaneceram saudáveis.
+- O container confirmou intervalos de 1 e 60 segundos, duas leituras consecutivas de CPU variaram, capacidades totais foram retornadas, HTTPS respondeu 200 e a API sem credenciais respondeu 401.
 
 ## 2026-10-12 — Métricas do host implantadas
 
