@@ -27,6 +27,8 @@ function enableDragScrolling(){
 function tick(){ const now=new Date(); $('#clock').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); $('#date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}); }
 
 const calendarMonthKey=()=>`${calendarDate.getFullYear()}-${String(calendarDate.getMonth()+1).padStart(2,'0')}`;
+const localDateKey=(date)=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const eventDateKey=(event)=>{const raw=event.start.dateTime||event.start.date||'';return event.start.date?raw.slice(0,10):localDateKey(new Date(raw));};
 const formatCalendarEvent=(event)=>{const value=event.start.dateTime||event.start.date;if(!value)return '—';if(event.start.date)return `Dia ${Number(value.slice(8,10))} · dia todo`;return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(value));};
 const loading=(label)=>`<span class="loading" role="status"><i aria-hidden="true"></i>${label}</span>`;
 function setGoogleLoading(){const events=$('#month-events');events.className='month-events empty';events.innerHTML=loading('Carregando agenda…');const tasks=$('#tasks');tasks.className='list empty';tasks.innerHTML=loading('Carregando tarefas…');$('#task-count').textContent='…';}
@@ -39,8 +41,9 @@ function renderCalendar(events=[]){
   const firstDay=new Date(year,month,1).getDay(); const days=new Date(year,month+1,0).getDate(); const cells=[];
   for(let index=0;index<42;index++){const day=index-firstDay+1;if(day<1||day>days){cells.push('<span class="calendar-day outside"></span>');continue;}const summaries=byDay.get(day)||[];const isToday=day===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();const label=summaries.length?`${summaries.length} evento${summaries.length>1?'s':''}: ${summaries.join(', ')}`:'';cells.push(`<span class="calendar-day${isToday?' today':''}${summaries.length?' has-event':''}" title="${escapeHtml(label)}"><b>${day}</b>${summaries.length?'<i></i>':''}</span>`);}
   $('#calendar-grid').innerHTML=cells.join('');
-  const eventList=$('#month-events'); eventList.classList.toggle('empty',!events.length);
-  eventList.innerHTML=events.length?events.map(event=>`<div class="month-event"><time>${formatCalendarEvent(event)}</time><strong>${escapeHtml(event.summary)}</strong></div>`).join(''):'Nenhum evento neste mês.';
+  const visibleEvents=events.filter(event=>eventDateKey(event)>=localDateKey(today));
+  const eventList=$('#month-events'); eventList.classList.toggle('empty',!visibleEvents.length);
+  eventList.innerHTML=visibleEvents.length?visibleEvents.map(event=>`<div class="month-event"><time>${formatCalendarEvent(event)}</time><strong>${escapeHtml(event.summary)}</strong></div>`).join(''):'Nenhum evento de hoje em diante neste mês.';
 }
 
 async function loadWeather(city){
@@ -96,7 +99,7 @@ function renderHostMetrics(data){
 }
 async function loadHostMetrics(){ try { renderHostMetrics(await api('/api/host/metrics')); } catch(error) { $('#host-state').textContent='Indisponível'; $('#host-state').className='status bad'; } }
 
-async function loadGoogle(){ setGoogleLoading(); try { const data=await api('/api/google/data?month='+calendarMonthKey()); googleConnected=true; $('#google-connect').textContent='Google conectado'; renderCalendar(data.events); $('#task-count').textContent=data.tasks.length; $('#tasks').classList.remove('empty'); $('#tasks').innerHTML=data.tasks.length?data.tasks.slice(0,10).map(task=>`<button class="row task" data-list="${escapeHtml(task.tasklist_id)}" data-task="${escapeHtml(task.id)}"><span>○</span><span>${escapeHtml(task.title)}</span><small>${task.due?formatDate(task.due):''}</small></button>`).join(''):'Nenhuma tarefa pendente.'; }
+async function loadGoogle(){ setGoogleLoading(); try { const data=await api('/api/google/data?month='+calendarMonthKey()); googleConnected=true; $('#google-connect').textContent='Google conectado'; renderCalendar(data.events); $('#task-count').textContent=data.tasks.length; $('#tasks').classList.remove('empty'); $('#tasks').innerHTML=data.tasks.length?data.tasks.map(task=>`<button class="row task" data-list="${escapeHtml(task.tasklist_id)}" data-task="${escapeHtml(task.id)}"><span>○</span><span>${escapeHtml(task.title)}</span><small>${task.due?formatDate(task.due):''}</small></button>`).join(''):'Nenhuma tarefa pendente.'; }
   catch(error){ $('#month-events').textContent='Não foi possível carregar a agenda.'; $('#tasks').textContent='Não foi possível carregar as tarefas.'; $('#task-count').textContent='—'; if(!error.message.includes('não foi conectado')) toast(error.message); }
 }
 

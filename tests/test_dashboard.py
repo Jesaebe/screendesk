@@ -6,7 +6,6 @@ import types
 import sys
 import tempfile
 import unittest
-from datetime import date
 from unittest.mock import patch
 
 SERVER_PATH = Path(__file__).parents[1] / "dashboard" / "src" / "server.py"
@@ -115,15 +114,18 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("timeMin=2026-11-01", events_url)
         self.assertIn("timeMax=2026-12-01", events_url)
 
-    def test_tasks_keep_only_today_and_future_due_dates(self):
-        tasks = [
-            {"id": "future", "due": "2026-10-15T00:00:00.000Z"},
-            {"id": "past", "due": "2026-10-12T00:00:00.000Z"},
-            {"id": "today", "due": "2026-10-13T00:00:00.000Z"},
-            {"id": "undated", "due": None},
-        ]
-        visible = server.current_and_future_tasks(tasks, date(2026, 10, 13))
-        self.assertEqual([task["id"] for task in visible], ["today", "future"])
+    def test_persistent_auth_cookie_is_signed_and_expires(self):
+        cookie = server.auth_cookie_value("secret", 200)
+        header = f"other=value; {server.AUTH_COOKIE}={cookie}"
+        self.assertTrue(server.valid_auth_cookie(header, "secret", now=100))
+        self.assertFalse(server.valid_auth_cookie(header, "wrong", now=100))
+        self.assertFalse(server.valid_auth_cookie(header, "secret", now=201))
+
+    def test_frontend_filters_events_but_renders_all_open_tasks(self):
+        script = (SERVER_PATH.parents[1] / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("events.filter(event=>eventDateKey(event)>=localDateKey(today))", script)
+        self.assertIn("data.tasks.map(task=>", script)
+        self.assertNotIn("data.tasks.slice(0,10)", script)
 
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 import fcntl
 import hashlib
 import hmac
+from http.cookies import SimpleCookie
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -40,6 +41,8 @@ PASSWORD_FILE = Path(os.environ.get("DASHBOARD_PASSWORD_FILE", "/run/secrets/das
 BACKUP_CONFIG_PATH = Path(os.environ.get("BACKUP_CONFIG_PATH", "/backup-config/sources.toml"))
 BACKUP_CONTROL_URL = os.environ.get("BACKUP_CONTROL_URL", "http://backup:8090/test")
 USERNAME = os.environ.get("DASHBOARD_USERNAME", "admin")
+AUTH_COOKIE = "screendeck_session"
+AUTH_COOKIE_MAX_AGE = 180 * 24 * 60 * 60
 OAUTH_STATES: dict[str, float] = {}
 WEATHER_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
 TESTED_BACKUP_SOURCES: dict[str, str] = {}
@@ -247,19 +250,22 @@ def google_api(url: str, *, method: str = "GET", body: dict[str, Any] | None = N
     return request_json(url, method=method, headers={"Authorization": f"Bearer {token['access_token']}"}, body=body)
 
 
-def current_and_future_tasks(tasks: list[dict[str, Any]], today: Any = None) -> list[dict[str, Any]]:
-    """Keep dated tasks due today or later, ordered by due date."""
-    cutoff = today or datetime.now(ZoneInfo("America/Bahia")).date()
-    visible = []
-    for task in tasks:
-        due = str(task.get("due") or "")
-        try:
-            due_date = datetime.strptime(due[:10], "%Y-%m-%d").date()
-        except ValueError:
-            continue
-        if due_date >= cutoff:
-            visible.append(task)
-    return sorted(visible, key=lambda task: task["due"])
+def auth_cookie_value(password: str, expires: int) -> str:
+    payload = f"{USERNAME}:{expires}"
+    signature = hmac.new(password.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return f"{expires}.{signature}"
+
+
+def valid_auth_cookie(header: str, password: str, now: int | None = None) -> bool:
+    try:
+        cookies = SimpleCookie()
+        cookies.load(header)
+        expires_text, supplied = cookies[AUTH_COOKIE].value.split(".", 1)
+        expires = int(expires_text)
+        expected = auth_cookie_value(password, expires).split(".", 1)[1]
+        return expires >= (now if now is not None else int(time.time())) and hmac.compare_digest(supplied, expected)
+    except (KeyError, ValueError):
+        return False
 
 
 def weather(city: str) -> dict[str, Any]:
@@ -330,7 +336,6 @@ def google_data(month: str | None = None) -> dict[str, Any]:
             tasks.append({"id": task["id"], "title": task.get("title", "Sem título"), "due": task.get("due"),
                           "notes": task.get("notes"), "tasklist_id": tasklist_id})
     events.sort(key=lambda item: item["start"].get("dateTime") or item["start"].get("date") or "")
-    tasks = current_and_future_tasks(tasks)
     return {"month": month_start.strftime("%Y-%m"), "calendars": calendars, "tasklists": tasklists,
             "events": events[:100], "tasks": tasks[:60]}
 
@@ -355,11 +360,27 @@ class Handler(SimpleHTTPRequestHandler):
             return True
         try:
             expected_password = PASSWORD_FILE.read_text(encoding="utf-8").strip()
+            if valid_auth_cookie(self.headers.get("Cookie", ""), expected_password):
+                return True
             scheme, encoded = self.headers.get("Authorization", " ").split(" ", 1)
             supplied = base64.b64decode(encoded).decode().split(":", 1)
-            return scheme.lower() == "basic" and len(supplied) == 2 and supplied[0] == USERNAME and hmac.compare_digest(supplied[1], expected_password)
+            accepted = scheme.lower() == "basic" and len(supplied) == 2 and supplied[0] == USERNAME and hmac.compare_digest(supplied[1], expected_password)
+            if accepted:
+                expires = int(time.time()) + AUTH_COOKIE_MAX_AGE
+                self._auth_cookie = (
+                    f"{AUTH_COOKIE}={auth_cookie_value(expected_password, expires)}; "
+                    f"Max-Age={AUTH_COOKIE_MAX_AGE}; Path=/; HttpOnly; SameSite=Strict"
+                )
+            return accepted
         except (ValueError, UnicodeError):
             return False
+
+    def end_headers(self) -> None:
+        cookie = getattr(self, "_auth_cookie", "")
+        if cookie:
+            self.send_header("Set-Cookie", cookie)
+            self._auth_cookie = ""
+        super().end_headers()
 
     def require_auth(self) -> bool:
         if self.authenticated():
