@@ -4,7 +4,8 @@
 
 - Os ícones de CPU, memória, disco raiz, backups e carga foram ampliados e posicionados à esquerda dos respectivos dados.
 - Agenda e tarefas passaram a exibir spinners com texto durante a carga inicial e a troca de mês, além de mensagens próprias para desconexão e erro.
-- A revisão ainda não foi implantada.
+- A revisão foi implantada pelo commit `e7a0c81`, reconstruindo somente o dashboard; dashboard e backup permaneceram saudáveis.
+- Foram confirmados cinco ícones ampliados, dois estados de carregamento, animação do spinner, oito eventos, três tarefas e HTTPS com resposta 200.
 
 ## 2026-10-12 — Lista mensal e ícones de métricas preparados
 
