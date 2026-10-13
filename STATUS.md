@@ -5,7 +5,8 @@
 - Um botão de reload foi acrescentado imediatamente à direita do bloco de clima no cabeçalho.
 - A ação recarrega o dashboard completo, atualizando clima, agenda, tarefas, backups e métricas.
 - O controle possui rótulo acessível, tooltip e dimensões próprias para toque, inclusive em telas estreitas.
-- A alteração ainda não foi implantada.
+- A revisão `fdfa808` foi implantada reconstruindo somente o dashboard; dashboard e backup foram confirmados saudáveis e sem backup em andamento.
+- O Firefox ESR do tablet foi encerrado isoladamente e reaberto pelo launcher em modo kiosk, passando do PID `4386` para `5201`.
 
 ## 2026-10-13 — Sobreposição no cadastro de bancos corrigida localmente
 
@@ -13,7 +14,7 @@
 - Labels, inputs e selects agora podem encolher dentro do grid sem invadir campos vizinhos.
 - O modal ganhou altura máxima e rolagem própria; abaixo de 900 px o conteúdo é empilhado e abaixo de 520 px o formulário usa uma coluna.
 - Os botões de ação agora quebram linha quando necessário, evitando sobreposição em telas estreitas.
-- A suíte completa passou com 85 testes e o diff não apresentou erros de whitespace; a alteração ainda não foi implantada.
+- A suíte completa passou com 86 testes e o diff não apresentou erros de whitespace; a correção foi implantada junto da revisão `fdfa808`.
 
 ## 2026-10-13 — Cadastro de bancos reorganizado
 
