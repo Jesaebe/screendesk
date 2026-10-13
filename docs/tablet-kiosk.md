@@ -14,7 +14,8 @@
 - Memória: 1,9 GiB; aproximadamente 702 MiB disponíveis durante o levantamento.
 - Swap: 975 MiB; 257 MiB em uso durante o levantamento.
 - Raiz: 28 GiB, 7,3 GiB usados e 19 GiB disponíveis.
-- Chromium: não instalado; pacote i386 disponível nos repositórios Debian configurados.
+- Firefox ESR: instalado e já usado manualmente em modo kiosk.
+- Chromium: não instalado; permanece apenas como alternativa compatível.
 - Diretório `~/.config/autostart`: sem lançador local encontrado.
 - Crontab do usuário: vazio.
 - Nenhum serviço systemd de usuário específico para kiosk foi encontrado.
@@ -28,26 +29,26 @@ Nenhuma configuração foi alterada durante o levantamento.
 
 ## Estado desejado
 
-- Instalar Chromium pelo repositório oficial do Debian.
-- Iniciar o Chromium após o login automático do usuário `painel`.
+- Reutilizar o Firefox ESR já instalado, mantendo Chromium apenas como fallback.
+- Iniciar o Firefox ESR após o login automático do usuário `painel`.
 - Usar modo kiosk apontando para a URL do dashboard.
 - Manter resolução `1920x1200` e orientação horizontal.
 - Desabilitar bloqueio, suspensão e desligamento automático da tela somente para a sessão dedicada `painel`.
 - Reiniciar o navegador automaticamente se ele encerrar inesperadamente.
-- Não armazenar credenciais do dashboard na linha de comando ou no arquivo `.desktop`.
-- URL LAN planejada: `http://192.168.25.249:8123`, condicionada à confirmação de que a porta está livre no servidor.
+- Persistir a autenticação somente no perfil dedicado do navegador, nunca na linha de comando, URL ou arquivo `.desktop`.
+- Usar a URL HTTPS definitiva do dashboard.
 
 ## Implantação futura
 
 A instalação e as mudanças de sessão exigem autorização explícita. Antes de aplicar:
 
-1. definir URL ou hostname definitivo do dashboard;
+1. confirmar a URL HTTPS definitiva do dashboard;
 2. registrar os valores atuais do Cinnamon para rollback;
-3. instalar Chromium sem pacotes externos ou globais;
+3. confirmar o Firefox ESR existente no perfil `painel`;
 4. criar launcher versionado e específico do usuário;
 5. alterar energia/bloqueio somente na sessão `painel`;
 6. reiniciar a sessão de forma controlada;
 7. validar touch, kiosk, recuperação do navegador e permanência da tela;
 8. documentar comandos e resultados no `STATUS.md`.
 
-Os artefatos locais estão em `tablet/`. `install.sh` exige confirmação literal, arquitetura i386, usuário `painel` e URL HTTP(S). O launcher reinicia o Chromium cinco segundos após uma saída inesperada. `rollback.sh` restaura as preferências capturadas e não desinstala Chromium.
+Os artefatos locais estão em `tablet/`. `install.sh` exige confirmação literal, arquitetura i386, usuário `painel` e URL HTTP(S). O launcher prioriza Firefox ESR e reinicia o navegador cinco segundos após uma saída inesperada. `rollback.sh` restaura as preferências capturadas e não remove navegador algum.

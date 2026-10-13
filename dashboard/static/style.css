@@ -1,6 +1,10 @@
 :root { color-scheme: dark; --bg:#0f0b14; --panel:#181121; --panel2:#21172d; --line:#3a2a4a; --text:#f7f3fa; --muted:#aa9bb7; --accent:#723ebe; --accent-soft:#a978e8; --success:#8ce0b6; --amber:#ffc66d; --red:#ff8585; }
 * { box-sizing:border-box; }
 body { margin:0; min-height:100vh; background:radial-gradient(circle at 80% -10%,#321b4a 0,transparent 35%),var(--bg); color:var(--text); font:16px/1.4 system-ui,sans-serif; }
+body { user-select:none; -webkit-user-select:none; }
+input,select { user-select:text; -webkit-user-select:text; }
+.drag-scroll { cursor:grab; touch-action:pan-y; }
+.drag-scroll.is-dragging { cursor:grabbing; scroll-behavior:auto; }
 button,input,select { font:inherit; }
 button { cursor:pointer; color:inherit; background:#291b38; border:1px solid var(--line); border-radius:12px; padding:.65rem 1rem; }
 button:hover,button:focus-visible { border-color:var(--accent-soft); outline:none; }
@@ -111,7 +115,7 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
   .calendar-card .card-title>button { padding:.45rem .6rem; font-size:.75rem; }
   .calendar-day { min-height:clamp(1.5rem,3.4vh,2.4rem); }
   .month-events { flex:1; min-height:3rem; }
-  .list { margin-top:.7rem; gap:.35rem; max-height:calc(100% - 2.3rem); overflow:hidden; }
+  .list { margin-top:.7rem; gap:.35rem; max-height:calc(100% - 2.3rem); overflow-y:auto; overscroll-behavior:contain; scrollbar-color:var(--accent) transparent; }
   .row { padding:.45rem; gap:.5rem; }
   .temperature-control { margin:clamp(.6rem,2vh,1.2rem) 0; }
   .temperature-control strong { font-size:clamp(2.2rem,5vh,3.2rem); }

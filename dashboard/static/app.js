@@ -11,6 +11,19 @@ let calendarDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let googleConnected = false;
 let latestBackupRunId = '';
 
+function enableDragScrolling(){
+  const targets=document.querySelectorAll('.month-events,#tasks,#backup-history,.sources-list');
+  targets.forEach(target=>{
+    target.classList.add('drag-scroll');
+    let startY=0; let startScroll=0; let dragged=false;
+    target.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0)return;startY=event.clientY;startScroll=target.scrollTop;dragged=false;target.setPointerCapture(event.pointerId);});
+    target.addEventListener('pointermove',event=>{if(!target.hasPointerCapture(event.pointerId))return;const distance=event.clientY-startY;if(Math.abs(distance)>4){dragged=true;target.classList.add('is-dragging');event.preventDefault();target.scrollTop=startScroll-distance;}});
+    const stop=event=>{if(!target.hasPointerCapture(event.pointerId))return;target.releasePointerCapture(event.pointerId);target.classList.remove('is-dragging');if(dragged){target.dataset.suppressClick='true';setTimeout(()=>delete target.dataset.suppressClick,0);}};
+    target.addEventListener('pointerup',stop);target.addEventListener('pointercancel',stop);
+    target.addEventListener('click',event=>{if(target.dataset.suppressClick){event.preventDefault();event.stopPropagation();}},true);
+  });
+}
+
 function tick(){ const now=new Date(); $('#clock').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); $('#date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}); }
 
 const calendarMonthKey=()=>`${calendarDate.getFullYear()}-${String(calendarDate.getMonth()+1).padStart(2,'0')}`;
@@ -94,7 +107,7 @@ function sslOptions(engine,value){const values=engine==='postgresql'?[['require'
 function editSource(source){sourceForm.reset();setTimeout(()=>{sourceForm.elements.id.value=source.id;sourceForm.elements.id.disabled=true;['display_name','engine','version','host','port','database','estimated_size_mb'].forEach(name=>sourceForm.elements[name].value=source[name]);sourceForm.elements.schedule.value=source.schedule.join(', ');sourceForm.elements.enabled.checked=source.enabled;sslOptions(source.engine,source.sslmode);$('#source-delete').hidden=false;},0);}
 function renderSources(){const list=$('#sources-list');list.innerHTML=backupSources.map(source=>`<button type="button" data-source="${escapeHtml(source.id)}"><span><strong>${escapeHtml(source.display_name)}</strong><small>${escapeHtml(source.engine)} · ${escapeHtml(source.host)}:${source.port}/${escapeHtml(source.database)}</small></span><b class="status ${source.enabled?'good':'neutral'}">${source.enabled?'Ativo':'Pausado'}</b></button>`).join('');}
 async function loadSources(){const data=await api('/api/backup/sources');backupSources=data.items;renderSources();}
-async function init(){ tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); latestBackupRunId=(overview.backup||{}).run_id||''; loadRecentBackups(); loadBackupStatus(); setInterval(loadBackupStatus,1000); setInterval(loadRecentBackups,30000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ enableDragScrolling(); tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); latestBackupRunId=(overview.backup||{}).run_id||''; loadRecentBackups(); loadBackupStatus(); setInterval(loadBackupStatus,1000); setInterval(loadRecentBackups,30000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };

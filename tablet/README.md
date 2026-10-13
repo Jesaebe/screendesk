@@ -12,7 +12,9 @@ sudo SCREENDECK_TABLET_AUTHORIZED=YES \
   ./install.sh
 ```
 
-O instalador exige host i386, usuário `painel`, URL HTTP(S) e confirmação literal. Ele instala Chromium pelo APT do Debian, cria arquivos somente no perfil dedicado e ajusta energia/bloqueio dessa sessão.
+O instalador exige host i386, usuário `painel`, URL HTTP(S) e confirmação literal. Ele usa Firefox ESR/Firefox já instalado (com Chromium como alternativa), cria arquivos somente no perfil dedicado e ajusta energia/bloqueio dessa sessão.
+
+O LightDM já faz login automático do usuário `painel`; o arquivo de autostart abre o navegador em kiosk cinco segundos depois. Antes do primeiro reinício, abra o dashboard uma vez no perfil `painel`, informe a autenticação HTTP e marque a opção para salvar a credencial. A senha fica no perfil persistente do Firefox e não aparece no launcher, na URL ou no Git.
 
 ## Rollback futuro
 

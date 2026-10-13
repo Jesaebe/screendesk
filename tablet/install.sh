@@ -27,8 +27,10 @@ if [[ "${SCREENDECK_HA_URL:-}" != http://* && "${SCREENDECK_HA_URL:-}" != https:
   exit 1
 fi
 
-apt-get update
-apt-get install --no-install-recommends -y chromium
+if ! command -v firefox-esr >/dev/null && ! command -v firefox >/dev/null && ! command -v chromium >/dev/null; then
+  echo "Nenhum navegador compatível encontrado (Firefox ESR, Firefox ou Chromium)." >&2
+  exit 1
+fi
 
 install -d -o "$tablet_user" -g "$tablet_user" -m 0755 \
   "$tablet_home/.local/bin" \
@@ -60,4 +62,4 @@ sudo -u "$tablet_user" env DBUS_SESSION_BUS_ADDRESS="$session_bus" \
 sudo -u "$tablet_user" env DBUS_SESSION_BUS_ADDRESS="$session_bus" \
   gsettings set org.cinnamon.settings-daemon.plugins.power sleep-display-ac 0
 
-echo "Configuração preparada. Reinicie somente após validar a URL e com autorização."
+echo "Autostart preparado. Entre uma vez no dashboard e salve a credencial no perfil do navegador antes de reiniciar."

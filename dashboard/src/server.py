@@ -247,6 +247,21 @@ def google_api(url: str, *, method: str = "GET", body: dict[str, Any] | None = N
     return request_json(url, method=method, headers={"Authorization": f"Bearer {token['access_token']}"}, body=body)
 
 
+def current_and_future_tasks(tasks: list[dict[str, Any]], today: Any = None) -> list[dict[str, Any]]:
+    """Keep dated tasks due today or later, ordered by due date."""
+    cutoff = today or datetime.now(ZoneInfo("America/Bahia")).date()
+    visible = []
+    for task in tasks:
+        due = str(task.get("due") or "")
+        try:
+            due_date = datetime.strptime(due[:10], "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if due_date >= cutoff:
+            visible.append(task)
+    return sorted(visible, key=lambda task: task["due"])
+
+
 def weather(city: str) -> dict[str, Any]:
     normalized = city.strip()[:100]
     cached = WEATHER_CACHE.get(normalized.casefold())
@@ -315,6 +330,7 @@ def google_data(month: str | None = None) -> dict[str, Any]:
             tasks.append({"id": task["id"], "title": task.get("title", "Sem título"), "due": task.get("due"),
                           "notes": task.get("notes"), "tasklist_id": tasklist_id})
     events.sort(key=lambda item: item["start"].get("dateTime") or item["start"].get("date") or "")
+    tasks = current_and_future_tasks(tasks)
     return {"month": month_start.strftime("%Y-%m"), "calendars": calendars, "tasklists": tasklists,
             "events": events[:100], "tasks": tasks[:60]}
 

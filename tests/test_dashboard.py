@@ -6,6 +6,7 @@ import types
 import sys
 import tempfile
 import unittest
+from datetime import date
 from unittest.mock import patch
 
 SERVER_PATH = Path(__file__).parents[1] / "dashboard" / "src" / "server.py"
@@ -113,6 +114,16 @@ class DashboardTests(unittest.TestCase):
         events_url = next(url for url in requested if "/events?" in url)
         self.assertIn("timeMin=2026-11-01", events_url)
         self.assertIn("timeMax=2026-12-01", events_url)
+
+    def test_tasks_keep_only_today_and_future_due_dates(self):
+        tasks = [
+            {"id": "future", "due": "2026-10-15T00:00:00.000Z"},
+            {"id": "past", "due": "2026-10-12T00:00:00.000Z"},
+            {"id": "today", "due": "2026-10-13T00:00:00.000Z"},
+            {"id": "undated", "due": None},
+        ]
+        visible = server.current_and_future_tasks(tasks, date(2026, 10, 13))
+        self.assertEqual([task["id"] for task in visible], ["today", "future"])
 
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:

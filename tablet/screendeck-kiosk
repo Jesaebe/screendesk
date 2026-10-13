@@ -16,20 +16,21 @@ if [[ "${SCREENDECK_HA_URL:-}" != http://* && "${SCREENDECK_HA_URL:-}" != https:
   exit 1
 fi
 
-command -v chromium >/dev/null
-
 # Reforço por sessão; as preferências persistentes são configuradas pelo instalador.
 xset s off
 xset -dpms
 xset s noblank
 
 while true; do
-  chromium \
-    --kiosk \
-    --no-first-run \
-    --disable-session-crashed-bubble \
-    --disable-features=Translate \
-    --ozone-platform=x11 \
-    "$SCREENDECK_HA_URL"
+  if command -v firefox-esr >/dev/null; then
+    MOZ_USE_XINPUT2=1 firefox-esr --kiosk "$SCREENDECK_HA_URL"
+  elif command -v firefox >/dev/null; then
+    MOZ_USE_XINPUT2=1 firefox --kiosk "$SCREENDECK_HA_URL"
+  elif command -v chromium >/dev/null; then
+    chromium --kiosk --no-first-run --disable-session-crashed-bubble --disable-features=Translate --ozone-platform=x11 "$SCREENDECK_HA_URL"
+  else
+    echo "Nenhum navegador compatível encontrado." >&2
+    exit 1
+  fi
   sleep 5
 done

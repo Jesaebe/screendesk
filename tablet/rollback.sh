@@ -35,4 +35,4 @@ rm -f \
   "$tablet_home/.local/bin/screendeck-kiosk" \
   "$tablet_home/.config/screendeck-home/kiosk.env"
 
-echo "Preferências restauradas. Chromium foi preservado."
+echo "Preferências restauradas. Os navegadores instalados foram preservados."

@@ -12,15 +12,16 @@ class TabletArtifactTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue((TABLET / name).is_file())
 
-    def test_installer_requires_authorization_before_apt(self):
+    def test_installer_requires_authorization_and_uses_existing_browser(self):
         content = (TABLET / "install.sh").read_text(encoding="utf-8")
         guard = content.index("SCREENDECK_TABLET_AUTHORIZED")
-        install = content.index("apt-get update")
-        self.assertLess(guard, install)
+        browser_check = content.index("command -v firefox-esr")
+        self.assertLess(guard, browser_check)
+        self.assertNotIn("apt-get install", content)
         self.assertIn("dpkg --print-architecture", content)
         self.assertIn("SCREENDECK_HA_URL", content)
 
-    def test_rollback_is_targeted_and_does_not_remove_chromium(self):
+    def test_rollback_is_targeted_and_does_not_remove_browsers(self):
         content = (TABLET / "rollback.sh").read_text(encoding="utf-8")
         self.assertNotIn("rm -rf", content)
         self.assertNotIn("apt-get remove", content)
@@ -31,6 +32,7 @@ class TabletArtifactTests(unittest.TestCase):
         self.assertNotIn("192.168.25.", content)
         self.assertNotIn("password", content.lower())
         self.assertIn("--kiosk", content)
+        self.assertIn("firefox-esr", content)
         self.assertIn("xset -dpms", content)
 
 
