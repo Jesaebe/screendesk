@@ -5,7 +5,8 @@
 - O espaço abaixo da grade mensal passou a exibir todos os eventos do mês com data, horário e título em uma lista com rolagem própria.
 - Os cinco blocos internos de saúde receberam ícones específicos para CPU, memória, disco raiz, backups e carga.
 - A página principal continua sem rolagem; somente a lista de eventos do mês pode rolar dentro do cartão.
-- A revisão ainda não foi implantada.
+- A revisão foi implantada pelo commit `bf5ab71`, reconstruindo somente o dashboard; dashboard e backup permaneceram saudáveis.
+- A validação confirmou oito eventos e três tarefas no mês atual, a lista mensal servida, os cinco ícones internos e HTTPS com resposta 200.
 
 ## 2026-10-12 — Calendário mensal e leitura visual preparados
 
