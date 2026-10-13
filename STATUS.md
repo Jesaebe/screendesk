@@ -6,7 +6,8 @@
 - O cartão Google agora apresenta o mês completo, permite avançar e retroceder, destaca hoje e marca dias com eventos.
 - A API aceita o mês selecionado e consulta seus limites completos, incluindo dias anteriores ao momento atual.
 - O histórico de saúde recebeu título e legenda explícita, com barras separadas para CPU e memória.
-- A revisão ainda não foi implantada.
+- A revisão foi implantada pelo commit `d3b8ac5`, reconstruindo somente o dashboard; dashboard e backup permaneceram saudáveis.
+- A conta Google autorizada retornou o mês solicitado, oito eventos e três tarefas sem expor conteúdo; HTTPS respondeu 200 e a API sem credenciais permaneceu em 401.
 
 ## 2026-10-12 — Tela única e métricas em tempo real preparadas
 
