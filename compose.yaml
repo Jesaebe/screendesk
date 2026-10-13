@@ -19,11 +19,13 @@ services:
       HOST_BACKUP_PATH: /host/backups
       HOST_METRICS_INTERVAL_SECONDS: ${HOST_METRICS_INTERVAL_SECONDS:-1}
       HOST_METRICS_HISTORY_INTERVAL_SECONDS: ${HOST_METRICS_HISTORY_INTERVAL_SECONDS:-60}
+      BACKUP_CONFIG_PATH: /backup-config/sources.toml
     ports:
       - "${DASHBOARD_PORT:-8123}:8080"
     volumes:
       - dashboard-data:/data
       - backup-status:/backup-status:ro
+      - ${BACKUP_CONFIG_HOST:-./secrets/sources.toml}:/backup-config/sources.toml:rw
       - ./secrets/dashboard:/run/secrets:ro
       - /proc/stat:/host/proc/stat:ro
       - /proc/meminfo:/host/proc/meminfo:ro

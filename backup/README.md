@@ -2,7 +2,7 @@
 
 O diretório contém o serviço de backup. O entrypoint carrega as origens, executa o agendador contínuo e encadeia dump, upload criptografado e retenção. As origens só executam quando possuem `enabled = true`; Maker permanece desabilitado até o teste controlado no servidor.
 
-`sources.example.toml` contém a origem Maker desabilitada e um segundo bloco que serve de modelo para novas origens. Cada bloco referencia um arquivo de segredo exclusivo montado somente para leitura; nunca grave a senha diretamente no TOML ou em variável de ambiente.
+`sources.example.toml` contém a origem Maker desabilitada e um segundo bloco que serve de modelo. Em produção, todas as origens usam o usuário `cyriusBackup` e o segredo existente montado em `/run/secrets/maker-password`; nunca grave a senha diretamente no TOML ou em variável de ambiente.
 
 Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup`, o segredo protegido, um `pg_dump` de validação e o remote `crypt` foram confirmados em 10/10/2026. Por conter maiúscula, o nome deve ser citado como `"cyriusBackup"` em comandos SQL. O procedimento sem senha versionada está em `docs/runbooks/create-maker-backup-role.sql`. A origem só será habilitada durante o teste controlado.
 
@@ -10,7 +10,7 @@ O runbook concede acesso aos objetos existentes. Se a aplicação criar tabelas 
 
 As agendas são interpretadas no fuso definido em cada origem. Para Maker: 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
 
-Cada bloco `[[source]]` possui sua própria lista `schedule`, portanto não existe obrigação de quatro execuções diárias para todos os bancos. Exemplos válidos incluem `schedule = ["02:00"]` para uma execução diária ou `schedule = ["06:00", "18:00"]` para duas. Depois de alterar o arquivo real no servidor, valide o TOML e reinicie somente o serviço `backup`; não é necessário reconstruir a imagem.
+Cada bloco `[[source]]` possui sua própria lista `schedule`, portanto não existe obrigação de quatro execuções diárias para todos os bancos. Exemplos válidos incluem `schedule = ["02:00"]` para uma execução diária ou `schedule = ["06:00", "18:00"]` para duas. O dashboard gerencia o cadastro e o agendador relê o arquivo protegido antes de cada rodada, sem exigir reinício.
 
 ## Executor local
 

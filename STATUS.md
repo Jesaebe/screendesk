@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Cadastro de bancos preparado
+
+- O dashboard recebeu gerenciamento de origens para criar, editar, pausar e remover bancos, com horários independentes e validação dos campos.
+- Todas as origens são fixadas no usuário `cyriusBackup` e no segredo existente `maker-password`; nenhuma senha é enviada ao navegador ou gravada no cadastro.
+- O serviço de backup passa a reler o cadastro antes de cada rodada, mantendo a configuração anterior se uma recarga falhar.
+- Remoção exige pausa prévia e preserva dumps e históricos existentes.
+- A revisão ainda não foi implantada.
+
 ## 2026-10-12 — Ícones ampliados e carregamento Google preparados
 
 - Os ícones de CPU, memória, disco raiz, backups e carga foram ampliados e posicionados à esquerda dos respectivos dados.

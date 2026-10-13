@@ -47,7 +47,7 @@
       <article class="card backup-card">
         <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">↥</span><h2>Último backup</h2></span><span id="backup-state" class="status neutral">Verificando</span></div>
         <dl id="backup-details"><div><dt>Origem</dt><dd>—</dd></div><div><dt>Concluído</dt><dd>—</dd></div><div><dt>Tamanho</dt><dd>—</dd></div><div><dt>Duração</dt><dd>—</dd></div></dl>
-        <button id="history-button" class="text-button">Ver histórico</button>
+        <div class="backup-actions"><button id="history-button" class="text-button">Ver histórico</button><button id="sources-button" class="text-button">Gerenciar bancos</button></div>
       </article>
 
       <article class="card health-card">
@@ -81,6 +81,28 @@
   <dialog id="history-dialog">
     <div class="card-title"><h2>Histórico de backups</h2><button id="history-close" aria-label="Fechar">×</button></div>
     <div id="backup-history" class="list"></div>
+  </dialog>
+
+  <dialog id="sources-dialog" class="sources-dialog">
+    <div class="card-title"><h2>Bancos de backup</h2><button id="sources-close" aria-label="Fechar">×</button></div>
+    <p class="hint">Todos usam <strong>cyriusBackup</strong> e o segredo protegido já instalado.</p>
+    <div id="sources-list" class="sources-list"></div>
+    <form id="source-form">
+      <div class="source-fields">
+        <label>Identificador<input name="id" required pattern="[a-z0-9][a-z0-9-]{1,62}" placeholder="ex.: financeiro"></label>
+        <label>Nome<input name="display_name" required placeholder="Financeiro"></label>
+        <label>Tipo<select name="engine"><option value="postgresql">PostgreSQL</option><option value="mariadb">MariaDB</option><option value="mysql">MySQL</option></select></label>
+        <label>Versão<input name="version" placeholder="16"></label>
+        <label class="wide">Host<input name="host" required placeholder="192.168.1.50"></label>
+        <label>Porta<input name="port" required type="number" min="1" max="65535" value="5432"></label>
+        <label>Banco<input name="database" required></label>
+        <label>SSL<select name="sslmode"><option value="require">Obrigatório</option><option value="prefer">Preferencial</option><option value="disable">Desativado</option></select></label>
+        <label>Estimativa (MB)<input name="estimated_size_mb" type="number" min="0" value="100"></label>
+        <label class="wide">Horários<input name="schedule" required placeholder="00:00, 12:00"></label>
+        <label class="toggle"><input name="enabled" type="checkbox"> Ativo</label>
+      </div>
+      <div class="dialog-actions"><button type="reset">Novo</button><button id="source-delete" type="button" class="danger" hidden>Remover</button><button class="primary" type="submit">Salvar</button></div>
+    </form>
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>

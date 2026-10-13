@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import calendar
 from datetime import datetime, timedelta, timezone
+import fcntl
 import hashlib
 import hmac
 from http import HTTPStatus
@@ -13,13 +14,16 @@ import json
 import mimetypes
 import os
 from pathlib import Path
+import re
 import secrets
 import time
+import tomllib
 from .host_metrics import HostMetrics
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, quote, urlencode, urlparse
 from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
 
 
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +36,7 @@ PUBLIC_URL = os.environ.get("DASHBOARD_PUBLIC_URL", "http://localhost:8123").rst
 GOOGLE_SECRET = Path(os.environ.get("GOOGLE_CLIENT_SECRET_FILE", "/run/secrets/google-client.json"))
 SMARTTHINGS_TOKEN = Path(os.environ.get("SMARTTHINGS_TOKEN_FILE", "/run/secrets/smartthings-token"))
 PASSWORD_FILE = Path(os.environ.get("DASHBOARD_PASSWORD_FILE", "/run/secrets/dashboard-password"))
+BACKUP_CONFIG_PATH = Path(os.environ.get("BACKUP_CONFIG_PATH", "/backup-config/sources.toml"))
 USERNAME = os.environ.get("DASHBOARD_USERNAME", "admin")
 OAUTH_STATES: dict[str, float] = {}
 WEATHER_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
@@ -59,6 +64,90 @@ def write_json(path: Path, value: Any) -> None:
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.chmod(temporary, 0o600)
     temporary.replace(path)
+
+
+SOURCE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{1,62}$")
+SOURCE_FIELDS = ("id", "display_name", "engine", "version", "host", "port", "database", "sslmode",
+                 "schedule", "timezone", "estimated_size_mb", "enabled", "readiness_note")
+
+
+def validate_backup_source(raw: dict[str, Any]) -> dict[str, Any]:
+    source = {key: raw.get(key) for key in SOURCE_FIELDS}
+    source["id"] = str(source["id"] or "").strip().lower()
+    source["display_name"] = str(source["display_name"] or source["id"]).strip()
+    source["engine"] = str(source["engine"] or "").lower()
+    source["version"] = str(source["version"] or "").strip()
+    source["host"] = str(source["host"] or "").strip()
+    source["database"] = str(source["database"] or "").strip()
+    source["sslmode"] = str(source["sslmode"] or "require").lower()
+    source["timezone"] = str(source["timezone"] or "America/Bahia")
+    source["readiness_note"] = str(source["readiness_note"] or "Gerenciado pelo dashboard.").strip()
+    if not SOURCE_ID.fullmatch(source["id"]):
+        raise ValueError("Identificador deve usar letras minúsculas, números e hífens")
+    if source["engine"] not in {"postgresql", "mysql", "mariadb"}:
+        raise ValueError("Tipo de banco inválido")
+    valid_ssl = {"disable", "allow", "prefer", "require", "verify-ca", "verify-full"} if source["engine"] == "postgresql" else {"disabled", "preferred", "required", "verify-ca", "verify-identity"}
+    if source["sslmode"] not in valid_ssl:
+        raise ValueError("Modo SSL inválido para o tipo de banco")
+    if not source["host"] or not source["database"] or not source["display_name"]:
+        raise ValueError("Nome, host e banco são obrigatórios")
+    source["port"] = int(source["port"])
+    source["estimated_size_mb"] = int(source["estimated_size_mb"] or 0)
+    if not 1 <= source["port"] <= 65535 or source["estimated_size_mb"] < 0:
+        raise ValueError("Porta ou tamanho estimado inválido")
+    schedule = source["schedule"]
+    if isinstance(schedule, str):
+        schedule = [value.strip() for value in schedule.split(",") if value.strip()]
+    if not isinstance(schedule, list) or not schedule:
+        raise ValueError("Informe ao menos um horário")
+    for value in schedule:
+        if not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", str(value)):
+            raise ValueError(f"Horário inválido: {value}")
+    source["schedule"] = [str(value) for value in schedule]
+    ZoneInfo(source["timezone"])
+    source["enabled"] = bool(source["enabled"])
+    source["username"] = "cyriusBackup"
+    source["password_file"] = "/run/secrets/maker-password"
+    return source
+
+
+def load_backup_sources() -> list[dict[str, Any]]:
+    with BACKUP_CONFIG_PATH.open("rb") as stream:
+        fcntl.flock(stream.fileno(), fcntl.LOCK_SH)
+        payload = tomllib.load(stream)
+    return [validate_backup_source(item) for item in payload.get("source", [])]
+
+
+def serialize_backup_sources(sources: list[dict[str, Any]]) -> str:
+    lines: list[str] = []
+    for source in sources:
+        lines.extend(["[[source]]", *[
+            f'{key} = {json.dumps(source[key], ensure_ascii=False)}'
+            for key in ("id", "display_name", "engine", "version", "host")
+        ], f'port = {source["port"]}', f'database = {json.dumps(source["database"], ensure_ascii=False)}',
+            'username = "cyriusBackup"', 'password_file = "/run/secrets/maker-password"',
+            f'sslmode = {json.dumps(source["sslmode"])}',
+            "schedule = [" + ", ".join(json.dumps(value) for value in source["schedule"]) + "]",
+            f'timezone = {json.dumps(source["timezone"])}', f'estimated_size_mb = {source["estimated_size_mb"]}',
+            f'enabled = {str(source["enabled"]).lower()}',
+            f'readiness_note = {json.dumps(source["readiness_note"], ensure_ascii=False)}', ""])
+    return "\n".join(lines)
+
+
+def save_backup_sources(sources: list[dict[str, Any]]) -> None:
+    validated = [validate_backup_source(source) for source in sources]
+    if not validated or len({source["id"] for source in validated}) != len(validated):
+        raise ValueError("O cadastro precisa ter origens com identificadores únicos")
+    content = serialize_backup_sources(validated)
+    with BACKUP_CONFIG_PATH.open("r+", encoding="utf-8") as stream:
+        fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+        previous = stream.read()
+        write_json(DATA_ROOT / "sources-config-backup.json", {"toml": previous})
+        stream.seek(0)
+        stream.write(content)
+        stream.truncate()
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def request_json(url: str, *, method: str = "GET", headers: dict[str, str] | None = None,
@@ -260,6 +349,8 @@ class Handler(SimpleHTTPRequestHandler):
                 except (FileNotFoundError, PermissionError):
                     pass
                 self.send_json({"items": [json.loads(line) for line in reversed(lines) if line.strip()]})
+            elif parsed.path == "/api/backup/sources":
+                self.send_json({"items": load_backup_sources(), "username": "cyriusBackup"})
             elif parsed.path == "/api/host/metrics":
                 self.send_json({"current": HOST_METRICS.snapshot(), "history": HOST_METRICS.history()})
             elif parsed.path == "/api/weather":
@@ -322,6 +413,32 @@ class Handler(SimpleHTTPRequestHandler):
                         settings[key] = payload[key]
                 write_json(SETTINGS_PATH, settings)
                 self.send_json(settings)
+            elif parsed.path == "/api/backup/sources":
+                candidate = validate_backup_source(payload)
+                sources = load_backup_sources()
+                replaced = False
+                for index, source in enumerate(sources):
+                    if source["id"] == candidate["id"]:
+                        sources[index] = candidate
+                        replaced = True
+                        break
+                if not replaced:
+                    sources.append(candidate)
+                save_backup_sources(sources)
+                self.send_json(candidate)
+            elif parsed.path == "/api/backup/sources/delete":
+                identifier = str(payload["id"])
+                sources = load_backup_sources()
+                target = next((source for source in sources if source["id"] == identifier), None)
+                if target is None:
+                    raise ValueError("Origem não encontrada")
+                if target["enabled"]:
+                    raise ValueError("Pause a origem antes de removê-la")
+                remaining = [source for source in sources if source["id"] != identifier]
+                if not remaining:
+                    raise ValueError("Não é possível remover a única origem cadastrada")
+                save_backup_sources(remaining)
+                self.send_json({"removed": identifier})
             elif parsed.path == "/api/google/task/complete":
                 list_id = quote(payload["tasklist_id"], safe="")
                 task_id = quote(payload["task_id"], safe="")

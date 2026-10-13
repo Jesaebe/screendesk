@@ -16,6 +16,7 @@ from .schedule import is_due
 
 
 Pipeline = Callable[[Source, str, datetime], RunReport]
+SourceLoader = Callable[[], list[Source]]
 
 
 @dataclass(frozen=True)
@@ -32,11 +33,13 @@ class BackupScheduler:
         pipeline: Pipeline,
         status_root: Path,
         notifier: FailureNotifier,
+        source_loader: SourceLoader | None = None,
     ):
         self.sources = sources
         self.pipeline = pipeline
         self.status_root = status_root
         self.notifier = notifier
+        self.source_loader = source_loader
         self._state_path = status_root / "scheduler-state.json"
         self._notification_path = status_root / "notification-status.json"
         self._service_status_path = status_root / "service-status.json"
@@ -119,6 +122,11 @@ class BackupScheduler:
         return report
 
     def run_due(self, instant: datetime | None = None) -> list[ScheduledResult]:
+        if self.source_loader is not None:
+            try:
+                self.sources = self.source_loader()
+            except (OSError, ValueError) as error:
+                print(f"backup source reload failed: {type(error).__name__}", flush=True)
         current = instant or datetime.now(timezone.utc)
         results: list[ScheduledResult] = []
         for source in self.sources:

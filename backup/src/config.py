@@ -1,5 +1,6 @@
 """Load and validate versionable backup source definitions."""
 
+import fcntl
 from pathlib import Path
 import re
 import tomllib
@@ -25,6 +26,7 @@ def validate_time(value: str) -> None:
 
 def load_sources(path: Path) -> list[Source]:
     with path.open("rb") as stream:
+        fcntl.flock(stream.fileno(), fcntl.LOCK_SH)
         payload = tomllib.load(stream)
 
     raw_sources = payload.get("source", [])

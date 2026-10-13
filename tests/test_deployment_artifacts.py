@@ -37,6 +37,8 @@ class DeploymentArtifactTests(unittest.TestCase):
         compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
         self.assertIn("backup-status:/backup-status:ro", compose)
         self.assertIn("dashboard-data:/data", compose)
+        self.assertIn(":/backup-config/sources.toml:rw", compose)
+        self.assertIn(":/run/secrets/sources.toml:ro", compose)
 
     def test_rclone_config_is_mounted_read_only_from_server(self):
         compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")

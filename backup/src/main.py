@@ -108,6 +108,7 @@ def scheduler() -> int:
         pipeline=pipeline,
         status_root=status_root,
         notifier=_notifier_from_environment(),
+        source_loader=lambda: load_sources(config_path),
     )
     service.run_forever(interval_seconds=interval_seconds)
     return 0

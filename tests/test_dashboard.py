@@ -70,6 +70,39 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("timeMin=2026-11-01", events_url)
         self.assertIn("timeMax=2026-12-01", events_url)
 
+    def test_backup_registry_forces_shared_existing_credential(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "sources.toml"
+            path.write_text("""[[source]]
+id = "maker"
+display_name = "Maker"
+engine = "postgresql"
+host = "db.local"
+port = 5432
+database = "janus"
+username = "ignored"
+password_file = "/run/secrets/other"
+sslmode = "require"
+schedule = ["00:00"]
+timezone = "America/Bahia"
+enabled = false
+""", encoding="utf-8")
+            original = server.BACKUP_CONFIG_PATH
+            original_data_root = server.DATA_ROOT
+            server.BACKUP_CONFIG_PATH = path
+            server.DATA_ROOT = Path(directory)
+            try:
+                sources = server.load_backup_sources()
+                sources[0]["display_name"] = "Maker atualizado"
+                server.save_backup_sources(sources)
+                saved = server.load_backup_sources()[0]
+            finally:
+                server.BACKUP_CONFIG_PATH = original
+                server.DATA_ROOT = original_data_root
+            self.assertEqual(saved["username"], "cyriusBackup")
+            self.assertEqual(saved["password_file"], "/run/secrets/maker-password")
+            self.assertEqual(saved["display_name"], "Maker atualizado")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,6 +18,10 @@ O clima usa a geocodificação e previsão do Open-Meteo e não exige chave.
 
 O dispositivo SmartThings é escolhido após consultar `/api/smartthings/devices`; seu ID é salvo em `/data/settings.json` como `smartthings_device_id`.
 
+## Cadastro de bancos
+
+O diálogo “Gerenciar bancos” cria, edita, pausa e remove origens de backup. Todos os cadastros usam obrigatoriamente `cyriusBackup` e `/run/secrets/maker-password`; a senha não é enviada ao navegador. O dashboard valida e grava o TOML compartilhado, e o backup o relê antes de cada rodada. Uma origem ativa precisa ser pausada antes da remoção; relatórios e arquivos existentes são preservados.
+
 ## Saúde do servidor
 
 O painel exibe, em blocos com ícones grandes à esquerda dos dados, CPU e quantidade de processadores lógicos, carga, memória total, swap, capacidade total do disco raiz e do volume de backups, uptime e disponibilidade dos dois serviços. A leitura atual é renovada a cada segundo usando somente montagens específicas e somente leitura definidas no Compose. O histórico persistente continua gravando uma amostra por minuto e mantém até 1.440 amostras, equivalentes a 24 horas.
