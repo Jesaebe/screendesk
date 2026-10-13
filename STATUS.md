@@ -1,5 +1,20 @@
 # Status — ScreenDeck Home
 
+## 2026-10-13 — Botão de recarga do painel preparado
+
+- Um botão de reload foi acrescentado imediatamente à direita do bloco de clima no cabeçalho.
+- A ação recarrega o dashboard completo, atualizando clima, agenda, tarefas, backups e métricas.
+- O controle possui rótulo acessível, tooltip e dimensões próprias para toque, inclusive em telas estreitas.
+- A alteração ainda não foi implantada.
+
+## 2026-10-13 — Sobreposição no cadastro de bancos corrigida localmente
+
+- O formulário de bancos passou de quatro para três colunas no layout amplo, dando largura útil aos campos ao lado da lista de origens.
+- Labels, inputs e selects agora podem encolher dentro do grid sem invadir campos vizinhos.
+- O modal ganhou altura máxima e rolagem própria; abaixo de 900 px o conteúdo é empilhado e abaixo de 520 px o formulário usa uma coluna.
+- Os botões de ação agora quebram linha quando necessário, evitando sobreposição em telas estreitas.
+- A suíte completa passou com 85 testes e o diff não apresentou erros de whitespace; a alteração ainda não foi implantada.
+
 ## 2026-10-13 — Cadastro de bancos reorganizado
 
 - O modal de bancos foi dividido entre a lista de origens e o formulário de conexão, aproveitando a largura da tela e eliminando a rolagem no layout do tablet/desktop.

@@ -7,6 +7,17 @@ SCRIPTS = ROOT / "scripts"
 
 
 class DeploymentArtifactTests(unittest.TestCase):
+    def test_postgresql_permission_script_is_generic_and_has_runbook(self):
+        script = (SCRIPTS / "grant-postgresql-backup-permissions.sh").read_text(encoding="utf-8")
+        runbook = (ROOT / "docs" / "runbooks" / "grant-postgresql-backup-permissions.md").read_text(encoding="utf-8")
+        self.assertIn('--database)', script)
+        self.assertIn('--backup-role)', script)
+        self.assertIn("GRANT SELECT ON ALL TABLES", script)
+        self.assertIn("ALTER DEFAULT PRIVILEGES FOR ROLE", script)
+        self.assertNotIn("PGPASSWORD=", script)
+        self.assertIn("objetos_sem_select", runbook)
+        self.assertIn("cada banco", runbook)
+
     def test_preflight_is_read_only_and_checks_target(self):
         content = (SCRIPTS / "preflight-deploy.sh").read_text(encoding="utf-8")
         self.assertIn("192.168.25.249", content)

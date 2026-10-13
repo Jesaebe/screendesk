@@ -4,9 +4,9 @@ O diretório contém o serviço de backup. O entrypoint carrega as origens, exec
 
 `sources.example.toml` contém a origem Maker desabilitada e um segundo bloco que serve de modelo. Em produção, todas as origens usam o usuário `cyriusBackup` e o segredo existente montado em `/run/secrets/maker-password`; nunca grave a senha diretamente no TOML ou em variável de ambiente.
 
-Maker permanece com `enabled = false`. O usuário exclusivo `cyriusBackup`, o segredo protegido, um `pg_dump` de validação e o remote `crypt` foram confirmados em 10/10/2026. Por conter maiúscula, o nome deve ser citado como `"cyriusBackup"` em comandos SQL. O procedimento sem senha versionada está em `docs/runbooks/create-maker-backup-role.sql`. A origem só será habilitada durante o teste controlado.
+O usuário exclusivo `cyriusBackup`, o segredo protegido, o pipeline e a restauração do Maker foram validados. Por conter maiúscula, o nome deve ser citado como `"cyriusBackup"` em comandos SQL. Para cada banco PostgreSQL adicional, aplique e valide as permissões com `scripts/grant-postgresql-backup-permissions.sh`, seguindo `docs/runbooks/grant-postgresql-backup-permissions.md`.
 
-O runbook concede acesso aos objetos existentes. Se a aplicação criar tabelas ou sequências no futuro, os proprietários desses objetos também deverão configurar `ALTER DEFAULT PRIVILEGES` para o usuário de backup ou o procedimento precisará ser reaplicado antes do próximo dump.
+O script concede acesso aos objetos existentes e configura `ALTER DEFAULT PRIVILEGES` para os atuais proprietários. Ele deve ser reaplicado quando surgir um schema ou uma role criadora de objetos que ainda não existia na execução anterior.
 
 As agendas são interpretadas no fuso definido em cada origem. Para Maker: 00:00, 06:00, 12:00 e 18:00 em `America/Bahia`.
 

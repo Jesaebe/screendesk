@@ -144,6 +144,25 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("function sourceIdentifier(name)", script)
         self.assertIn("sourceForm.elements.id.value||sourceIdentifier(payload.display_name)", script)
 
+    def test_backup_source_form_prevents_field_overlap(self):
+        stylesheet = (SERVER_PATH.parents[1] / "static" / "style.css").read_text(encoding="utf-8")
+        self.assertIn(".source-fields label { min-width:0; }", stylesheet)
+        self.assertIn(".source-fields input,.source-fields select { width:100%; min-width:0; }", stylesheet)
+        self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", stylesheet)
+        self.assertIn("@media (max-width:900px)", stylesheet)
+        self.assertIn("@media (max-width:520px)", stylesheet)
+
+    def test_dashboard_has_reload_button_next_to_weather(self):
+        static = SERVER_PATH.parents[1] / "static"
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        script = (static / "app.js").read_text(encoding="utf-8")
+        stylesheet = (static / "style.css").read_text(encoding="utf-8")
+        self.assertIn('<div class="hero-actions">', markup)
+        self.assertIn('id="reload-button"', markup)
+        self.assertIn('aria-label="Recarregar painel"', markup)
+        self.assertIn("$('#reload-button').onclick=()=>window.location.reload()", script)
+        self.assertIn(".reload-button", stylesheet)
+
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sources.toml"
