@@ -7,7 +7,8 @@
 - A revisão `ede797a` foi implantada no servidor, reconstruindo somente o dashboard; o backup permaneceu saudável e sem execução ativa.
 - O container servido contém o filtro e a rolagem novos, `/healthz` respondeu 200 e a API sem credenciais permaneceu protegida com 401.
 - O launcher do tablet foi adaptado para priorizar o Firefox ESR instalado, abrir em kiosk após o login automático e reiniciar após encerramento inesperado.
-- A instalação no tablet permanece pendente: o host `192.168.25.47` respondeu, mas recusou autenticação SSH por chave para as contas `painel` e `jesaweb`.
+- O autostart foi instalado no perfil `painel`, com a credencial do dashboard salva diretamente no perfil persistente do Firefox, sem senha em URL, script ou Git.
+- Após reinício real do tablet, o launcher iniciou automaticamente e abriu `firefox-esr --kiosk http://192.168.25.249:8123`; bloqueio e inatividade permaneceram desativados.
 
 ## 2026-10-12 — Legibilidade da lista de backups preparada
 
