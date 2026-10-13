@@ -12,7 +12,7 @@
     <header class="hero">
       <div>
         <p class="eyebrow" id="date">CARREGANDO</p>
-        <h1 id="clock">--:--</h1>
+        <h1 id="clock">--:--:--</h1>
       </div>
       <button class="city" id="city-button" aria-label="Alterar cidade">
         <span id="weather-icon">◌</span>
@@ -22,17 +22,19 @@
 
     <section class="grid">
       <article class="card calendar-card">
-        <div class="card-title"><h2>Próximos eventos</h2><button id="google-connect">Conectar Google</button></div>
-        <div id="events" class="list empty">Nenhum evento carregado.</div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">📅</span><h2>Calendário</h2></span><button id="google-connect">Conectar Google</button></div>
+        <div class="calendar-nav"><button id="calendar-prev" aria-label="Mês anterior">‹</button><strong id="calendar-month">—</strong><button id="calendar-next" aria-label="Próximo mês">›</button></div>
+        <div class="calendar-weekdays" aria-hidden="true"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+        <div id="calendar-grid" class="calendar-grid" aria-label="Calendário mensal"></div>
       </article>
 
       <article class="card tasks-card">
-        <div class="card-title"><h2>Tarefas</h2><span id="task-count" class="count">0</span></div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">✓</span><h2>Tarefas</h2></span><span id="task-count" class="count">0</span></div>
         <div id="tasks" class="list empty">Nenhuma tarefa carregada.</div>
       </article>
 
       <article class="card climate-card">
-        <div class="card-title"><h2>Ar-condicionado</h2><span id="ac-state" class="status neutral">Não conectado</span></div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">❄</span><h2>Ar-condicionado</h2></span><span id="ac-state" class="status neutral">Não conectado</span></div>
         <div class="temperature-control">
           <button data-temp-step="-1" aria-label="Diminuir temperatura">−</button>
           <strong><span id="target-temp">23</span>°</strong>
@@ -42,13 +44,13 @@
       </article>
 
       <article class="card backup-card">
-        <div class="card-title"><h2>Último backup</h2><span id="backup-state" class="status neutral">Verificando</span></div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">↥</span><h2>Último backup</h2></span><span id="backup-state" class="status neutral">Verificando</span></div>
         <dl id="backup-details"><div><dt>Origem</dt><dd>—</dd></div><div><dt>Concluído</dt><dd>—</dd></div><div><dt>Tamanho</dt><dd>—</dd></div><div><dt>Duração</dt><dd>—</dd></div></dl>
         <button id="history-button" class="text-button">Ver histórico</button>
       </article>
 
       <article class="card health-card">
-        <div class="card-title"><h2>Saúde do servidor</h2><span id="host-state" class="status neutral">Coletando</span></div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">♥</span><h2>Saúde do servidor</h2></span><span id="host-state" class="status neutral">Coletando</span></div>
         <div class="metrics" id="host-metrics">
           <div class="metric"><span>CPU</span><strong id="metric-cpu">—</strong><div class="meter"><i id="meter-cpu"></i></div><small id="metric-cpu-total">—</small></div>
           <div class="metric"><span>Memória</span><strong id="metric-memory">—</strong><div class="meter"><i id="meter-memory"></i></div><small id="metric-memory-total">—</small><small id="metric-swap">Swap —</small></div>
@@ -57,7 +59,8 @@
           <div class="metric"><span>Carga (1/5/15 min)</span><strong id="metric-load">—</strong><small id="metric-uptime">—</small></div>
         </div>
         <div class="services"><span>Dashboard <b id="service-dashboard" class="service-dot"></b></span><span>Backup <b id="service-backup" class="service-dot"></b></span></div>
-        <div id="metrics-history" class="metrics-history" aria-label="Histórico recente de CPU e memória"></div>
+        <div class="history-label"><span>Últimos 30 minutos</span><span class="history-legend"><i class="cpu"></i> CPU <i class="memory"></i> Memória</span></div>
+        <div id="metrics-history" class="metrics-history" aria-label="Histórico dos últimos 30 minutos de CPU e memória"></div>
       </article>
     </section>
 

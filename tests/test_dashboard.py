@@ -48,6 +48,28 @@ class DashboardTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Cidade não encontrada"):
                 server.weather("Lugar inexistente")
 
+    def test_google_data_requests_complete_selected_month(self):
+        requested = []
+
+        def fake_google_api(url, **_kwargs):
+            requested.append(url)
+            if url.endswith("calendarList"):
+                return {"items": [{"id": "primary"}]}
+            if url.endswith("users/@me/lists"):
+                return {"items": []}
+            if "/events?" in url:
+                return {"items": [{"id": "event-1", "summary": "Consulta", "start": {"date": "2026-11-12"}}]}
+            return {"items": []}
+
+        with patch.object(server, "google_api", side_effect=fake_google_api):
+            result = server.google_data("2026-11")
+
+        self.assertEqual(result["month"], "2026-11")
+        self.assertEqual(result["events"][0]["summary"], "Consulta")
+        events_url = next(url for url in requested if "/events?" in url)
+        self.assertIn("timeMin=2026-11-01", events_url)
+        self.assertIn("timeMax=2026-12-01", events_url)
+
 
 if __name__ == "__main__":
     unittest.main()

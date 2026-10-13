@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import calendar
 from datetime import datetime, timedelta, timezone
 import hashlib
 import hmac
@@ -148,7 +149,7 @@ def weather(city: str) -> dict[str, Any]:
     return result
 
 
-def google_data() -> dict[str, Any]:
+def google_data(month: str | None = None) -> dict[str, Any]:
     settings = read_json(SETTINGS_PATH, {})
     calendar_ids = settings.get("calendar_ids", [])
     tasklist_ids = settings.get("tasklist_ids", [])
@@ -158,12 +159,22 @@ def google_data() -> dict[str, Any]:
         calendar_ids = [item["id"] for item in calendars]
     if not tasklist_ids:
         tasklist_ids = [item["id"] for item in tasklists]
-    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    end = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat().replace("+00:00", "Z")
+    current = datetime.now(timezone.utc)
+    if month:
+        try:
+            year, month_number = (int(value) for value in month.split("-", 1))
+            month_start = datetime(year, month_number, 1, tzinfo=timezone.utc)
+        except (TypeError, ValueError):
+            raise ValueError("Mês inválido; use AAAA-MM") from None
+    else:
+        month_start = datetime(current.year, current.month, 1, tzinfo=timezone.utc)
+    month_end = month_start + timedelta(days=calendar.monthrange(month_start.year, month_start.month)[1])
+    time_min = month_start.isoformat().replace("+00:00", "Z")
+    time_max = month_end.isoformat().replace("+00:00", "Z")
     events: list[dict[str, Any]] = []
     for calendar_id in calendar_ids[:20]:
         url = "https://www.googleapis.com/calendar/v3/calendars/" + quote(calendar_id, safe="") + "/events?" + urlencode({
-            "timeMin": now, "timeMax": end, "singleEvents": "true", "orderBy": "startTime", "maxResults": 20,
+            "timeMin": time_min, "timeMax": time_max, "singleEvents": "true", "orderBy": "startTime", "maxResults": 50,
         })
         for event in google_api(url).get("items", []):
             events.append({"id": event.get("id"), "summary": event.get("summary", "Sem título"),
@@ -178,7 +189,8 @@ def google_data() -> dict[str, Any]:
             tasks.append({"id": task["id"], "title": task.get("title", "Sem título"), "due": task.get("due"),
                           "notes": task.get("notes"), "tasklist_id": tasklist_id})
     events.sort(key=lambda item: item["start"].get("dateTime") or item["start"].get("date") or "")
-    return {"calendars": calendars, "tasklists": tasklists, "events": events[:40], "tasks": tasks[:60]}
+    return {"month": month_start.strftime("%Y-%m"), "calendars": calendars, "tasklists": tasklists,
+            "events": events[:100], "tasks": tasks[:60]}
 
 
 def smartthings(path: str, *, method: str = "GET", body: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -255,7 +267,8 @@ class Handler(SimpleHTTPRequestHandler):
                 city = query.get("city", [read_json(SETTINGS_PATH, {}).get("city", "Salvador")])[0]
                 self.send_json(weather(city))
             elif parsed.path == "/api/google/data":
-                self.send_json(google_data())
+                query = parse_qs(parsed.query)
+                self.send_json(google_data(query.get("month", [None])[0]))
             elif parsed.path == "/api/google/auth/start":
                 client = google_client()
                 if not client:

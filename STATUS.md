@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Calendário mensal e leitura visual preparados
+
+- O relógio passou a exibir segundos e os cartões receberam ícones de identificação.
+- O cartão Google agora apresenta o mês completo, permite avançar e retroceder, destaca hoje e marca dias com eventos.
+- A API aceita o mês selecionado e consulta seus limites completos, incluindo dias anteriores ao momento atual.
+- O histórico de saúde recebeu título e legenda explícita, com barras separadas para CPU e memória.
+- A revisão ainda não foi implantada.
+
 ## 2026-10-12 — Tela única e métricas em tempo real preparadas
 
 - O layout kiosk passou a organizar os quatro cartões principais em uma linha, compactar-se em telas baixas e ocupar uma única viewport sem rolagem a partir de 900 px de largura.

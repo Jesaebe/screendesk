@@ -2,6 +2,8 @@
 
 Dashboard web leve para data/hora, clima, Google Calendar, Google Tasks, ar-condicionado Samsung via SmartThings e situação dos backups.
 
+O relógio inclui segundos. O calendário mensal permite navegar entre meses, destaca o dia atual e marca os dias que possuem eventos nas agendas Google conectadas.
+
 ## Segredos
 
 No servidor, crie `secrets/dashboard/` com arquivos `0600`:
