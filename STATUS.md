@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Lista mensal e ícones de métricas preparados
+
+- O espaço abaixo da grade mensal passou a exibir todos os eventos do mês com data, horário e título em uma lista com rolagem própria.
+- Os cinco blocos internos de saúde receberam ícones específicos para CPU, memória, disco raiz, backups e carga.
+- A página principal continua sem rolagem; somente a lista de eventos do mês pode rolar dentro do cartão.
+- A revisão ainda não foi implantada.
+
 ## 2026-10-12 — Calendário mensal e leitura visual preparados
 
 - O relógio passou a exibir segundos e os cartões receberam ícones de identificação.

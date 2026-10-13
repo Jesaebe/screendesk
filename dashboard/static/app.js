@@ -12,6 +12,7 @@ let googleConnected = false;
 function tick(){ const now=new Date(); $('#clock').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); $('#date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}); }
 
 const calendarMonthKey=()=>`${calendarDate.getFullYear()}-${String(calendarDate.getMonth()+1).padStart(2,'0')}`;
+const formatCalendarEvent=(event)=>{const value=event.start.dateTime||event.start.date;if(!value)return '—';if(event.start.date)return `Dia ${Number(value.slice(8,10))} · dia todo`;return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(value));};
 function renderCalendar(events=[]){
   const year=calendarDate.getFullYear(); const month=calendarDate.getMonth(); const today=new Date();
   $('#calendar-month').textContent=calendarDate.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
@@ -20,6 +21,8 @@ function renderCalendar(events=[]){
   const firstDay=new Date(year,month,1).getDay(); const days=new Date(year,month+1,0).getDate(); const cells=[];
   for(let index=0;index<42;index++){const day=index-firstDay+1;if(day<1||day>days){cells.push('<span class="calendar-day outside"></span>');continue;}const summaries=byDay.get(day)||[];const isToday=day===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();const label=summaries.length?`${summaries.length} evento${summaries.length>1?'s':''}: ${summaries.join(', ')}`:'';cells.push(`<span class="calendar-day${isToday?' today':''}${summaries.length?' has-event':''}" title="${escapeHtml(label)}"><b>${day}</b>${summaries.length?'<i></i>':''}</span>`);}
   $('#calendar-grid').innerHTML=cells.join('');
+  const eventList=$('#month-events'); eventList.classList.toggle('empty',!events.length);
+  eventList.innerHTML=events.length?events.map(event=>`<div class="month-event"><time>${formatCalendarEvent(event)}</time><strong>${escapeHtml(event.summary)}</strong></div>`).join(''):'Nenhum evento neste mês.';
 }
 
 async function loadWeather(city){
