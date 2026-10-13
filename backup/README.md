@@ -41,3 +41,5 @@ A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. 
 Os slots processados são persistidos atomicamente em `scheduler-state.json`, limitados aos 512 mais recentes, para evitar repetição após reinício. O resultado do canal de alerta fica separado em `notification-status.json`. Uma falha do SMTP não altera o resultado do backup nem encerra o agendador.
 
 Enquanto o pipeline executa, `active-backup.json` publica atomicamente a origem e o horário de início no volume de status. O arquivo é removido ao concluir ou falhar e também durante a inicialização, evitando um indicador obsoleto após reinício.
+
+Quando o comando de dump falha, o relatório usa a primeira linha útil e sanitizada de erro, limitada a 300 caracteres. Se não houver uma linha reconhecível, mantém o código de saída como fallback; a saída completa continua restrita ao log operacional.

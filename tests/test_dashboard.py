@@ -27,6 +27,32 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("'Motivo'", script)
         self.assertIn("'Falhou em'", script)
 
+    def test_legacy_backup_failure_is_enriched_from_safe_log(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log = root / "logs" / "camara" / "failure.log"
+            log.parent.mkdir(parents=True)
+            log.write_text(
+                "pg_dump: error: permission denied for table cam_cidades\n"
+                "pg_dump: detail: Query was: LOCK TABLE public.cam_cidades\n",
+                encoding="utf-8",
+            )
+            original = server.BACKUP_FILES_ROOT
+            server.BACKUP_FILES_ROOT = root
+            try:
+                report = server.backup_report_with_log_detail({
+                    "error": "dump command exited with code 1",
+                    "log_file": "/backups/logs/camara/failure.log",
+                })
+                escaped = server.backup_report_with_log_detail({
+                    "error": "dump command exited with code 1",
+                    "log_file": "/backups/logs/../../outside.log",
+                })
+            finally:
+                server.BACKUP_FILES_ROOT = original
+        self.assertEqual(report["error"], "pg_dump: error: permission denied for table cam_cidades")
+        self.assertEqual(escaped["error"], "dump command exited with code 1")
+
     def test_json_round_trip_is_private(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "settings.json"

@@ -77,6 +77,27 @@ class ExecutorTests(unittest.TestCase):
             log = Path(report.log_file).read_text()
             self.assertNotIn("test-password", log)
             self.assertIn("[REDACTED]", log)
+            self.assertEqual(report.error, "dump command exited with code 2")
+
+    def test_failure_report_uses_sanitized_dump_detail(self):
+        runner = FakeRunner(
+            returncode=1,
+            stderr="pg_dump: error: permission denied for table invoices test-password\n",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report = execute_backup(
+                self.enabled_maker,
+                "test-password",
+                root / "backups",
+                root / "status",
+                runner,
+            )
+        self.assertEqual(
+            report.error,
+            "pg_dump: error: permission denied for table invoices [REDACTED]",
+        )
+        self.assertNotIn("test-password", report.error)
 
     def test_existing_lock_prevents_runner_call(self):
         runner = FakeRunner()

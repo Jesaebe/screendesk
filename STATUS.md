@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Causa detalhada das falhas de dump preparada
+
+- O serviço de backup passa a registrar no relatório a primeira linha útil e sanitizada emitida pelo comando de dump, limitada a 300 caracteres.
+- Para a falha atual e outros relatórios antigos, o dashboard recupera o detalhe do log sanitizado por um caminho validado e somente leitura, sem alterar o histórico.
+- A saída completa continua apenas no log operacional e o código de saída permanece como fallback quando não houver detalhe reconhecível.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Motivo da falha no card de backup preparado
 
 - Quando o último backup falha, o card troca o campo de tamanho por “Motivo” e mostra o erro sanitizado já presente no relatório.

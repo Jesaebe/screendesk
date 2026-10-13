@@ -107,6 +107,16 @@ def _timestamp(value: datetime) -> str:
     return value.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
+def _command_failure_detail(output: str, returncode: int) -> str:
+    """Return one useful, bounded line from already-sanitized dump output."""
+    for raw_line in output.splitlines():
+        line = " ".join(raw_line.strip().split())
+        lowered = line.lower()
+        if line and ("error:" in lowered or "fatal:" in lowered):
+            return line[:300]
+    return f"dump command exited with code {returncode}"
+
+
 def execute_backup(
     source: Source,
     password: str,
@@ -168,7 +178,7 @@ def execute_backup(
             sanitized_output = retention_note + redact(result.stdout + result.stderr, [password])
             log_path.write_text(sanitized_output, encoding="utf-8")
             if result.returncode != 0:
-                raise RuntimeError(f"dump command exited with code {result.returncode}")
+                raise RuntimeError(_command_failure_detail(sanitized_output, result.returncode))
             if not partial.is_file() or partial.stat().st_size <= 0:
                 raise RuntimeError("dump command did not produce a non-empty file")
             partial.replace(final)

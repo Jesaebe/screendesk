@@ -30,6 +30,7 @@ APP_ROOT = Path(__file__).resolve().parents[1]
 STATIC_ROOT = APP_ROOT / "static"
 DATA_ROOT = Path(os.environ.get("DASHBOARD_DATA_ROOT", "/data"))
 BACKUP_ROOT = Path(os.environ.get("BACKUP_STATUS_ROOT", "/backup-status"))
+BACKUP_FILES_ROOT = Path(os.environ.get("HOST_BACKUP_PATH", "/host/backups"))
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 TOKEN_PATH = DATA_ROOT / "google-token.json"
 PUBLIC_URL = os.environ.get("DASHBOARD_PUBLIC_URL", "http://localhost:8123").rstrip("/")
@@ -66,6 +67,35 @@ def write_json(path: Path, value: Any) -> None:
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     os.chmod(temporary, 0o600)
     temporary.replace(path)
+
+
+def backup_report_with_log_detail(report: Any) -> Any:
+    """Enrich legacy generic dump failures from the read-only sanitized log."""
+    if not isinstance(report, dict) or not str(report.get("error", "")).startswith("dump command exited"):
+        return report
+    log_file = str(report.get("log_file", ""))
+    prefix = "/backups/logs/"
+    if not log_file.startswith(prefix):
+        return report
+    logs_root = (BACKUP_FILES_ROOT / "logs").resolve()
+    candidate = (logs_root / log_file.removeprefix(prefix)).resolve()
+    if not candidate.is_relative_to(logs_root):
+        return report
+    try:
+        output = candidate.read_text(encoding="utf-8")[:8192]
+    except (FileNotFoundError, PermissionError, OSError, UnicodeError):
+        return report
+    for raw_line in output.splitlines():
+        line = " ".join(raw_line.strip().split())
+        if line and ("error:" in line.lower() or "fatal:" in line.lower()):
+            enriched = dict(report)
+            enriched["error"] = line[:300]
+            return enriched
+    return report
+
+
+def latest_backup_report() -> Any:
+    return backup_report_with_log_detail(read_json(BACKUP_ROOT / "latest.json", None))
 
 
 SOURCE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{1,62}$")
@@ -346,12 +376,12 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             if parsed.path == "/api/overview":
                 settings = read_json(SETTINGS_PATH, {"city": "Salvador"})
-                self.send_json({"settings": settings, "backup": read_json(BACKUP_ROOT / "latest.json", None),
+                self.send_json({"settings": settings, "backup": latest_backup_report(),
                                 "google_connected": google_token() is not None,
                                 "smartthings_connected": SMARTTHINGS_TOKEN.exists()})
             elif parsed.path == "/api/backup/status":
                 self.send_json({
-                    "latest": read_json(BACKUP_ROOT / "latest.json", None),
+                    "latest": latest_backup_report(),
                     "active": read_json(BACKUP_ROOT / "active-backup.json", None),
                 })
             elif parsed.path == "/api/backups":
