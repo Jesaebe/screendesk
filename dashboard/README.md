@@ -20,7 +20,7 @@ O dispositivo SmartThings é escolhido após consultar `/api/smartthings/devices
 
 ## Cadastro de bancos
 
-O diálogo “Gerenciar bancos” cria, edita, pausa e remove origens de backup. Todos os cadastros usam obrigatoriamente `cyriusBackup` e `/run/secrets/maker-password`; a senha não é enviada ao navegador. O dashboard valida e grava o TOML compartilhado, e o backup o relê antes de cada rodada. Uma origem ativa precisa ser pausada antes da remoção; relatórios e arquivos existentes são preservados.
+O diálogo “Gerenciar bancos” cria, edita, pausa e remove origens de backup. Todos os cadastros usam obrigatoriamente `cyriusBackup` e `/run/secrets/maker-password`; a senha não é enviada ao navegador. O botão “Testar conexão” solicita ao serviço de backup uma consulta somente leitura, mostra versão e latência ou um erro sanitizado e é obrigatório antes de ativar uma origem nova ou alterada. O dashboard valida e grava o TOML compartilhado, e o backup o relê antes de cada rodada. Uma origem ativa precisa ser pausada antes da remoção; relatórios e arquivos existentes são preservados.
 
 ## Saúde do servidor
 

@@ -20,6 +20,7 @@ services:
       HOST_METRICS_INTERVAL_SECONDS: ${HOST_METRICS_INTERVAL_SECONDS:-1}
       HOST_METRICS_HISTORY_INTERVAL_SECONDS: ${HOST_METRICS_HISTORY_INTERVAL_SECONDS:-60}
       BACKUP_CONFIG_PATH: /backup-config/sources.toml
+      BACKUP_CONTROL_URL: http://backup:8090/test
     ports:
       - "${DASHBOARD_PORT:-8123}:8080"
     volumes:
@@ -77,6 +78,8 @@ services:
       - ${RCLONE_CONFIG_DIR_HOST:-/home/cyrius/.config/rclone}:/run/rclone:rw
     networks:
       - internal
+    expose:
+      - "8090"
     healthcheck:
       test: ["CMD", "python3", "-m", "src.main", "healthcheck"]
       interval: 1m

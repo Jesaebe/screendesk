@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 
 from .config import load_sources
+from .control import start_control_server
 from .executor import SubprocessRunner
 from .notifications import FailureNotifier, NotificationError, SMTPNotifier, SMTPSettings
 from .pipeline import run_pipeline
@@ -87,6 +88,7 @@ def scheduler() -> int:
 
     sources = load_sources(config_path)
     runner = SubprocessRunner()
+    start_control_server(Path("/run/secrets/maker-password"), runner)
 
     def pipeline(source, password, started_at):
         return run_pipeline(

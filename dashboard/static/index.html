@@ -101,7 +101,8 @@
         <label class="wide">Horários<input name="schedule" required placeholder="00:00, 12:00"></label>
         <label class="toggle"><input name="enabled" type="checkbox"> Ativo</label>
       </div>
-      <div class="dialog-actions"><button type="reset">Novo</button><button id="source-delete" type="button" class="danger" hidden>Remover</button><button class="primary" type="submit">Salvar</button></div>
+      <div id="connection-test-result" class="connection-test-result" aria-live="polite"></div>
+      <div class="dialog-actions"><button type="reset">Novo</button><button id="source-test" type="button">Testar conexão</button><button id="source-delete" type="button" class="danger" hidden>Remover</button><button class="primary" type="submit">Salvar</button></div>
     </form>
   </dialog>
 

@@ -34,6 +34,8 @@ A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. 
 
 `src/scheduler.py` avalia cada agenda no fuso da origem, impede repetição dentro do mesmo minuto e lê a senha do arquivo protegido antes de chamar o pipeline. Arquivo ausente ou vazio gera `configuration_failed`, relatório e notificação.
 
+`src/control.py` expõe somente na rede interna do Compose um endpoint para teste de conexão. Ele usa o segredo existente no próprio serviço, executa uma consulta de versão sem modificar o banco e retorna apenas versão, latência ou categoria sanitizada da falha; a porta não é publicada no host.
+
 `src/notifications.py` oferece o contrato de notificação e adaptador SMTP com STARTTLS. Nos testes, pipeline, notificador e SMTP são falsos. O entrypoint chama `run_forever`; com todas as origens desabilitadas, o laço apenas avalia a agenda e não executa comandos externos. Enquanto SMTP não estiver completo, uma tentativa de alerta registra o canal como não configurado sem encerrar o agendador.
 
 Os slots processados são persistidos atomicamente em `scheduler-state.json`, limitados aos 512 mais recentes, para evitar repetição após reinício. O resultado do canal de alerta fica separado em `notification-status.json`. Uma falha do SMTP não altera o resultado do backup nem encerra o agendador.

@@ -37,9 +37,11 @@ GOOGLE_SECRET = Path(os.environ.get("GOOGLE_CLIENT_SECRET_FILE", "/run/secrets/g
 SMARTTHINGS_TOKEN = Path(os.environ.get("SMARTTHINGS_TOKEN_FILE", "/run/secrets/smartthings-token"))
 PASSWORD_FILE = Path(os.environ.get("DASHBOARD_PASSWORD_FILE", "/run/secrets/dashboard-password"))
 BACKUP_CONFIG_PATH = Path(os.environ.get("BACKUP_CONFIG_PATH", "/backup-config/sources.toml"))
+BACKUP_CONTROL_URL = os.environ.get("BACKUP_CONTROL_URL", "http://backup:8090/test")
 USERNAME = os.environ.get("DASHBOARD_USERNAME", "admin")
 OAUTH_STATES: dict[str, float] = {}
 WEATHER_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+TESTED_BACKUP_SOURCES: dict[str, str] = {}
 HOST_METRICS = HostMetrics(
     Path(os.environ.get("HOST_PROC_ROOT", "/host/proc")),
     Path(os.environ.get("HOST_ROOT_PATH", "/host/root")),
@@ -109,6 +111,11 @@ def validate_backup_source(raw: dict[str, Any]) -> dict[str, Any]:
     source["username"] = "cyriusBackup"
     source["password_file"] = "/run/secrets/maker-password"
     return source
+
+
+def backup_source_fingerprint(source: dict[str, Any]) -> str:
+    fields = {key: source[key] for key in ("id", "engine", "host", "port", "database", "sslmode")}
+    return hashlib.sha256(json.dumps(fields, sort_keys=True).encode()).hexdigest()
 
 
 def load_backup_sources() -> list[dict[str, Any]]:
@@ -416,6 +423,11 @@ class Handler(SimpleHTTPRequestHandler):
             elif parsed.path == "/api/backup/sources":
                 candidate = validate_backup_source(payload)
                 sources = load_backup_sources()
+                existing = next((source for source in sources if source["id"] == candidate["id"]), None)
+                connection_changed = existing is None or backup_source_fingerprint(existing) != backup_source_fingerprint(candidate)
+                activation = candidate["enabled"] and (existing is None or not existing["enabled"] or connection_changed)
+                if activation and TESTED_BACKUP_SOURCES.get(candidate["id"]) != backup_source_fingerprint(candidate):
+                    raise ValueError("Teste a conexão com sucesso antes de ativar esta origem")
                 replaced = False
                 for index, source in enumerate(sources):
                     if source["id"] == candidate["id"]:
@@ -426,6 +438,12 @@ class Handler(SimpleHTTPRequestHandler):
                     sources.append(candidate)
                 save_backup_sources(sources)
                 self.send_json(candidate)
+            elif parsed.path == "/api/backup/sources/test":
+                candidate = validate_backup_source(payload)
+                result = request_json(BACKUP_CONTROL_URL, method="POST", body=candidate)
+                if result.get("ok"):
+                    TESTED_BACKUP_SOURCES[candidate["id"]] = backup_source_fingerprint(candidate)
+                self.send_json(result)
             elif parsed.path == "/api/backup/sources/delete":
                 identifier = str(payload["id"])
                 sources = load_backup_sources()

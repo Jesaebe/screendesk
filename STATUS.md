@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Teste de conexão de bancos preparado
+
+- O cadastro recebeu “Testar conexão”, com spinner e resultado de versão, latência ou falha sanitizada.
+- A consulta roda no serviço de backup com `cyriusBackup` e o segredo existente, sem senha no navegador, argumentos ou resposta.
+- A API de teste fica somente na rede interna do Compose e não publica porta no host.
+- Uma origem nova, reativada ou com conexão alterada não pode ser ativada sem aprovação do teste para os mesmos dados.
+- A revisão ainda não foi implantada.
+
 ## 2026-10-12 — Cadastro de bancos preparado
 
 - O dashboard recebeu gerenciamento de origens para criar, editar, pausar e remover bancos, com horários independentes e validação dos campos.
