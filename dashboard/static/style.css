@@ -55,7 +55,14 @@ dl { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 dl div { border-left:2px solid var(--line); padding-left:.75rem; } dt { color:var(--muted); font-size:.8rem; } dd { margin:.25rem 0 0; font-weight:700; }
 .backup-error { color:var(--red); font-size:.82rem; line-height:1.25; overflow-wrap:anywhere; }
 .text-button { background:transparent; border:0; padding:.5rem 0; color:var(--accent-soft); }
-.backup-actions { display:flex; justify-content:space-between; gap:.5rem; }
+.recent-backups-title { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding-top:.45rem; border-top:1px solid var(--line); color:var(--muted); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.backup-actions { display:flex; gap:.35rem; }
+.icon-button { display:grid; place-items:center; width:1.8rem; height:1.8rem; padding:0; border-radius:9px; color:var(--accent-soft); font-size:1rem; }
+.recent-backups { display:grid; gap:.2rem; margin-top:.35rem; min-height:0; }
+.recent-backups .empty { color:var(--muted); font-size:.75rem; }
+.recent-backup { display:grid; grid-template-columns:.5rem minmax(0,1fr) auto auto; align-items:center; gap:.4rem; min-height:1.45rem; padding:.15rem .3rem; border-radius:7px; background:#ffffff06; font-size:.7rem; }
+.recent-backup>i { width:.42rem; height:.42rem; border-radius:50%; background:var(--muted); }.recent-backup>i.good { background:var(--success); }.recent-backup>i.bad { background:var(--red); }
+.recent-backup strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.recent-backup span,.recent-backup time { color:var(--muted); white-space:nowrap; }
 .health-card { grid-column:1/-1; min-height:auto; }
 .metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.8rem; margin-top:1.2rem; }
 .metric { display:grid; grid-template-columns:2.8rem minmax(0,1fr); gap:.7rem; align-items:center; background:#ffffff08; border-radius:14px; padding:.85rem; }
@@ -96,6 +103,8 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
   .grid { min-height:0; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:minmax(0,1fr) auto; gap:clamp(.45rem,1vh,.8rem); }
   .card { min-height:0; padding:clamp(.7rem,1.3vh,1rem); border-radius:16px; overflow:hidden; }
   .calendar-card,.tasks-card,.climate-card,.backup-card { height:100%; }
+  .backup-card { display:flex; flex-direction:column; }
+  .recent-backups { flex:1; }
   .calendar-card { display:flex; flex-direction:column; }
   .calendar-card .card-title>button { padding:.45rem .6rem; font-size:.75rem; }
   .calendar-day { min-height:clamp(1.5rem,3.4vh,2.4rem); }
@@ -124,6 +133,8 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
   .city>span:first-child { display:none; }
   .temperature-control { margin:.35rem 0; }
   .actions button { padding:.4rem .55rem; }
+  .backup-card dl { margin:.45rem 0; }
+  .recent-backup { min-height:1.15rem; padding:.08rem .25rem; }
   .metrics-history { display:none; }
   .services { margin-top:.35rem; }
 }

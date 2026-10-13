@@ -390,7 +390,10 @@ class Handler(SimpleHTTPRequestHandler):
                     lines = (BACKUP_ROOT / "history.jsonl").read_text(encoding="utf-8").splitlines()[-30:]
                 except (FileNotFoundError, PermissionError):
                     pass
-                self.send_json({"items": [json.loads(line) for line in reversed(lines) if line.strip()]})
+                self.send_json({"items": [
+                    backup_report_with_log_detail(json.loads(line))
+                    for line in reversed(lines) if line.strip()
+                ]})
             elif parsed.path == "/api/backup/sources":
                 self.send_json({"items": load_backup_sources(), "username": "cyriusBackup"})
             elif parsed.path == "/api/host/metrics":

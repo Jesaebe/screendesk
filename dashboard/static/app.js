@@ -8,6 +8,7 @@ const formatCapacity = (value=0) => value ? `${new Intl.NumberFormat('pt-BR',{ma
 const escapeHtml = (value='') => String(value).replace(/[&<>"']/g, character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 let calendarDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let googleConnected = false;
+let latestBackupRunId = '';
 
 function tick(){ const now=new Date(); $('#clock').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); $('#date').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}); }
 
@@ -50,7 +51,12 @@ function renderBackup(backup,active){
   [backup.source,formatDate(backup.finished_at),detail,`${Math.round(backup.duration_seconds||0)} s`].forEach((value,i)=>values[i].textContent=value);
   if(!good){values[2].className='backup-error';values[2].title=detail;}
 }
-async function loadBackupStatus(){try{const data=await api('/api/backup/status');renderBackup(data.latest,data.active);}catch(error){/* Mantém o último estado visível durante falhas transitórias. */}}
+function renderRecentBackups(items=[]){
+  const list=$('#recent-backups'); const recent=items.slice(0,5);
+  list.innerHTML=recent.length?recent.map(item=>{const good=item.status==='success';const label=good?'Concluído':'Falhou';const detail=good?formatBytes(item.size_bytes):(item.error||'Falha sem detalhe');return `<div class="recent-backup" title="${escapeHtml(detail)}"><i class="${good?'good':'bad'}" aria-hidden="true"></i><strong>${escapeHtml(item.source)}</strong><span>${label}</span><time>${formatDate(item.finished_at)}</time></div>`;}).join(''):'<span class="empty">Nenhum backup registrado.</span>';
+}
+async function loadRecentBackups(){try{const data=await api('/api/backups');renderRecentBackups(data.items||[]);}catch(error){/* Mantém o histórico já visível. */}}
+async function loadBackupStatus(){try{const data=await api('/api/backup/status');renderBackup(data.latest,data.active);const runId=(data.latest||{}).run_id||'';if(runId&&runId!==latestBackupRunId){latestBackupRunId=runId;loadRecentBackups();}}catch(error){/* Mantém o último estado visível durante falhas transitórias. */}}
 
 const percent=(value)=>value==null?'—':`${Math.round(value)}%`;
 const setMetric=(name,value)=>{ $(`#metric-${name}`).textContent=percent(value); const meter=$(`#meter-${name}`); meter.style.width=`${Math.max(0,Math.min(100,value||0))}%`; meter.className=value>=85?'bad':value>=70?'warn':''; };
@@ -83,7 +89,7 @@ function sslOptions(engine,value){const values=engine==='postgresql'?[['require'
 function editSource(source){sourceForm.reset();setTimeout(()=>{sourceForm.elements.id.value=source.id;sourceForm.elements.id.disabled=true;['display_name','engine','version','host','port','database','estimated_size_mb'].forEach(name=>sourceForm.elements[name].value=source[name]);sourceForm.elements.schedule.value=source.schedule.join(', ');sourceForm.elements.enabled.checked=source.enabled;sslOptions(source.engine,source.sslmode);$('#source-delete').hidden=false;},0);}
 function renderSources(){const list=$('#sources-list');list.innerHTML=backupSources.map(source=>`<button type="button" data-source="${escapeHtml(source.id)}"><span><strong>${escapeHtml(source.display_name)}</strong><small>${escapeHtml(source.engine)} · ${escapeHtml(source.host)}:${source.port}/${escapeHtml(source.database)}</small></span><b class="status ${source.enabled?'good':'neutral'}">${source.enabled?'Ativo':'Pausado'}</b></button>`).join('');}
 async function loadSources(){const data=await api('/api/backup/sources');backupSources=data.items;renderSources();}
-async function init(){ tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); loadBackupStatus(); setInterval(loadBackupStatus,1000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); latestBackupRunId=(overview.backup||{}).run_id||''; loadRecentBackups(); loadBackupStatus(); setInterval(loadBackupStatus,1000); setInterval(loadRecentBackups,30000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };

@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Cinco backups recentes no card preparados
+
+- O card passa a mostrar abaixo do resultado atual os cinco backups mais recentes, com origem, resultado, horário e detalhe disponível ao apontar.
+- A lista se atualiza quando surge um novo relatório e também a cada 30 segundos, sem recarregar a página.
+- Histórico completo e gerenciamento de bancos permanecem disponíveis em botões compactos com ícones, tooltip e rótulos acessíveis.
+- O layout foi mantido dentro do card para preservar o dashboard sem rolagem geral.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Causa detalhada das falhas de dump preparada
 
 - O serviço de backup passa a registrar no relatório a primeira linha útil e sanitizada emitida pelo comando de dump, limitada a 300 caracteres.

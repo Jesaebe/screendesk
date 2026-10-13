@@ -45,9 +45,10 @@
       </article>
 
       <article class="card backup-card">
-        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">↥</span><h2>Último backup</h2></span><span id="backup-state" class="status neutral">Verificando</span></div>
+        <div class="card-title"><span class="title-with-icon"><span class="card-icon" aria-hidden="true">↥</span><h2>Backups</h2></span><span id="backup-state" class="status neutral">Verificando</span></div>
         <dl id="backup-details"><div><dt>Origem</dt><dd>—</dd></div><div><dt>Concluído</dt><dd>—</dd></div><div><dt>Tamanho</dt><dd>—</dd></div><div><dt>Duração</dt><dd>—</dd></div></dl>
-        <div class="backup-actions"><button id="history-button" class="text-button">Ver histórico</button><button id="sources-button" class="text-button">Gerenciar bancos</button></div>
+        <div class="recent-backups-title"><span>Últimos realizados</span><div class="backup-actions"><button id="history-button" class="icon-button" title="Ver histórico" aria-label="Ver histórico">↺</button><button id="sources-button" class="icon-button" title="Gerenciar bancos" aria-label="Gerenciar bancos">⚙</button></div></div>
+        <div id="recent-backups" class="recent-backups"><span class="empty">Carregando histórico…</span></div>
       </article>
 
       <article class="card health-card">

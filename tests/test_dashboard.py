@@ -27,6 +27,15 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("'Motivo'", script)
         self.assertIn("'Falhou em'", script)
 
+    def test_backup_card_renders_five_recent_runs_and_icon_actions(self):
+        static = SERVER_PATH.parents[1] / "static"
+        script = (static / "app.js").read_text(encoding="utf-8")
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        self.assertIn("items.slice(0,5)", script)
+        self.assertIn('id="recent-backups"', markup)
+        self.assertIn('aria-label="Ver histórico"', markup)
+        self.assertIn('aria-label="Gerenciar bancos"', markup)
+
     def test_legacy_backup_failure_is_enriched_from_safe_log(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

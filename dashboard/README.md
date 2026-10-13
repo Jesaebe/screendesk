@@ -32,6 +32,8 @@ Quando o resultado mais recente é uma falha, o campo de tamanho é substituído
 
 Relatórios antigos que contenham apenas o código de saída são enriquecidos, em memória, com a primeira linha útil do log sanitizado. O caminho é validado dentro de `/host/backups/logs`, montado como somente leitura, e o arquivo de status original não é alterado.
 
+O mesmo card mantém uma lista compacta dos cinco backups mais recentes, com origem, resultado, horário e detalhe em tooltip. Os acessos ao histórico completo e ao gerenciamento de bancos usam botões por ícone com rótulos acessíveis.
+
 Agenda e tarefas mostram indicadores animados e acessíveis enquanto os dados Google estão sendo carregados, inclusive durante a navegação entre meses.
 
 Em telas kiosk com pelo menos 900 pixels de largura, o layout ocupa exatamente a altura disponível e não cria rolagem na página. Cartões e listas são compactados conforme a altura para manter todas as áreas visíveis.
