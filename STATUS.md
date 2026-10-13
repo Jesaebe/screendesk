@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-13 — Cadastro de bancos reorganizado
+
+- O modal de bancos foi dividido entre a lista de origens e o formulário de conexão, aproveitando a largura da tela e eliminando a rolagem no layout do tablet/desktop.
+- O campo visível “Identificador” foi removido; novas origens recebem internamente um identificador derivado do nome, com sufixo automático para evitar duplicidade.
+- Edições preservam o identificador existente, mantendo históricos, diretórios e referências de backup compatíveis.
+- A revisão `1596052` foi implantada reconstruindo somente o dashboard; o Firefox foi reiniciado para carregar os arquivos novos.
+- O layout servido foi confirmado, e dashboard e backup permaneceram saudáveis.
+
 ## 2026-10-13 — Atualização automática das tarefas implantada
 
 - Agenda e tarefas do Google passam a sincronizar em segundo plano a cada 15 segundos e imediatamente ao retornar para a tela.
