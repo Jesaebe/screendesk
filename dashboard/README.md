@@ -20,6 +20,8 @@ O dispositivo SmartThings é escolhido após consultar `/api/smartthings/devices
 
 ## Saúde do servidor
 
-O painel exibe, em blocos com ícones próprios, CPU e quantidade de processadores lógicos, carga, memória total, swap, capacidade total do disco raiz e do volume de backups, uptime e disponibilidade dos dois serviços. A leitura atual é renovada a cada segundo usando somente montagens específicas e somente leitura definidas no Compose. O histórico persistente continua gravando uma amostra por minuto e mantém até 1.440 amostras, equivalentes a 24 horas.
+O painel exibe, em blocos com ícones grandes à esquerda dos dados, CPU e quantidade de processadores lógicos, carga, memória total, swap, capacidade total do disco raiz e do volume de backups, uptime e disponibilidade dos dois serviços. A leitura atual é renovada a cada segundo usando somente montagens específicas e somente leitura definidas no Compose. O histórico persistente continua gravando uma amostra por minuto e mantém até 1.440 amostras, equivalentes a 24 horas.
+
+Agenda e tarefas mostram indicadores animados e acessíveis enquanto os dados Google estão sendo carregados, inclusive durante a navegação entre meses.
 
 Em telas kiosk com pelo menos 900 pixels de largura, o layout ocupa exatamente a altura disponível e não cria rolagem na página. Cartões e listas são compactados conforme a altura para manter todas as áreas visíveis.

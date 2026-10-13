@@ -1,5 +1,11 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Ícones ampliados e carregamento Google preparados
+
+- Os ícones de CPU, memória, disco raiz, backups e carga foram ampliados e posicionados à esquerda dos respectivos dados.
+- Agenda e tarefas passaram a exibir spinners com texto durante a carga inicial e a troca de mês, além de mensagens próprias para desconexão e erro.
+- A revisão ainda não foi implantada.
+
 ## 2026-10-12 — Lista mensal e ícones de métricas preparados
 
 - O espaço abaixo da grade mensal passou a exibir todos os eventos do mês com data, horário e título em uma lista com rolagem própria.
