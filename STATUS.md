@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Legibilidade da lista de backups preparada
+
+- A fonte dos cinco backups recentes foi ampliada, com maior destaque para a origem e ajuste específico para horário e metadados.
+- O modal de histórico recebeu a mesma hierarquia visual, aumentando nome, detalhes e data sem alterar a quantidade de registros.
+- O espaçamento compacto foi preservado para manter os cinco itens dentro do card e o dashboard sem rolagem geral.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Tamanho, duração e cores no histórico preparados
 
 - Os cinco backups recentes passam a mostrar tamanho e duração ao lado da origem e do horário.

@@ -60,10 +60,10 @@ dl div { border-left:2px solid var(--line); padding-left:.75rem; } dt { color:va
 .icon-button { display:grid; place-items:center; width:1.8rem; height:1.8rem; padding:0; border-radius:9px; color:var(--accent-soft); font-size:1rem; }
 .recent-backups { display:grid; gap:.2rem; margin-top:.35rem; min-height:0; }
 .recent-backups .empty { color:var(--muted); font-size:.75rem; }
-.recent-backup { display:grid; grid-template-columns:.5rem minmax(0,1fr) auto auto; align-items:center; gap:.4rem; min-height:1.45rem; padding:.15rem .3rem; border-radius:7px; background:#ffffff06; font-size:.68rem; }
+.recent-backup { display:grid; grid-template-columns:.5rem minmax(0,1fr) auto auto; align-items:center; gap:.45rem; min-height:1.5rem; padding:.15rem .3rem; border-radius:7px; background:#ffffff06; font-size:.76rem; line-height:1.2; }
 .recent-backup>i { width:.42rem; height:.42rem; border-radius:50%; background:var(--muted); }.recent-backup>i.good { background:var(--success); }.recent-backup>i.bad { background:var(--red); }
-.recent-backup strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.recent-backup span,.recent-backup time { color:var(--muted); white-space:nowrap; }
-.history-row>span:nth-child(2) { min-width:0; }.history-row strong,.history-row small { display:block; }.history-row small { margin-top:.15rem; }.history-row .dot { align-self:center; }
+.recent-backup strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.82rem; }.recent-backup span,.recent-backup time { color:var(--muted); white-space:nowrap; }.recent-backup time { font-size:.72rem; }
+.history-row>span:nth-child(2) { min-width:0; }.history-row strong,.history-row small { display:block; }.history-row strong { font-size:.95rem; }.history-row small { margin-top:.15rem; font-size:.8rem; }.history-row time { font-size:.78rem; }.history-row .dot { align-self:center; }
 #backup-history { max-height:min(65vh,32rem); overflow-y:auto; scrollbar-color:var(--accent) transparent; }
 .health-card { grid-column:1/-1; min-height:auto; }
 .metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.8rem; margin-top:1.2rem; }
@@ -136,7 +136,7 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
   .temperature-control { margin:.35rem 0; }
   .actions button { padding:.4rem .55rem; }
   .backup-card dl { margin:.45rem 0; }
-  .recent-backup { min-height:1.15rem; padding:.08rem .25rem; }
+  .recent-backup { min-height:1.3rem; padding:.08rem .25rem; }
   .metrics-history { display:none; }
   .services { margin-top:.35rem; }
 }
