@@ -39,3 +39,5 @@ A retenção usa `--min-age 15d` dentro do diretório exclusivo de cada origem. 
 `src/notifications.py` oferece o contrato de notificação e adaptador SMTP com STARTTLS. Nos testes, pipeline, notificador e SMTP são falsos. O entrypoint chama `run_forever`; com todas as origens desabilitadas, o laço apenas avalia a agenda e não executa comandos externos. Enquanto SMTP não estiver completo, uma tentativa de alerta registra o canal como não configurado sem encerrar o agendador.
 
 Os slots processados são persistidos atomicamente em `scheduler-state.json`, limitados aos 512 mais recentes, para evitar repetição após reinício. O resultado do canal de alerta fica separado em `notification-status.json`. Uma falha do SMTP não altera o resultado do backup nem encerra o agendador.
+
+Enquanto o pipeline executa, `active-backup.json` publica atomicamente a origem e o horário de início no volume de status. O arquivo é removido ao concluir ou falhar e também durante a inicialização, evitando um indicador obsoleto após reinício.

@@ -349,6 +349,11 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json({"settings": settings, "backup": read_json(BACKUP_ROOT / "latest.json", None),
                                 "google_connected": google_token() is not None,
                                 "smartthings_connected": SMARTTHINGS_TOKEN.exists()})
+            elif parsed.path == "/api/backup/status":
+                self.send_json({
+                    "latest": read_json(BACKUP_ROOT / "latest.json", None),
+                    "active": read_json(BACKUP_ROOT / "active-backup.json", None),
+                })
             elif parsed.path == "/api/backups":
                 lines = []
                 try:

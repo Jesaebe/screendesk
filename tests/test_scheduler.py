@@ -160,6 +160,29 @@ class SchedulerTests(unittest.TestCase):
             scheduler.run_due(self.due)
         self.assertEqual(notifier.reports[0].status, "cloud_failed")
 
+    def test_active_status_exists_only_while_pipeline_runs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            password_file = root / "password"
+            password_file.write_text("secret")
+            recording = RecordingPipeline()
+
+            def inspect_active(source, password, instant):
+                active = json.loads((root / "active-backup.json").read_text())
+                self.assertEqual(active["status"], "running")
+                self.assertEqual(active["source"], "maker")
+                self.assertEqual(active["display_name"], self.maker.display_name)
+                return recording(source, password, instant)
+
+            scheduler = BackupScheduler(
+                [replace(self.maker, password_file=str(password_file))],
+                inspect_active,
+                root,
+                RecordingNotifier(),
+            )
+            scheduler.run_due(self.due)
+            self.assertFalse((root / "active-backup.json").exists())
+
     def test_unexpected_error_is_sanitized_and_notified(self):
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:
@@ -172,6 +195,7 @@ class SchedulerTests(unittest.TestCase):
                 notifier,
             )
             report = scheduler.run_due(self.due)[0].report
+            self.assertFalse((Path(directory) / "active-backup.json").exists())
         self.assertEqual(report.status, "internal_failed")
         self.assertNotIn("secret", report.error)
         self.assertIn("[REDACTED]", report.error)

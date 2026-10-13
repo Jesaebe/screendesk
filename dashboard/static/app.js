@@ -33,7 +33,21 @@ async function loadWeather(city){
   catch(error){ toast(error.message); }
 }
 
-function renderBackup(backup){ const state=$('#backup-state'); if(!backup){state.textContent='Sem dados';return;} const good=backup.status==='success'; state.textContent=good?'Concluído':'Falhou'; state.className='status '+(good?'good':'bad'); const values=[backup.source,formatDate(backup.finished_at),formatBytes(backup.size_bytes),`${Math.round(backup.duration_seconds||0)} s`]; document.querySelectorAll('#backup-details dd').forEach((node,i)=>node.textContent=values[i]); }
+function renderBackup(backup,active){
+  const state=$('#backup-state'); const labels=document.querySelectorAll('#backup-details dt'); const values=document.querySelectorAll('#backup-details dd');
+  if(active){
+    state.textContent='Backup em andamento'; state.className='status running';
+    ['Origem','Iniciado','Situação','Duração'].forEach((label,i)=>labels[i].textContent=label);
+    const elapsed=Math.max(0,Math.floor((Date.now()-new Date(active.started_at).getTime())/1000));
+    [active.display_name||active.source,formatDate(active.started_at),'Criando e enviando backup',`${Math.floor(elapsed/60)} min ${elapsed%60} s`].forEach((value,i)=>values[i].textContent=value);
+    return;
+  }
+  ['Origem','Concluído','Tamanho','Duração'].forEach((label,i)=>labels[i].textContent=label);
+  if(!backup){state.textContent='Sem dados';state.className='status neutral';values.forEach(node=>node.textContent='—');return;}
+  const good=backup.status==='success'; state.textContent=good?'Concluído':'Falhou'; state.className='status '+(good?'good':'bad');
+  [backup.source,formatDate(backup.finished_at),formatBytes(backup.size_bytes),`${Math.round(backup.duration_seconds||0)} s`].forEach((value,i)=>values[i].textContent=value);
+}
+async function loadBackupStatus(){try{const data=await api('/api/backup/status');renderBackup(data.latest,data.active);}catch(error){/* Mantém o último estado visível durante falhas transitórias. */}}
 
 const percent=(value)=>value==null?'—':`${Math.round(value)}%`;
 const setMetric=(name,value)=>{ $(`#metric-${name}`).textContent=percent(value); const meter=$(`#meter-${name}`); meter.style.width=`${Math.max(0,Math.min(100,value||0))}%`; meter.className=value>=85?'bad':value>=70?'warn':''; };
@@ -66,7 +80,7 @@ function sslOptions(engine,value){const values=engine==='postgresql'?[['require'
 function editSource(source){sourceForm.reset();setTimeout(()=>{sourceForm.elements.id.value=source.id;sourceForm.elements.id.disabled=true;['display_name','engine','version','host','port','database','estimated_size_mb'].forEach(name=>sourceForm.elements[name].value=source[name]);sourceForm.elements.schedule.value=source.schedule.join(', ');sourceForm.elements.enabled.checked=source.enabled;sslOptions(source.engine,source.sslmode);$('#source-delete').hidden=false;},0);}
 function renderSources(){const list=$('#sources-list');list.innerHTML=backupSources.map(source=>`<button type="button" data-source="${escapeHtml(source.id)}"><span><strong>${escapeHtml(source.display_name)}</strong><small>${escapeHtml(source.engine)} · ${escapeHtml(source.host)}:${source.port}/${escapeHtml(source.database)}</small></span><b class="status ${source.enabled?'good':'neutral'}">${source.enabled?'Ativo':'Pausado'}</b></button>`).join('');}
 async function loadSources(){const data=await api('/api/backup/sources');backupSources=data.items;renderSources();}
-async function init(){ tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); loadBackupStatus(); setInterval(loadBackupStatus,1000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };

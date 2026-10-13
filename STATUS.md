@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Indicador de backup em andamento preparado
+
+- O agendador publica no volume compartilhado a origem e o início da execução enquanto o pipeline está ativo, removendo o indicador ao concluir ou falhar.
+- O card de backups consulta esse estado a cada segundo e exibe spinner, banco em processamento, horário inicial e duração ao vivo sem perder o último resultado concluído.
+- A nova API é somente leitura e o estado ativo é limpo também na inicialização, evitando indicação obsoleta após reinício.
+- A suíte completa passou com 75 testes e a validação local não executou infraestrutura nem um backup real.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Teste de conexão de bancos preparado
 
 - O cadastro recebeu “Testar conexão”, com spinner e resultado de versão, latência ou falha sanitizada.

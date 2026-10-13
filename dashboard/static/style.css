@@ -45,6 +45,8 @@ h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.1em; margin:0; co
 .dot { width:.55rem; height:.55rem; border-radius:50%; background:var(--accent); }
 .count,.status { border-radius:999px; padding:.3rem .65rem; font-size:.8rem; }
 .status.good { color:var(--success); background:#8ce0b619; }.status.bad { color:var(--red); background:#ff858519; }.status.neutral { color:var(--muted); background:#ffffff0a; }
+.status.running { color:var(--amber); background:#ffc85719; display:inline-flex; align-items:center; gap:.4rem; }
+.status.running::before { content:""; width:.65rem; height:.65rem; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .8s linear infinite; }
 .temperature-control { display:flex; justify-content:center; align-items:center; gap:1.5rem; margin:2rem 0; }
 .temperature-control strong { font-size:3.5rem; font-variant-numeric:tabular-nums; }
 .temperature-control button { width:3rem; height:3rem; padding:0; font-size:1.5rem; }

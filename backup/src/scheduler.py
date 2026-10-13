@@ -43,6 +43,8 @@ class BackupScheduler:
         self._state_path = status_root / "scheduler-state.json"
         self._notification_path = status_root / "notification-status.json"
         self._service_status_path = status_root / "service-status.json"
+        self._active_path = status_root / "active-backup.json"
+        self._active_path.unlink(missing_ok=True)
         self._completed_slots = self._load_slots()
 
     def _load_slots(self) -> set[tuple[str, str]]:
@@ -150,15 +152,27 @@ class BackupScheduler:
                     "configuration_failed",
                 )
             else:
+                self._write_json_atomic(
+                    self._active_path,
+                    {
+                        "status": "running",
+                        "source": source.identifier,
+                        "display_name": source.display_name,
+                        "started_at": current.astimezone(timezone.utc).isoformat(),
+                    },
+                )
                 try:
-                    report = self.pipeline(source, password, current)
-                except Exception as error:
-                    report = self._failure_report(
-                        source,
-                        current,
-                        redact(f"pipeline raised an unexpected error: {error}", [password]),
-                        "internal_failed",
-                    )
+                    try:
+                        report = self.pipeline(source, password, current)
+                    except Exception as error:
+                        report = self._failure_report(
+                            source,
+                            current,
+                            redact(f"pipeline raised an unexpected error: {error}", [password]),
+                            "internal_failed",
+                        )
+                finally:
+                    self._active_path.unlink(missing_ok=True)
             if report.status != "success":
                 self._notify_safely(report, current)
             results.append(ScheduledResult(source.identifier, slot, report))
