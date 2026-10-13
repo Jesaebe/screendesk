@@ -6,7 +6,10 @@
 - Todas as origens são fixadas no usuário `cyriusBackup` e no segredo existente `maker-password`; nenhuma senha é enviada ao navegador ou gravada no cadastro.
 - O serviço de backup passa a reler o cadastro antes de cada rodada, mantendo a configuração anterior se uma recarga falhar.
 - Remoção exige pausa prévia e preserva dumps e históricos existentes.
-- A revisão ainda não foi implantada.
+- A revisão foi implantada pelo commit `aee968d`, reconstruindo dashboard e backup após confirmar ausência de execução em andamento.
+- Um cadastro temporário desativado foi criado, relido e removido pelo endpoint; ele usou automaticamente `cyriusBackup` e `maker-password`, sem executar dump.
+- O arquivo permaneceu `0600`, o cadastro final voltou a conter somente Maker ativo nos quatro horários, o último backup continuou `success` e ambos os containers ficaram saudáveis.
+- HTTPS respondeu 200 e o endpoint de cadastro sem credenciais permaneceu protegido com HTTP 401.
 
 ## 2026-10-12 — Ícones ampliados e carregamento Google preparados
 
