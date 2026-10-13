@@ -6,7 +6,9 @@
 - O card de backups consulta esse estado a cada segundo e exibe spinner, banco em processamento, horário inicial e duração ao vivo sem perder o último resultado concluído.
 - A nova API é somente leitura e o estado ativo é limpo também na inicialização, evitando indicação obsoleta após reinício.
 - A suíte completa passou com 75 testes e a validação local não executou infraestrutura nem um backup real.
-- Implantação ainda pendente nesta revisão.
+- A revisão foi implantada pelo commit `471aaf1`, reconstruindo dashboard e backup após confirmar ausência de lock ou execução em andamento.
+- Dashboard e backup ficaram saudáveis; a API manteve o último resultado `success` e uma simulação somente do marcador confirmou `running` sem gerar dump ou upload.
+- O marcador sintético foi removido automaticamente ao final da validação, a rota sem credenciais respondeu 401 e o HTTPS público permaneceu protegido com 401.
 
 ## 2026-10-12 — Teste de conexão de bancos preparado
 
