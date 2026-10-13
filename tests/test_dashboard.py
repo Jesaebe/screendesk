@@ -35,6 +35,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('id="recent-backups"', markup)
         self.assertIn('aria-label="Ver histórico"', markup)
         self.assertIn('aria-label="Gerenciar bancos"', markup)
+        self.assertIn("formatBytes(item.size_bytes)", script)
+        self.assertIn("formatDuration(item.duration_seconds)", script)
+        self.assertIn("renderBackupHistory", script)
 
     def test_legacy_backup_failure_is_enriched_from_safe_log(self):
         with tempfile.TemporaryDirectory() as directory:

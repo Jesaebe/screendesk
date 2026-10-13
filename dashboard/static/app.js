@@ -5,6 +5,7 @@ const toast = (message) => { const node=$('#toast'); node.textContent=message; n
 const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(value)) : '—';
 const formatBytes = (value=0) => value ? new Intl.NumberFormat('pt-BR',{style:'unit',unit:'megabyte',maximumFractionDigits:1}).format(value/1048576) : '—';
 const formatCapacity = (value=0) => value ? `${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(value/1073741824)} GB` : '—';
+const formatDuration = (value=0) => { const seconds=Math.max(0,Math.round(value||0)); return seconds<60?`${seconds} s`:`${Math.floor(seconds/60)} min ${seconds%60} s`; };
 const escapeHtml = (value='') => String(value).replace(/[&<>"']/g, character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 let calendarDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let googleConnected = false;
@@ -53,7 +54,11 @@ function renderBackup(backup,active){
 }
 function renderRecentBackups(items=[]){
   const list=$('#recent-backups'); const recent=items.slice(0,5);
-  list.innerHTML=recent.length?recent.map(item=>{const good=item.status==='success';const label=good?'Concluído':'Falhou';const detail=good?formatBytes(item.size_bytes):(item.error||'Falha sem detalhe');return `<div class="recent-backup" title="${escapeHtml(detail)}"><i class="${good?'good':'bad'}" aria-hidden="true"></i><strong>${escapeHtml(item.source)}</strong><span>${label}</span><time>${formatDate(item.finished_at)}</time></div>`;}).join(''):'<span class="empty">Nenhum backup registrado.</span>';
+  list.innerHTML=recent.length?recent.map(item=>{const good=item.status==='success';const label=good?'Concluído':'Falhou';const detail=good?`${formatBytes(item.size_bytes)} · ${formatDuration(item.duration_seconds)}`:(item.error||'Falha sem detalhe');return `<div class="recent-backup" title="${escapeHtml(`${label} · ${detail}`)}" aria-label="${escapeHtml(`${item.source}, ${label}, ${formatBytes(item.size_bytes)}, ${formatDuration(item.duration_seconds)}, ${formatDate(item.finished_at)}`)}"><i class="${good?'good':'bad'}" aria-hidden="true"></i><strong>${escapeHtml(item.source)}</strong><span>${formatBytes(item.size_bytes)} · ${formatDuration(item.duration_seconds)}</span><time>${formatDate(item.finished_at)}</time></div>`;}).join(''):'<span class="empty">Nenhum backup registrado.</span>';
+}
+function renderBackupHistory(items=[]){
+  const history=$('#backup-history');
+  history.innerHTML=items.length?items.map(item=>{const good=item.status==='success';const label=good?'Concluído':'Falhou';const reason=good?'':(item.error||'Falha sem detalhe');return `<div class="row history-row" title="${escapeHtml(reason)}"><span class="dot ${good?'good':'bad'}" aria-hidden="true"></span><span><strong>${escapeHtml(item.source)}</strong><small>${label} · ${formatBytes(item.size_bytes)} · ${formatDuration(item.duration_seconds)}</small></span><time>${formatDate(item.finished_at)}</time></div>`;}).join(''):'Sem histórico.';
 }
 async function loadRecentBackups(){try{const data=await api('/api/backups');renderRecentBackups(data.items||[]);}catch(error){/* Mantém o histórico já visível. */}}
 async function loadBackupStatus(){try{const data=await api('/api/backup/status');renderBackup(data.latest,data.active);const runId=(data.latest||{}).run_id||'';if(runId&&runId!==latestBackupRunId){latestBackupRunId=runId;loadRecentBackups();}}catch(error){/* Mantém o último estado visível durante falhas transitórias. */}}
@@ -100,7 +105,7 @@ $('#calendar-next').onclick=()=>moveCalendar(1);
 $('#tasks').onclick=async(event)=>{const task=event.target.closest('[data-task]');if(!task)return;await api('/api/google/task/complete',{method:'POST',body:JSON.stringify({tasklist_id:task.dataset.list,task_id:task.dataset.task})});task.remove();toast('Tarefa concluída');};
 document.querySelectorAll('[data-temp-step]').forEach(button=>button.onclick=()=>{$('#target-temp').textContent=Math.max(16,Math.min(30,+$('#target-temp').textContent + +button.dataset.tempStep));});
 document.querySelectorAll('[data-ac]').forEach(button=>button.onclick=async()=>{try{const command=button.dataset.ac;const payload={command};if(command==='temperature')payload.value=+$('#target-temp').textContent;await api('/api/smartthings/command',{method:'POST',body:JSON.stringify(payload)});toast('Comando enviado ao ar-condicionado');}catch(error){toast(error.message);}});
-$('#history-button').onclick=async()=>{const data=await api('/api/backups');$('#backup-history').innerHTML=data.items.map(item=>`<div class="row"><span class="dot"></span><span>${item.source} · ${item.status}</span><time>${formatDate(item.finished_at)}</time></div>`).join('')||'Sem histórico.';$('#history-dialog').showModal();};
+$('#history-button').onclick=async()=>{const data=await api('/api/backups');renderBackupHistory(data.items||[]);$('#history-dialog').showModal();};
 $('#history-close').onclick=()=>$('#history-dialog').close();
 $('#sources-button').onclick=async()=>{try{await loadSources();$('#sources-dialog').showModal();}catch(error){toast(error.message);}};
 $('#sources-close').onclick=()=>$('#sources-dialog').close();

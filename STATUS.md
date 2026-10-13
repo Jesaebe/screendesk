@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-12 — Tamanho, duração e cores no histórico preparados
+
+- Os cinco backups recentes passam a mostrar tamanho e duração ao lado da origem e do horário.
+- O modal do histórico recebe os mesmos dados, com resultado traduzido para “Concluído” ou “Falhou”.
+- Os pontos à esquerda ficam verdes para sucesso e vermelhos para falha, tanto no card quanto no modal; o motivo da falha permanece disponível no tooltip.
+- Implantação ainda pendente nesta revisão.
+
 ## 2026-10-12 — Cinco backups recentes no card preparados
 
 - O card passa a mostrar abaixo do resultado atual os cinco backups mais recentes, com origem, resultado, horário e detalhe disponível ao apontar.
