@@ -6,7 +6,9 @@
 - A lista se atualiza quando surge um novo relatório e também a cada 30 segundos, sem recarregar a página.
 - Histórico completo e gerenciamento de bancos permanecem disponíveis em botões compactos com ícones, tooltip e rótulos acessíveis.
 - O layout foi mantido dentro do card para preservar o dashboard sem rolagem geral.
-- Implantação ainda pendente nesta revisão.
+- A revisão foi implantada pelo commit `26b6f55`, reconstruindo somente o dashboard; o backup não foi interrompido.
+- A versão servida contém o novo bloco e o renderizador limitado a cinco itens; a API retornou 14 registros, com os cinco mais recentes disponíveis para o card.
+- O backup mais recente da origem `camara` já aparece como `success`; dashboard e backup permaneceram saudáveis.
 
 ## 2026-10-12 — Causa detalhada das falhas de dump preparada
 
