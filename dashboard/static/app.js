@@ -9,6 +9,7 @@ const formatDuration = (value=0) => { const seconds=Math.max(0,Math.round(value|
 const escapeHtml = (value='') => String(value).replace(/[&<>"']/g, character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 let calendarDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let googleConnected = false;
+let googleLoading = false;
 let latestBackupRunId = '';
 
 function enableDragScrolling(){
@@ -99,8 +100,13 @@ function renderHostMetrics(data){
 }
 async function loadHostMetrics(){ try { renderHostMetrics(await api('/api/host/metrics')); } catch(error) { $('#host-state').textContent='Indisponível'; $('#host-state').className='status bad'; } }
 
-async function loadGoogle(){ setGoogleLoading(); try { const data=await api('/api/google/data?month='+calendarMonthKey()); googleConnected=true; $('#google-connect').textContent='Google conectado'; renderCalendar(data.events); $('#task-count').textContent=data.tasks.length; $('#tasks').classList.remove('empty'); $('#tasks').innerHTML=data.tasks.length?data.tasks.map(task=>`<button class="row task" data-list="${escapeHtml(task.tasklist_id)}" data-task="${escapeHtml(task.id)}"><span>○</span><span>${escapeHtml(task.title)}</span><small>${task.due?formatDate(task.due):''}</small></button>`).join(''):'Nenhuma tarefa pendente.'; }
-  catch(error){ $('#month-events').textContent='Não foi possível carregar a agenda.'; $('#tasks').textContent='Não foi possível carregar as tarefas.'; $('#task-count').textContent='—'; if(!error.message.includes('não foi conectado')) toast(error.message); }
+async function loadGoogle(showLoading=false){
+  if(googleLoading)return;
+  googleLoading=true;
+  if(showLoading)setGoogleLoading();
+  try { const data=await api('/api/google/data?month='+calendarMonthKey()); googleConnected=true; $('#google-connect').textContent='Google conectado'; renderCalendar(data.events); $('#task-count').textContent=data.tasks.length; $('#tasks').classList.toggle('empty',!data.tasks.length); $('#tasks').innerHTML=data.tasks.length?data.tasks.map(task=>`<button class="row task" data-list="${escapeHtml(task.tasklist_id)}" data-task="${escapeHtml(task.id)}"><span>○</span><span>${escapeHtml(task.title)}</span><small>${task.due?formatDate(task.due):''}</small></button>`).join(''):'Nenhuma tarefa pendente.'; }
+  catch(error){ if(showLoading){$('#month-events').textContent='Não foi possível carregar a agenda.';$('#tasks').textContent='Não foi possível carregar as tarefas.';$('#task-count').textContent='—';}if(!error.message.includes('não foi conectado'))toast(error.message); }
+  finally { googleLoading=false; }
 }
 
 async function loadDevices(selected=''){ try { const data=await api('/api/smartthings/devices'); const devices=data.items||[]; $('#device-select').innerHTML='<option value="">Selecione o aparelho</option>'+devices.map(device=>`<option value="${device.deviceId}" ${device.deviceId===selected?'selected':''}>${device.label||device.name}</option>`).join(''); } catch(error) { /* Token ainda não instalado. */ } }
@@ -110,15 +116,16 @@ function sslOptions(engine,value){const values=engine==='postgresql'?[['require'
 function editSource(source){sourceForm.reset();setTimeout(()=>{sourceForm.elements.id.value=source.id;sourceForm.elements.id.disabled=true;['display_name','engine','version','host','port','database','estimated_size_mb'].forEach(name=>sourceForm.elements[name].value=source[name]);sourceForm.elements.schedule.value=source.schedule.join(', ');sourceForm.elements.enabled.checked=source.enabled;sslOptions(source.engine,source.sslmode);$('#source-delete').hidden=false;},0);}
 function renderSources(){const list=$('#sources-list');list.innerHTML=backupSources.map(source=>`<button type="button" data-source="${escapeHtml(source.id)}"><span><strong>${escapeHtml(source.display_name)}</strong><small>${escapeHtml(source.engine)} · ${escapeHtml(source.host)}:${source.port}/${escapeHtml(source.database)}</small></span><b class="status ${source.enabled?'good':'neutral'}">${source.enabled?'Ativo':'Pausado'}</b></button>`).join('');}
 async function loadSources(){const data=await api('/api/backup/sources');backupSources=data.items;renderSources();}
-async function init(){ enableDragScrolling(); tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); latestBackupRunId=(overview.backup||{}).run_id||''; loadRecentBackups(); loadBackupStatus(); setInterval(loadBackupStatus,1000); setInterval(loadRecentBackups,30000); loadWeather(city); if(overview.google_connected) loadGoogle(); else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
+async function init(){ enableDragScrolling(); tick(); setInterval(tick,1000); renderCalendar(); setGoogleLoading(); loadHostMetrics(); setInterval(loadHostMetrics,1000); const overview=await api('/api/overview'); const city=overview.settings.city||'Salvador'; $('#city-input').value=city; renderBackup(overview.backup,null); latestBackupRunId=(overview.backup||{}).run_id||''; loadRecentBackups(); loadBackupStatus(); setInterval(loadBackupStatus,1000); setInterval(loadRecentBackups,30000); loadWeather(city); if(overview.google_connected){loadGoogle(true);setInterval(()=>loadGoogle(),15000);}else setGoogleDisconnected(); if(overview.smartthings_connected) { $('#ac-state').textContent=overview.settings.smartthings_device_id?'Conectado':'Selecione o aparelho'; $('#ac-state').className='status good'; loadDevices(overview.settings.smartthings_device_id||''); } }
 
 $('#city-button').onclick=()=>$('#settings-dialog').showModal();
 $('#settings-form').onsubmit=async(event)=>{ event.preventDefault(); const city=$('#city-input').value.trim(); if(!city)return; const smartthings_device_id=$('#device-select').value; await api('/api/settings',{method:'POST',body:JSON.stringify({city,smartthings_device_id})}); $('#settings-dialog').close(); loadWeather(city); };
 $('#google-connect').onclick=()=>location.href='/api/google/auth/start';
-const moveCalendar=(offset)=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+offset,1);renderCalendar();if(googleConnected)loadGoogle();};
+const moveCalendar=(offset)=>{calendarDate=new Date(calendarDate.getFullYear(),calendarDate.getMonth()+offset,1);renderCalendar();if(googleConnected)loadGoogle(true);};
 $('#calendar-prev').onclick=()=>moveCalendar(-1);
 $('#calendar-next').onclick=()=>moveCalendar(1);
-$('#tasks').onclick=async(event)=>{const task=event.target.closest('[data-task]');if(!task)return;await api('/api/google/task/complete',{method:'POST',body:JSON.stringify({tasklist_id:task.dataset.list,task_id:task.dataset.task})});task.remove();toast('Tarefa concluída');};
+$('#tasks').onclick=async(event)=>{const task=event.target.closest('[data-task]');if(!task)return;await api('/api/google/task/complete',{method:'POST',body:JSON.stringify({tasklist_id:task.dataset.list,task_id:task.dataset.task})});task.remove();$('#task-count').textContent=$('#tasks').querySelectorAll('[data-task]').length;await loadGoogle();toast('Tarefa concluída');};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&googleConnected)loadGoogle();});
 document.querySelectorAll('[data-temp-step]').forEach(button=>button.onclick=()=>{$('#target-temp').textContent=Math.max(16,Math.min(30,+$('#target-temp').textContent + +button.dataset.tempStep));});
 document.querySelectorAll('[data-ac]').forEach(button=>button.onclick=async()=>{try{const command=button.dataset.ac;const payload={command};if(command==='temperature')payload.value=+$('#target-temp').textContent;await api('/api/smartthings/command',{method:'POST',body:JSON.stringify(payload)});toast('Comando enviado ao ar-condicionado');}catch(error){toast(error.message);}});
 $('#history-button').onclick=async()=>{const data=await api('/api/backups');renderBackupHistory(data.items||[]);$('#history-dialog').showModal();};

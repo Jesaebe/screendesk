@@ -127,6 +127,14 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("data.tasks.map(task=>", script)
         self.assertNotIn("data.tasks.slice(0,10)", script)
 
+    def test_google_tasks_refresh_automatically_and_after_changes(self):
+        script = (SERVER_PATH.parents[1] / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("setInterval(()=>loadGoogle(),15000)", script)
+        self.assertIn("visibilitychange", script)
+        self.assertIn("task.remove();$('#task-count').textContent=", script)
+        self.assertIn("await loadGoogle();toast('Tarefa concluída')", script)
+        self.assertIn("if(googleLoading)return", script)
+
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sources.toml"
