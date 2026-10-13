@@ -5,7 +5,8 @@
 - Quando o último backup falha, o card troca o campo de tamanho por “Motivo” e mostra o erro sanitizado já presente no relatório.
 - O horário passa a ser identificado como “Falhou em”; o layout continua com quatro campos para não aumentar a altura do dashboard.
 - O relatório atual da origem `camara` foi confirmado com `status=failed` e motivo sanitizado disponível para exibição.
-- Implantação ainda pendente nesta revisão.
+- A correção foi implantada pelo commit `05944ef`, reconstruindo somente o dashboard; o serviço de backup não foi recriado.
+- A versão servida contém a leitura de `backup.error`, o relatório atual mantém o motivo disponível e dashboard e backup ficaram saudáveis.
 
 ## 2026-10-12 — Indicador de backup em andamento preparado
 
