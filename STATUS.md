@@ -5,7 +5,8 @@
 - Os cinco backups recentes passam a mostrar tamanho e duração ao lado da origem e do horário.
 - O modal do histórico recebe os mesmos dados, com resultado traduzido para “Concluído” ou “Falhou”.
 - Os pontos à esquerda ficam verdes para sucesso e vermelhos para falha, tanto no card quanto no modal; o motivo da falha permanece disponível no tooltip.
-- Implantação ainda pendente nesta revisão.
+- A revisão foi implantada pelo commit `86913de`, reconstruindo somente o dashboard; o serviço de backup não foi interrompido.
+- A versão servida contém tamanho, duração, renderizador do modal e estilos verde/vermelho; dashboard e backup permaneceram saudáveis.
 
 ## 2026-10-12 — Cinco backups recentes no card preparados
 
