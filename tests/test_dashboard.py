@@ -169,7 +169,8 @@ class DashboardTests(unittest.TestCase):
         stylesheet = (SERVER_PATH.parents[1] / "static" / "style.css").read_text(encoding="utf-8")
         self.assertIn(".source-fields label { min-width:0; }", stylesheet)
         self.assertIn(".source-fields input,.source-fields select { width:100%; min-width:0; }", stylesheet)
-        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", stylesheet)
+        self.assertIn("grid-template-columns:repeat(4,minmax(0,1fr))", stylesheet)
+        self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", stylesheet)
         self.assertIn("@media (max-width:900px)", stylesheet)
         self.assertIn("@media (max-width:520px)", stylesheet)
 
@@ -180,6 +181,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('id="source-form-title">Novo banco', markup)
         self.assertIn("function editSource(source){if(!source)return;sourceForm.reset();", script)
         self.assertIn("button.classList.toggle('selected'", script)
+        self.assertIn("group('Pausados',backupSources.filter(source=>!source.enabled))", script)
+        self.assertIn("node.onclick=()=>editSource", script)
+        self.assertNotIn(".month-events,#tasks,#backup-history,.sources-list", script)
         self.assertNotIn("function editSource(source){sourceForm.reset();setTimeout", script)
 
     def test_dashboard_has_reload_button_next_to_weather(self):

@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-14 — Cadastro de bancos compactado e seleção reforçada
+
+- O formulário usa quatro colunas em telas amplas, três em larguras intermediárias e reduz progressivamente em telas menores.
+- A lista separa explicitamente bancos ativos e pausados, incluindo a contagem e um estado vazio para cada grupo.
+- Cada botão recebe seu próprio manipulador de edição; a lista deixou de usar o gesto de arraste que podia cancelar cliques do mouse.
+- O cadastro vigente no servidor contém quatro origens, todas ativas; não havia origem pausada no arquivo no momento da verificação.
+
 ## 2026-10-14 — Datas de tarefas, cadastro de bancos e duração corrigidos
 
 - Datas de conclusão do Google Tasks são exibidas como datas civis, sem conversão de fuso ou horário deslocado.
