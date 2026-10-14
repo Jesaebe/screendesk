@@ -84,6 +84,11 @@ class DashboardTests(unittest.TestCase):
     def test_missing_json_uses_default(self):
         self.assertEqual(server.read_json(Path("/missing/screendeck.json"), {"ok": True}), {"ok": True})
 
+    def test_static_dashboard_assets_are_not_cached(self):
+        source = SERVER_PATH.read_text(encoding="utf-8")
+        static_handler = source.split("def serve_static", 1)[1]
+        self.assertIn('self.send_header("Cache-Control", "no-store")', static_handler)
+
     def test_weather_uses_geocoding_and_forecast(self):
         responses = [
             {"results": [{"name": "Salvador", "latitude": -12.9, "longitude": -38.5, "country": "Brasil"}]},

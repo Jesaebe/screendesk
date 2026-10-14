@@ -6,6 +6,7 @@
 - A seleção de bancos cadastrados voltou a preencher o formulário de edição de forma síncrona e destaca visualmente a origem selecionada.
 - O modal de bancos foi reorganizado em uma lista lateral estável e formulário de duas colunas, com empilhamento responsivo para evitar sobreposições.
 - Durações de backups concluídos e em andamento usam minutos e segundos e acrescentam horas quando chegam a 60 minutos.
+- HTML, CSS e JavaScript passam a usar `Cache-Control: no-store`, garantindo que uma recarga mostre a versão recém-implantada.
 - A suíte completa passou com 89 testes; a entrega foi autorizada para implantação integral no dashboard.
 
 ## 2026-10-13 — Botão de recarga do painel preparado
