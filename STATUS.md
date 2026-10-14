@@ -1,5 +1,13 @@
 # Status — ScreenDeck Home
 
+## 2026-10-14 — Datas de tarefas, cadastro de bancos e duração corrigidos
+
+- Datas de conclusão do Google Tasks são exibidas como datas civis, sem conversão de fuso ou horário deslocado.
+- A seleção de bancos cadastrados voltou a preencher o formulário de edição de forma síncrona e destaca visualmente a origem selecionada.
+- O modal de bancos foi reorganizado em uma lista lateral estável e formulário de duas colunas, com empilhamento responsivo para evitar sobreposições.
+- Durações de backups concluídos e em andamento usam minutos e segundos e acrescentam horas quando chegam a 60 minutos.
+- A suíte completa passou com 89 testes; a entrega foi autorizada para implantação integral no dashboard.
+
 ## 2026-10-13 — Botão de recarga do painel preparado
 
 - Um botão de reload foi acrescentado imediatamente à direita do bloco de clima no cabeçalho.

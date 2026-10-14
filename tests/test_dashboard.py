@@ -39,6 +39,15 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("formatDuration(item.duration_seconds)", script)
         self.assertIn("renderBackupHistory", script)
 
+    def test_backup_duration_uses_hours_minutes_and_seconds_everywhere(self):
+        script = (SERVER_PATH.parents[1] / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("const hours=Math.floor(seconds/3600)", script)
+        self.assertIn("`${hours} h ${minutes} min ${remainder} s`", script)
+        self.assertIn("`${minutes} min ${remainder} s`", script)
+        self.assertIn("formatDuration(backup.duration_seconds)", script)
+        self.assertIn("formatDuration(elapsed)", script)
+        self.assertNotIn("`${Math.round(backup.duration_seconds||0)} s`", script)
+
     def test_legacy_backup_failure_is_enriched_from_safe_log(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -135,6 +144,13 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("await loadGoogle();toast('Tarefa concluída')", script)
         self.assertIn("if(googleLoading)return", script)
 
+    def test_google_task_due_date_is_rendered_without_timezone_conversion(self):
+        script = (SERVER_PATH.parents[1] / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("const formatTaskDue =", script)
+        self.assertIn("new Date(+match[1],+match[2]-1,+match[3])", script)
+        self.assertIn("<small>${formatTaskDue(task.due)}</small>", script)
+        self.assertNotIn("task.due?formatDate(task.due)", script)
+
     def test_backup_source_identifier_is_hidden_and_generated_from_name(self):
         static = SERVER_PATH.parents[1] / "static"
         markup = (static / "index.html").read_text(encoding="utf-8")
@@ -148,9 +164,18 @@ class DashboardTests(unittest.TestCase):
         stylesheet = (SERVER_PATH.parents[1] / "static" / "style.css").read_text(encoding="utf-8")
         self.assertIn(".source-fields label { min-width:0; }", stylesheet)
         self.assertIn(".source-fields input,.source-fields select { width:100%; min-width:0; }", stylesheet)
-        self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", stylesheet)
+        self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", stylesheet)
         self.assertIn("@media (max-width:900px)", stylesheet)
         self.assertIn("@media (max-width:520px)", stylesheet)
+
+    def test_existing_backup_source_can_be_selected_for_editing(self):
+        static = SERVER_PATH.parents[1] / "static"
+        script = (static / "app.js").read_text(encoding="utf-8")
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="source-form-title">Novo banco', markup)
+        self.assertIn("function editSource(source){if(!source)return;sourceForm.reset();", script)
+        self.assertIn("button.classList.toggle('selected'", script)
+        self.assertNotIn("function editSource(source){sourceForm.reset();setTimeout", script)
 
     def test_dashboard_has_reload_button_next_to_weather(self):
         static = SERVER_PATH.parents[1] / "static"
