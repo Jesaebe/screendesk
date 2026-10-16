@@ -2,6 +2,8 @@
 set -euo pipefail
 
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export SCREENDECK_GIT_COMMIT="${SCREENDECK_GIT_COMMIT:-$(git -C "$project_dir" rev-parse --short HEAD 2>/dev/null || printf unknown)}"
+export SCREENDECK_BUILD_TIME="${SCREENDECK_BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 compose=(docker compose --project-directory "$project_dir" --env-file "$project_dir/.env")
 
 if [[ "${SCREENDECK_DEPLOY_AUTHORIZED:-}" != "YES" ]]; then

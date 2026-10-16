@@ -4,6 +4,9 @@ services:
   dashboard:
     build:
       context: ./dashboard
+      args:
+        SCREENDECK_GIT_COMMIT: ${SCREENDECK_GIT_COMMIT:-unknown}
+        SCREENDECK_BUILD_TIME: ${SCREENDECK_BUILD_TIME:-unknown}
     restart: unless-stopped
     environment:
       TZ: ${TZ:-America/Bahia}

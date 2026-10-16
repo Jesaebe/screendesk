@@ -1,5 +1,12 @@
 # Status — ScreenDeck Home
 
+## 2026-10-16 — Identificação de versão preparada
+
+- O dashboard passa a mostrar versão semântica e commit implantado no cabeçalho de “Saúde do servidor”.
+- O horário real da construção fica disponível no tooltip do selo de versão.
+- `dashboard/VERSION` passa a ser a fonte única da versão funcional, iniciando em `1.1.0`.
+- Commit e horário são incorporados à imagem durante a implantação e expostos pela API do próprio dashboard.
+
 ## 2026-10-16 — Duração individual dos backups
 
 - Cada banco passa a iniciar seu próprio cronômetro somente quando sua execução começa.

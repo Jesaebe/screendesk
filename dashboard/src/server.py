@@ -40,6 +40,9 @@ SMARTTHINGS_TOKEN = Path(os.environ.get("SMARTTHINGS_TOKEN_FILE", "/run/secrets/
 PASSWORD_FILE = Path(os.environ.get("DASHBOARD_PASSWORD_FILE", "/run/secrets/dashboard-password"))
 BACKUP_CONFIG_PATH = Path(os.environ.get("BACKUP_CONFIG_PATH", "/backup-config/sources.toml"))
 BACKUP_CONTROL_URL = os.environ.get("BACKUP_CONTROL_URL", "http://backup:8090/test")
+APP_VERSION = (APP_ROOT / "VERSION").read_text(encoding="utf-8").strip()
+GIT_COMMIT = os.environ.get("SCREENDECK_GIT_COMMIT", "unknown")
+BUILD_TIME = os.environ.get("SCREENDECK_BUILD_TIME", "unknown")
 USERNAME = os.environ.get("DASHBOARD_USERNAME", "admin")
 AUTH_COOKIE = "screendeck_session"
 AUTH_COOKIE_MAX_AGE = 180 * 24 * 60 * 60
@@ -414,6 +417,8 @@ class Handler(SimpleHTTPRequestHandler):
             if parsed.path == "/api/overview":
                 settings = read_json(SETTINGS_PATH, {"city": "Salvador"})
                 self.send_json({"settings": settings, "backup": latest_backup_report(),
+                                "version": {"number": APP_VERSION, "commit": GIT_COMMIT,
+                                            "deployed_at": BUILD_TIME},
                                 "google_connected": google_token() is not None,
                                 "smartthings_connected": SMARTTHINGS_TOKEN.exists()})
             elif parsed.path == "/api/backup/status":

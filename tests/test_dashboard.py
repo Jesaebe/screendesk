@@ -218,6 +218,18 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("$('#reload-button').onclick=()=>window.location.reload()", script)
         self.assertIn(".reload-button", stylesheet)
 
+    def test_dashboard_exposes_and_renders_build_version(self):
+        static = SERVER_PATH.parents[1] / "static"
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        script = (static / "app.js").read_text(encoding="utf-8")
+        source = SERVER_PATH.read_text(encoding="utf-8")
+        version = (SERVER_PATH.parents[1] / "VERSION").read_text(encoding="utf-8").strip()
+        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
+        self.assertIn('id="app-version"', markup)
+        self.assertIn("renderVersion(overview.version)", script)
+        self.assertIn('"deployed_at": BUILD_TIME', source)
+        self.assertIn('"commit": GIT_COMMIT', source)
+
     def test_backup_registry_forces_shared_existing_credential(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sources.toml"
