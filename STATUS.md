@@ -1,11 +1,13 @@
 # Status — ScreenDeck Home
 
-## 2026-10-16 — Identificação de versão preparada
+## 2026-10-16 — Identificação de versão implantada
 
 - O dashboard passa a mostrar versão semântica e commit implantado no cabeçalho de “Saúde do servidor”.
 - O horário real da construção fica disponível no tooltip do selo de versão.
 - `dashboard/VERSION` passa a ser a fonte única da versão funcional, iniciando em `1.1.0`.
 - Commit e horário são incorporados à imagem durante a implantação e expostos pela API do próprio dashboard.
+- A revisão `0a107fa` foi implantada reconstruindo somente o dashboard; o serviço de backup não foi recriado.
+- A imagem em execução confirmou `1.1.0 · 0a107fa`, `/healthz` respondeu com sucesso e os dois serviços permaneceram saudáveis.
 
 ## 2026-10-16 — Duração individual dos backups
 
