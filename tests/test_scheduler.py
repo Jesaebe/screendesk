@@ -183,6 +183,31 @@ class SchedulerTests(unittest.TestCase):
             scheduler.run_due(self.due)
             self.assertFalse((root / "active-backup.json").exists())
 
+    def test_each_due_source_gets_its_own_execution_start(self):
+        pipeline = RecordingPipeline()
+        first_start = datetime(2026, 10, 9, 9, 0, 5, tzinfo=timezone.utc)
+        second_start = datetime(2026, 10, 9, 9, 2, 10, tzinfo=timezone.utc)
+        starts = iter([first_start, second_start])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            password_file = root / "password"
+            password_file.write_text("secret")
+            maker = replace(self.maker, password_file=str(password_file))
+            second = replace(maker, identifier="second", display_name="Second")
+            scheduler = BackupScheduler(
+                [maker, second],
+                pipeline,
+                root,
+                RecordingNotifier(),
+                now=lambda: next(starts),
+            )
+            scheduler.run_due(self.due)
+
+        self.assertEqual(
+            [call[2] for call in pipeline.calls],
+            [first_start, second_start],
+        )
+
     def test_unexpected_error_is_sanitized_and_notified(self):
         notifier = RecordingNotifier()
         with tempfile.TemporaryDirectory() as directory:

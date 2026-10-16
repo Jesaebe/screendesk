@@ -34,12 +34,14 @@ class BackupScheduler:
         status_root: Path,
         notifier: FailureNotifier,
         source_loader: SourceLoader | None = None,
+        now: Callable[[], datetime] | None = None,
     ):
         self.sources = sources
         self.pipeline = pipeline
         self.status_root = status_root
         self.notifier = notifier
         self.source_loader = source_loader
+        self._now = now or (lambda: datetime.now(timezone.utc))
         self._state_path = status_root / "scheduler-state.json"
         self._notification_path = status_root / "notification-status.json"
         self._service_status_path = status_root / "service-status.json"
@@ -152,18 +154,22 @@ class BackupScheduler:
                     "configuration_failed",
                 )
             else:
+                # ``current`` identifies the scheduled minute and is shared by every
+                # source due in this pass.  Duration, however, must start when this
+                # particular source actually begins (after any previous source).
+                execution_started = self._now()
                 self._write_json_atomic(
                     self._active_path,
                     {
                         "status": "running",
                         "source": source.identifier,
                         "display_name": source.display_name,
-                        "started_at": current.astimezone(timezone.utc).isoformat(),
+                        "started_at": execution_started.astimezone(timezone.utc).isoformat(),
                     },
                 )
                 try:
                     try:
-                        report = self.pipeline(source, password, current)
+                        report = self.pipeline(source, password, execution_started)
                     except Exception as error:
                         report = self._failure_report(
                             source,

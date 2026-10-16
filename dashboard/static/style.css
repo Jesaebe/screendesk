@@ -94,7 +94,7 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
 .sources-layout { display:grid; grid-template-columns:minmax(15rem,18rem) minmax(0,1fr); gap:1.25rem; margin-top:1rem; align-items:start; }
 .sources-layout aside,.sources-layout form { min-width:0; }.sources-layout aside { padding-right:1.25rem; border-right:1px solid var(--line); }
 .section-label { display:block; margin-bottom:.55rem; color:var(--muted); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-.sources-list { display:grid; grid-template-columns:minmax(0,1fr); gap:.8rem; max-height:min(62dvh,34rem); margin:0; overflow-y:auto; }
+.sources-list { display:grid; grid-template-columns:minmax(0,1fr); gap:.8rem; margin:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-color:var(--accent) transparent; }
 .source-group { display:grid; min-width:0; gap:.5rem; }.source-group>span { color:var(--muted); font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }.source-group>small { color:var(--muted); font-size:.72rem; }
 .source-group>button { display:flex; align-items:center; justify-content:space-between; width:100%; min-width:0; gap:.7rem; text-align:left; }
 .source-group>button.selected { border-color:var(--accent-soft); background:#723ebe33; box-shadow:inset 3px 0 var(--accent-soft); }
@@ -110,7 +110,7 @@ dialog form { display:grid; gap:1rem; } label { display:grid; gap:.4rem; color:v
 
 @media (max-width:1100px) { .source-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }.source-fields .wide { grid-column:span 2; } }
 
-@media (max-width:900px) { .sources-layout { grid-template-columns:1fr; } .sources-layout aside { padding:0 0 .8rem; border-right:0; border-bottom:1px solid var(--line); } .sources-list { grid-template-columns:repeat(2,minmax(0,1fr)); max-height:12rem; }.source-form-heading { align-items:flex-start; flex-direction:column; gap:.2rem; } }
+@media (max-width:900px) { .sources-layout { grid-template-columns:1fr; } .sources-layout aside { padding:0 0 .8rem; border-right:0; border-bottom:1px solid var(--line); } .sources-list { grid-template-columns:repeat(2,minmax(0,1fr)); }.source-form-heading { align-items:flex-start; flex-direction:column; gap:.2rem; } }
 
 @media (max-width:700px) { .source-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 

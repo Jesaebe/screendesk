@@ -1,5 +1,25 @@
 # Status — ScreenDeck Home
 
+## 2026-10-16 — Duração individual dos backups
+
+- Cada banco passa a iniciar seu próprio cronômetro somente quando sua execução começa.
+- O horário compartilhado da rodada continua sendo usado apenas para identificar e deduplicar o agendamento.
+- O indicador ao vivo, o card de backups realizados e o histórico deixam de acumular o tempo gasto pelos bancos processados anteriormente.
+- Os registros exibidos no histórico permanecem persistidos em `history.jsonl` no volume nomeado `backup-status`, montado como `/status` no serviço de backup e como `/backup-status` no dashboard.
+
+## 2026-10-15 — Inclusão de banco isolada da edição
+
+- O botão “Novo” passa a iniciar explicitamente um cadastro sem identificador, mesmo após a edição de outra origem.
+- Depois de salvar, o formulário abandona o modo de edição antes de recarregar a lista.
+- Isso impede que uma inclusão reutilize o identificador oculto do último banco selecionado e o substitua.
+
+## 2026-10-15 — Lista de bancos dimensionada para cinco cadastros
+
+- O gerenciamento de bancos mostra até cinco cadastros completos antes de limitar a altura da lista.
+- Quando existem mais de cinco bancos, todos continuam disponíveis por uma barra de rolagem vertical.
+- O dimensionamento é recalculado ao abrir o diálogo, salvar um cadastro e redimensionar a janela.
+- Os cadastros permanecem persistidos no arquivo protegido `secrets/sources.toml` do servidor.
+
 ## 2026-10-14 — Cadastro de bancos compactado e seleção reforçada
 
 - O formulário usa quatro colunas em telas amplas, três em larguras intermediárias e reduz progressivamente em telas menores.

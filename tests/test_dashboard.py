@@ -165,6 +165,16 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("function sourceIdentifier(name)", script)
         self.assertIn("sourceForm.elements.id.value||sourceIdentifier(payload.display_name)", script)
 
+    def test_new_backup_source_cannot_reuse_selected_identifier(self):
+        static = SERVER_PATH.parents[1] / "static"
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        script = (static / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="source-new" type="button"', markup)
+        self.assertIn("function newSource()", script)
+        self.assertIn("sourceForm.elements.id.value=''", script)
+        self.assertIn("$('#source-new').onclick=newSource", script)
+        self.assertIn("newSource();await loadSources()", script)
+
     def test_backup_source_form_prevents_field_overlap(self):
         stylesheet = (SERVER_PATH.parents[1] / "static" / "style.css").read_text(encoding="utf-8")
         self.assertIn(".source-fields label { min-width:0; }", stylesheet)
@@ -185,6 +195,17 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("node.onclick=()=>editSource", script)
         self.assertNotIn(".month-events,#tasks,#backup-history,.sources-list", script)
         self.assertNotIn("function editSource(source){sourceForm.reset();setTimeout", script)
+
+    def test_backup_source_list_shows_five_before_scrolling(self):
+        static = SERVER_PATH.parents[1] / "static"
+        script = (static / "app.js").read_text(encoding="utf-8")
+        stylesheet = (static / "style.css").read_text(encoding="utf-8")
+        self.assertIn("function sizeSourcesList()", script)
+        self.assertIn("if(buttons.length>5)", script)
+        self.assertIn("buttons[4].getBoundingClientRect().bottom", script)
+        self.assertIn("requestAnimationFrame(sizeSourcesList)", script)
+        self.assertIn("overflow-y:auto", stylesheet)
+        self.assertIn("scrollbar-color:var(--accent) transparent", stylesheet)
 
     def test_dashboard_has_reload_button_next_to_weather(self):
         static = SERVER_PATH.parents[1] / "static"
