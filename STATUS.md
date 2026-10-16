@@ -6,6 +6,8 @@
 - O horário compartilhado da rodada continua sendo usado apenas para identificar e deduplicar o agendamento.
 - O indicador ao vivo, o card de backups realizados e o histórico deixam de acumular o tempo gasto pelos bancos processados anteriormente.
 - Os registros exibidos no histórico permanecem persistidos em `history.jsonl` no volume nomeado `backup-status`, montado como `/status` no serviço de backup e como `/backup-status` no dashboard.
+- A revisão `a8f3330` foi implantada no servidor pela rede local, reconstruindo somente `dashboard` e `backup` após confirmar que não havia backup em andamento.
+- Os dois serviços ficaram saudáveis, `/healthz` respondeu com sucesso e o Home Assistant preservado não foi removido.
 
 ## 2026-10-15 — Inclusão de banco isolada da edição
 
