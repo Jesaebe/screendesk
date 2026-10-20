@@ -134,6 +134,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&googleCon
 document.querySelectorAll('[data-temp-step]').forEach(button=>button.onclick=()=>{$('#target-temp').textContent=Math.max(16,Math.min(30,+$('#target-temp').textContent + +button.dataset.tempStep));});
 document.querySelectorAll('[data-ac]').forEach(button=>button.onclick=async()=>{try{const command=button.dataset.ac;const payload={command};if(command==='temperature')payload.value=+$('#target-temp').textContent;await api('/api/smartthings/command',{method:'POST',body:JSON.stringify(payload)});toast('Comando enviado ao ar-condicionado');}catch(error){toast(error.message);}});
 $('#history-button').onclick=async()=>{const data=await api('/api/backups');renderBackupHistory(data.items||[]);$('#history-dialog').showModal();};
+$('#backup-all-button').onclick=async()=>{const button=$('#backup-all-button');button.disabled=true;try{await api('/api/backup/run-all',{method:'POST',body:'{}'});toast('Backup de todos os bancos iniciado');loadBackupStatus();}catch(error){toast(error.message);}finally{setTimeout(()=>{button.disabled=false;},1000);}};
 $('#history-close').onclick=()=>$('#history-dialog').close();
 $('#sources-button').onclick=async()=>{try{await loadSources();$('#sources-dialog').showModal();requestAnimationFrame(sizeSourcesList);}catch(error){toast(error.message);}};
 $('#sources-close').onclick=()=>$('#sources-dialog').close();

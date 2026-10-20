@@ -94,6 +94,22 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertEqual(pipeline.calls, [])
 
+    def test_manual_run_executes_every_enabled_source_without_schedule(self):
+        pipeline = RecordingPipeline()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            password_file = root / "password"
+            password_file.write_text("secret")
+            maker = replace(self.maker, password_file=str(password_file), schedule=("23:59",))
+            second = replace(maker, identifier="second", display_name="Second")
+            paused = replace(maker, identifier="paused", enabled=False)
+            scheduler = BackupScheduler(
+                [maker, second, paused], pipeline, root, RecordingNotifier(), now=lambda: self.due
+            )
+            result = scheduler.run_all_manual()
+        self.assertEqual([item.source for item in result], ["maker", "second"])
+        self.assertEqual([call[0].identifier for call in pipeline.calls], ["maker", "second"])
+
     def test_deduplication_survives_scheduler_restart(self):
         first_pipeline = RecordingPipeline()
         with tempfile.TemporaryDirectory() as directory:

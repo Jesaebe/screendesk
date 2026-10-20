@@ -1,5 +1,14 @@
 # Status — ScreenDeck Home
 
+## 2026-10-20 — Backup manual de todas as origens
+
+- O cartão de backups ganhou um botão para iniciar, sem parâmetros, uma rodada manual de todas as origens ativas.
+- A solicitação retorna imediatamente e a execução continua em segundo plano, processando as origens em sequência.
+- Execuções manuais duplicadas e sobreposição com o agendador são impedidas por travas no serviço de backup.
+- O painel acompanha a origem em andamento pelo indicador existente e atualiza o histórico ao término de cada execução.
+- A versão funcional do dashboard foi atualizada para `1.2.0`.
+- Validação local: 96 testes aprovados, JavaScript e scripts de implantação sem erros de sintaxe.
+
 ## 2026-10-16 — Identificação de versão implantada
 
 - O dashboard passa a mostrar versão semântica e commit implantado no cabeçalho de “Saúde do servidor”.

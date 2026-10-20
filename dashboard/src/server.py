@@ -524,6 +524,9 @@ class Handler(SimpleHTTPRequestHandler):
                 if result.get("ok"):
                     TESTED_BACKUP_SOURCES[candidate["id"]] = backup_source_fingerprint(candidate)
                 self.send_json(result)
+            elif parsed.path == "/api/backup/run-all":
+                control_url = BACKUP_CONTROL_URL.rsplit("/", 1)[0] + "/run-all"
+                self.send_json(request_json(control_url, method="POST", body={}), HTTPStatus.ACCEPTED)
             elif parsed.path == "/api/backup/sources/delete":
                 identifier = str(payload["id"])
                 sources = load_backup_sources()

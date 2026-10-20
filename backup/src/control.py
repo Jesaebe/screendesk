@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import threading
 import time
-from typing import Any
+from typing import Any, Callable
 
 from .dump import Source, build_dump_environment
 from .executor import CommandRunner
@@ -61,21 +61,43 @@ def test_connection(payload: dict[str, Any], password: str, runner: CommandRunne
     return {"ok": False, "error": message, "latency_ms": duration_ms}
 
 
-def start_control_server(password_file: Path, runner: CommandRunner, port: int = 8090) -> None:
+def start_control_server(password_file: Path, runner: CommandRunner,
+                         run_all: Callable[[], object] | None = None, port: int = 8090) -> None:
+    manual_lock = threading.Lock()
+
+    def run_in_background() -> None:
+        try:
+            if run_all is not None:
+                run_all()
+        finally:
+            manual_lock.release()
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, _format: str, *_args: Any) -> None:
             return
 
         def do_POST(self) -> None:  # noqa: N802
             try:
+                if self.path == "/run-all":
+                    if run_all is None:
+                        self._send({"ok": False, "error": "Execução manual indisponível"}, HTTPStatus.SERVICE_UNAVAILABLE)
+                    elif not manual_lock.acquire(blocking=False):
+                        self._send({"ok": False, "error": "Um backup manual já está em andamento"}, HTTPStatus.CONFLICT)
+                    else:
+                        threading.Thread(target=run_in_background, name="manual-backup", daemon=True).start()
+                        self._send({"ok": True, "status": "started"}, HTTPStatus.ACCEPTED)
+                    return
                 length = min(int(self.headers.get("Content-Length", "0")), 16384)
                 payload = json.loads(self.rfile.read(length) or b"{}")
                 password = password_file.read_text(encoding="utf-8").rstrip("\r\n")
                 response = test_connection(payload, password, runner)
             except (OSError, ValueError, KeyError, json.JSONDecodeError):
                 response = {"ok": False, "error": "Dados de conexão inválidos", "latency_ms": 0}
+            self._send(response)
+
+        def _send(self, response: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
             body = json.dumps(response, ensure_ascii=False).encode()
-            self.send_response(HTTPStatus.OK)
+            self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()

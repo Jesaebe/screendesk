@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
+import threading
 from typing import Callable
 from zoneinfo import ZoneInfo
 
@@ -48,6 +49,7 @@ class BackupScheduler:
         self._active_path = status_root / "active-backup.json"
         self._active_path.unlink(missing_ok=True)
         self._completed_slots = self._load_slots()
+        self._run_lock = threading.Lock()
 
     def _load_slots(self) -> set[tuple[str, str]]:
         try:
@@ -126,6 +128,14 @@ class BackupScheduler:
         return report
 
     def run_due(self, instant: datetime | None = None) -> list[ScheduledResult]:
+        if not self._run_lock.acquire(blocking=False):
+            return []
+        try:
+            return self._run_due(instant)
+        finally:
+            self._run_lock.release()
+
+    def _run_due(self, instant: datetime | None = None) -> list[ScheduledResult]:
         if self.source_loader is not None:
             try:
                 self.sources = self.source_loader()
@@ -183,6 +193,50 @@ class BackupScheduler:
                 self._notify_safely(report, current)
             results.append(ScheduledResult(source.identifier, slot, report))
         return results
+
+    def run_all_manual(self) -> list[ScheduledResult]:
+        """Run every enabled source now, independently of its configured schedule."""
+        with self._run_lock:
+            if self.source_loader is not None:
+                self.sources = self.source_loader()
+            current = self._now()
+            results: list[ScheduledResult] = []
+            for source in self.sources:
+                if not source.enabled:
+                    continue
+                try:
+                    password = Path(source.password_file).read_text(encoding="utf-8").rstrip("\r\n")
+                except OSError:
+                    password = ""
+                if not password:
+                    report = self._failure_report(
+                        source, current,
+                        f"required password file is missing or empty: {source.password_file}",
+                        "configuration_failed",
+                    )
+                else:
+                    execution_started = self._now()
+                    self._write_json_atomic(self._active_path, {
+                        "status": "running", "source": source.identifier,
+                        "display_name": source.display_name,
+                        "started_at": execution_started.astimezone(timezone.utc).isoformat(),
+                        "manual": True,
+                    })
+                    try:
+                        try:
+                            report = self.pipeline(source, password, execution_started)
+                        except Exception as error:
+                            report = self._failure_report(
+                                source, current,
+                                redact(f"pipeline raised an unexpected error: {error}", [password]),
+                                "internal_failed",
+                            )
+                    finally:
+                        self._active_path.unlink(missing_ok=True)
+                if report.status != "success":
+                    self._notify_safely(report, current)
+                results.append(ScheduledResult(source.identifier, "manual", report))
+            return results
 
     def run_forever(
         self,

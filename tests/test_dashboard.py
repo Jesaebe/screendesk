@@ -35,6 +35,16 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('id="recent-backups"', markup)
         self.assertIn('aria-label="Ver histórico"', markup)
         self.assertIn('aria-label="Gerenciar bancos"', markup)
+
+    def test_backup_card_can_start_all_registered_backups(self):
+        static = SERVER_PATH.parents[1] / "static"
+        markup = (static / "index.html").read_text(encoding="utf-8")
+        script = (static / "app.js").read_text(encoding="utf-8")
+        server_source = SERVER_PATH.read_text(encoding="utf-8")
+        self.assertIn('id="backup-all-button"', markup)
+        self.assertIn('aria-label="Iniciar backup de todos os bancos"', markup)
+        self.assertIn("api('/api/backup/run-all',{method:'POST'", script)
+        self.assertIn('parsed.path == "/api/backup/run-all"', server_source)
         self.assertIn("formatBytes(item.size_bytes)", script)
         self.assertIn("formatDuration(item.duration_seconds)", script)
         self.assertIn("renderBackupHistory", script)

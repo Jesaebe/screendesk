@@ -88,8 +88,6 @@ def scheduler() -> int:
 
     sources = load_sources(config_path)
     runner = SubprocessRunner()
-    start_control_server(Path("/run/secrets/maker-password"), runner)
-
     def pipeline(source, password, started_at):
         return run_pipeline(
             source=source,
@@ -112,6 +110,7 @@ def scheduler() -> int:
         notifier=_notifier_from_environment(),
         source_loader=lambda: load_sources(config_path),
     )
+    start_control_server(Path("/run/secrets/maker-password"), runner, service.run_all_manual)
     service.run_forever(interval_seconds=interval_seconds)
     return 0
 
